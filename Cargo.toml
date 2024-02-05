@@ -18,4 +18,5 @@ chrono = "0.4"
 [dependencies]
 bytesize = "1"
 clap = "4"
+spinners = "4"
 walkdir = "2"
