@@ -13,12 +13,12 @@ fn argument_parser<'a>() -> ArgMatches {
     Command::new(release::DISPLAY_NAME)
         .version(release::VERSION_STR)
         .about(release::DISPLAY_DESCRIPTION)
-        .arg(Arg::new("fsize")
-            .long("fsize")
+        .arg(Arg::new("size")
+            .long("size")
             .short('s')
-            .value_name("path to scan")
+            .value_name("path")
             .action(ArgAction::Set)
-            .help("Check the size of a file."))
+            .help("Check the size of a file or directory"))
         .get_matches()
 }
 
@@ -26,7 +26,7 @@ fn main() {
     let start = Instant::now();
     let matches = argument_parser();
 
-    if let Some(passed_directory) = matches.get_one::<String>("fsize") {
+    if let Some(passed_directory) = matches.get_one::<String>("size") {
         let path = Path::new(passed_directory);
         if let Err(error) = get_file_size(path) {
             eprintln!("##==>>>> ERROR: {}", error);
