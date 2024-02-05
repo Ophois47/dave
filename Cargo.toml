@@ -1,0 +1,21 @@
+[package]
+name = "dave"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+name = "davelib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "dave"
+path = "src/main.rs"
+doc = false
+
+[build-dependencies]
+chrono = "0.4"
+
+[dependencies]
+bytesize = "1"
+clap = "4"
+walkdir = "2"
