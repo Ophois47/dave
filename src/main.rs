@@ -13,12 +13,6 @@ fn argument_parser<'a>() -> ArgMatches {
     Command::new(release::DISPLAY_NAME)
         .version(release::VERSION_STR)
         .about(release::DISPLAY_DESCRIPTION)
-        .arg(Arg::new("greeting")
-            .long("greeting")
-            .short('g')
-            .value_name("your name")
-            .action(ArgAction::Set)
-            .help("Say Hello to yourself."))
         .arg(Arg::new("fsize")
             .long("fsize")
             .short('s')
@@ -35,12 +29,6 @@ fn main() {
     if let Some(passed_directory) = matches.get_one::<String>("fsize") {
         let path = Path::new(passed_directory);
         if let Err(error) = get_file_size(path) {
-            eprintln!("##==>>>> ERROR: {}", error);
-        }
-    }
-
-    if let Some(name) = matches.get_one::<String>("greeting") {
-        if let Err(error) = greeting(name.to_string()) {
             eprintln!("##==>>>> ERROR: {}", error);
         }
     }
