@@ -2,6 +2,7 @@ use std::io;
 use std::fs;
 use std::path::Path;
 use bytesize::ByteSize;
+use colored::*;
 use rand::Rng;
 use spinners::{Spinner, Spinners};
 use walkdir::WalkDir;
@@ -14,17 +15,17 @@ fn generate_random_number() -> u16 {
 
 pub fn guess_number(guess: u16) -> io::Result<()> {
     if guess <= 0 || guess >= 11 {
-        println!("##==>> Your guess must be a value between 1 - 10");
+        println!("{}", "##==>> Your guess must be a value between 1 - 10".red());
         return Ok(())
     }
 
     let random_value = generate_random_number();
     if random_value == guess {
-        println!("#=> Well I'll be a monkey's uncle ... You done it.");
+        println!("{}", "#=> CORRECT! You got it right.".green());
     } else if random_value < guess {
-        println!("#=> WRONG! Too High!");
+        println!("{}", "#=> WRONG! Too High!".red());
     } else if random_value > guess {
-        println!("#=> WRONG! Too Low!");
+        println!("{}", "#=> WRONG! Too Low!".red());
     }
 
     println!("#=> Your Guess: {}", guess);
@@ -34,6 +35,7 @@ pub fn guess_number(guess: u16) -> io::Result<()> {
 
 pub fn get_file_size(path: &Path) -> io::Result<()> {
     let file_metadata = fs::metadata(path)?;
+    let stop_symbol = format!("{}", "🗸".green());
 
     if file_metadata.is_dir() {
         println!("##==> Path '{}' Points to a Directory.", path.display());
@@ -49,7 +51,7 @@ pub fn get_file_size(path: &Path) -> io::Result<()> {
             .filter(|metadata| metadata.is_file())
             .fold(0, |acc, m| acc + m.len());
 
-        spinner.stop_with_symbol("🗸");
+        spinner.stop_with_symbol(&stop_symbol);
         println!("##==>> Directory Size: {}", ByteSize::b(total_size));
     } else if file_metadata.is_file() {
         println!("##==> Path '{}' Points to a File.", path.display());
@@ -57,9 +59,9 @@ pub fn get_file_size(path: &Path) -> io::Result<()> {
 
         let mut spinner = Spinner::new(Spinners::Arc, String::new());
         println!("##==>> Size of File: {}", ByteSize::b(file_metadata.len()));
-        spinner.stop_with_symbol("🗸");
+        spinner.stop_with_symbol(&stop_symbol);
     } else {
-        println!("##==>>> Warning! Idk WTF that is ... Where did you find it?");
+        println!("{}", "##==>>> Warning! Idk WTF that is ... Where did you even find it?".red());
     }
     Ok(())
 }

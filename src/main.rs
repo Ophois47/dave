@@ -4,6 +4,7 @@ use clap::{
     ArgAction,
     ArgMatches,
 };
+use colored::*;
 use std::path::Path;
 use std::time::Instant;
 use davelib::perceptron::daves_perceptron;
@@ -41,20 +42,20 @@ fn main() {
     if let Some(passed_directory) = matches.get_one::<String>("size") {
         let path = Path::new(passed_directory);
         if let Err(error) = get_file_size(path) {
-            eprintln!("##==>>>> ERROR: {}", error);
+            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
         }
     }
 
     if let Some(passed_value) = matches.get_one::<String>("guess") {
         let guess = passed_value.parse::<u16>().unwrap();
         if let Err(error) = guess_number(guess) {
-            eprintln!("##==>>>> ERROR: {}", error);
+            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
         }
     }
 
     if matches.get_flag("perceptron") {
         if let Err(error) = daves_perceptron() {
-            eprintln!("##==>>>> ERROR: {}", error);
+            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
         }
     }
 
