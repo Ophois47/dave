@@ -1,6 +1,6 @@
 [package]
 name = "dave"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 
 [lib]
@@ -18,5 +18,6 @@ chrono = "0.4"
 [dependencies]
 bytesize = "1"
 clap = "4"
+rand = "0.8"
 spinners = "4"
 walkdir = "2"

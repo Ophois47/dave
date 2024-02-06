@@ -2,8 +2,35 @@ use std::io;
 use std::fs;
 use std::path::Path;
 use bytesize::ByteSize;
+use rand::Rng;
 use spinners::{Spinner, Spinners};
 use walkdir::WalkDir;
+
+fn generate_random_number() -> u16 {
+    let mut rng = rand::thread_rng();
+    let random_value: u16 = rng.gen_range(1..10);
+    random_value
+}
+
+pub fn guess_number(guess: u16) -> io::Result<()> {
+    if guess <= 0 || guess >= 11 {
+        println!("##==>> Your guess must be a value between 1 - 10");
+        return Ok(())
+    }
+
+    let random_value = generate_random_number();
+    if random_value == guess {
+        println!("#=> Well I'll be a monkey's uncle ... You done it.");
+    } else if random_value < guess {
+        println!("#=> WRONG! Too High!");
+    } else if random_value > guess {
+        println!("#=> WRONG! Too Low!");
+    }
+
+    println!("#=> Your Guess: {}", guess);
+    println!("#=> Correct Value: {}", random_value);
+    Ok(())
+}
 
 pub fn get_file_size(path: &Path) -> io::Result<()> {
     let file_metadata = fs::metadata(path)?;

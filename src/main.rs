@@ -17,9 +17,15 @@ fn argument_parser() -> ArgMatches {
         .arg(Arg::new("size")
             .long("size")
             .short('s')
-            .value_name("path")
+            .value_name("Valid Path")
             .action(ArgAction::Set)
             .help("Check the size of a file or directory"))
+        .arg(Arg::new("guess")
+            .long("guess")
+            .short('g')
+            .value_name("Number Value")
+            .action(ArgAction::Set)
+            .help("Guess a number from 0 - 10 for funsies"))
         .arg(Arg::new("perceptron")
             .long("perceptron")
             .short('p')
@@ -35,6 +41,13 @@ fn main() {
     if let Some(passed_directory) = matches.get_one::<String>("size") {
         let path = Path::new(passed_directory);
         if let Err(error) = get_file_size(path) {
+            eprintln!("##==>>>> ERROR: {}", error);
+        }
+    }
+
+    if let Some(passed_value) = matches.get_one::<String>("guess") {
+        let guess = passed_value.parse::<u16>().unwrap();
+        if let Err(error) = guess_number(guess) {
             eprintln!("##==>>>> ERROR: {}", error);
         }
     }
