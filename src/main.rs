@@ -60,8 +60,8 @@ fn argument_parser() -> ArgMatches {
         .arg(Arg::new("dgrep")
             .long("dgrep")
             .short('d')
+            .action(ArgAction::Set)
             .value_names(["[options]", "[pattern]", "[file]"])
-            .action(ArgAction::Append)
             .num_args(3)
             .value_parser(value_parser!(String))
             .help("Behold my glorious implementation of grep in Rust.\nPass this function 'i' or 'insensitive' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search"))
@@ -144,7 +144,7 @@ fn main() {
     // Handle Configuration Updates
     update_config(&matches);
 
-    if matches.get_flag("dgrep") {
+    if matches.contains_id("dgrep") {
         let dgrep_args: Vec<String> = matches.get_many("dgrep")
             .expect("##==>>>> ERROR: Missing Values")
             .cloned()
