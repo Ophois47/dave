@@ -34,7 +34,7 @@ fn argument_parser() -> ArgMatches {
         .arg(Arg::new("dgrep")
             .long("dgrep")
             .short('d')
-            .value_name("[options] [pattern] [file]")
+            .value_names(["[options]", "[pattern]", "[file]"])
             .action(ArgAction::Append)
             .num_args(3)
             .value_parser(value_parser!(String))
