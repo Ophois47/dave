@@ -11,6 +11,7 @@ use std::process;
 use std::time::Instant;
 use davelib::dave_grep;
 use davelib::dave_grep::Config;
+use davelib::dave_guess::guess_number;
 use davelib::dave_perceptron::daves_perceptron;
 use davelib::utils::*;
 use davelib::release;
