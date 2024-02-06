@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fs;
+use colored::*;
 
 pub struct Config {
 	pub pattern: String,
@@ -38,6 +39,9 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 	};
 
 	for line in results {
+		if line == "" || line == " " {
+			println!("{}", "##==>> No Matches Were Found For Your Pattern".red());
+		}
 		println!("{}", line);
 	}
 
