@@ -65,3 +65,24 @@ pub fn get_file_size(path: &Path) -> io::Result<()> {
     }
     Ok(())
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn wrong_guess() {
+        let guess = 13;
+        let random_value = generate_random_number();
+        assert_eq!(guess, random_value);
+    }
+
+    #[test]
+    fn correct_guess() {
+        let guess = 5;
+        let random_value = 5;
+        assert_eq!(guess, random_value);
+    }
+}

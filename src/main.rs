@@ -5,9 +5,13 @@ use clap::{
     ArgMatches,
 };
 use colored::*;
+use std::env;
 use std::path::Path;
+use std::process;
 use std::time::Instant;
-use davelib::perceptron::daves_perceptron;
+use davelib::dave_grep;
+use davelib::dave_grep::Config;
+use davelib::dave_perceptron::daves_perceptron;
 use davelib::utils::*;
 use davelib::release;
 
@@ -18,15 +22,20 @@ fn argument_parser() -> ArgMatches {
         .arg(Arg::new("size")
             .long("size")
             .short('s')
-            .value_name("Valid Path")
+            .value_name("Path")
             .action(ArgAction::Set)
             .help("Check the size of a file or directory"))
         .arg(Arg::new("guess")
             .long("guess")
             .short('g')
-            .value_name("Number Value")
+            .value_name("Guess")
             .action(ArgAction::Set)
             .help("Guess a number from 0 - 10 for funsies"))
+        .arg(Arg::new("dgrep")
+            .long("dgrep")
+            .value_name("[query] [filename] [case_insensitive]")
+            .action(ArgAction::Set)
+            .help("An implementation of grep. Pass this function\na query, a filename, and whether or not it should search case\ninsensitively or not"))
         .arg(Arg::new("perceptron")
             .long("perceptron")
             .short('p')
@@ -39,10 +48,21 @@ fn main() {
     let start = Instant::now();
     let matches = argument_parser();
 
+    let config = Config::new(env::args()).unwrap_or_else(|error| {
+        eprintln!("{}{}", "##==>>>> ERROR: Problem Parsing Arguments -> ".red(), error);
+        process::exit(1);
+    });
+
+    if let Err(error) = dave_grep::run(config) {
+        eprintln!("{}{}", "##==>>>> ERROR: Application Error -> ".red(), error);
+        process::exit(1);
+    }
+
     if let Some(passed_directory) = matches.get_one::<String>("size") {
         let path = Path::new(passed_directory);
         if let Err(error) = get_file_size(path) {
             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            process::exit(1);
         }
     }
 
@@ -50,12 +70,14 @@ fn main() {
         let guess = passed_value.parse::<u16>().unwrap();
         if let Err(error) = guess_number(guess) {
             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            process::exit(1);
         }
     }
 
     if matches.get_flag("perceptron") {
         if let Err(error) = daves_perceptron() {
             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            process::exit(1);
         }
     }
 
