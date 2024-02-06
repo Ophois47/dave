@@ -1,0 +1,24 @@
+Ideas I Want To Learn:
+==========================
+1.  Text Based Adventure Game
+2.  Grep text and pattern matching in files
+3.  Basic Web Scraper
+	 - Build a web scraper that fetches and parses the content of a webpage, extracting specific information like headlines or links. This will involve:
+	 - HTTP requests using libraries like reqwest
+	 - HTML parsing using libraries like scraper or select
+	 - String manipulation and regular expressions
+4.  File Encryption and Decryption
+5.  Currency Converter
+6.  Real-Time Object Detection System
+7.  Too Many Linked Lists Article
+8.  Budget Manager
+9.  File Format Parsers
+10. Guess A Number
+11. Weather App
+12. Calculator
+13. Blog Posts
+14. Quiz Game
+15. Recipe Book
+16. Operating System Kernel
+17. Compiler or Interpreter
+18. Driver Code

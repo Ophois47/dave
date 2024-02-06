@@ -40,12 +40,14 @@ pub fn daves_perceptron() -> io::Result<()> {
 	}
 
 	// Bias
-	println!("##==>> Bias: {}", bias);
+	println!("##==> Bias: {}", bias);
 
 	// Weights
-	println!("##==>> Weights:");
+	println!("##==> Weights:");
+	let mut weight_num = 1;
 	for weight in weights.iter() {
-		println!("{}", weight);
+		println!("#=> Weight #{}: {}", weight_num, weight);
+		weight_num += 1;
 	}
 
 	Ok(())
