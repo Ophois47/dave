@@ -176,9 +176,16 @@ fn main() {
     if let Some(passed_path) = matches.get_one::<String>("hash") {
         let path = Path::new(passed_path);
         if path.exists() {
-            if let Err(error) = hash_file(CONFIG.read().unwrap().hash_type(), passed_path.into()) {
-                eprintln!("##==>>>> ERROR: {}", error);
-            }
+            println!("{}", "##==> Path Exists! Continuing ...".green());
+            match hash_file(CONFIG.read().unwrap().hash_type(), passed_path.into()) {
+                Ok(hash_result) => {
+                    match String::from_utf8(hash_result) {
+                        Ok(string) => println!("{}", string),
+                        Err(error) => eprintln!("##==>>>> ERROR: {}", error),
+                    }
+                },
+                Err(error) => eprintln!("##==>>>> ERROR: {}", error),
+            };
         } else {
             eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
         }
