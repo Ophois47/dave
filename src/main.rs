@@ -59,12 +59,11 @@ fn main() {
     let gotten_filename = &dgrep_args[2];
     if Path::new(gotten_filename).exists() {
         let config = Config::new(dgrep_args).unwrap_or_else(|error| {
-            eprintln!("{}{}", "##==>>>> ERROR: Problem Parsing Arguments -> ".red(), error);
+            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             process::exit(1);
         });
         if let Err(error) = dave_grep::run(config) {
-            eprintln!("{}{}", "##==>>>> ERROR: Application Error -> ".red(), error);
-            process::exit(1);
+            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
         }
     } else {
         eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
