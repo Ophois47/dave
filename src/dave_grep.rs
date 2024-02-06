@@ -38,11 +38,12 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 		search_case_insensitive(&config.pattern, &contents)
 	};
 
-	for line in results {
-		if line == "" || line == " " {
-			println!("{}", "##==>> No Matches Were Found For Your Pattern".red());
+	if results.is_empty() {
+		println!("{}", "##==> There Were No Matches to Your Pattern".red());
+	} else {
+		for line in results {
+			println!("{}", line.green());
 		}
-		println!("{}", line);
 	}
 
 	Ok(())
