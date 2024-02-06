@@ -3,9 +3,9 @@ use clap::{
     Arg,
     ArgAction,
     ArgMatches,
+    value_parser,
 };
 use colored::*;
-use std::env;
 use std::path::Path;
 use std::process;
 use std::time::Instant;
@@ -33,11 +33,14 @@ fn argument_parser() -> ArgMatches {
             .help("Guess a number from 0 - 10 for funsies"))
         .arg(Arg::new("dgrep")
             .long("dgrep")
-            .value_name("[query] [filename] [case_insensitive]")
-            .action(ArgAction::Set)
-            .help("An implementation of grep. Pass this function\na query, a filename, and whether or not it should search case\ninsensitively or not"))
-        .arg(Arg::new("perceptron")
-            .long("perceptron")
+            .short('d')
+            .value_name("[options] [pattern] [file]")
+            .action(ArgAction::Append)
+            .num_args(3)
+            .value_parser(value_parser!(String))
+            .help("Behold my glorious implementation of grep in Rust.\nPass this function 'i' or 'insensitive' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search"))
+        .arg(Arg::new("dperceptron")
+            .long("dperceptron")
             .short('p')
             .action(ArgAction::SetTrue)
             .help("Behold my glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
@@ -48,14 +51,23 @@ fn main() {
     let start = Instant::now();
     let matches = argument_parser();
 
-    let config = Config::new(env::args()).unwrap_or_else(|error| {
-        eprintln!("{}{}", "##==>>>> ERROR: Problem Parsing Arguments -> ".red(), error);
-        process::exit(1);
-    });
+    let dgrep_args: Vec<String> = matches.get_many("dgrep")
+        .expect("##==>>>> ERROR: Missing Values")
+        .cloned()
+        .collect();
 
-    if let Err(error) = dave_grep::run(config) {
-        eprintln!("{}{}", "##==>>>> ERROR: Application Error -> ".red(), error);
-        process::exit(1);
+    let gotten_filename = &dgrep_args[2];
+    if Path::new(gotten_filename).exists() {
+        let config = Config::new(dgrep_args).unwrap_or_else(|error| {
+            eprintln!("{}{}", "##==>>>> ERROR: Problem Parsing Arguments -> ".red(), error);
+            process::exit(1);
+        });
+        if let Err(error) = dave_grep::run(config) {
+            eprintln!("{}{}", "##==>>>> ERROR: Application Error -> ".red(), error);
+            process::exit(1);
+        }
+    } else {
+        eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
     }
 
     if let Some(passed_directory) = matches.get_one::<String>("size") {
@@ -74,7 +86,7 @@ fn main() {
         }
     }
 
-    if matches.get_flag("perceptron") {
+    if matches.get_flag("dperceptron") {
         if let Err(error) = daves_perceptron() {
             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             process::exit(1);
