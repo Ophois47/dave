@@ -25,9 +25,14 @@ fn argument_parser() -> ArgMatches {
     Command::new(release::DISPLAY_NAME)
         .version(release::VERSION_STR)
         .about(release::DISPLAY_DESCRIPTION)
+        .arg(Arg::new("defaults")
+            .long("defaults")
+            .action(ArgAction::SetTrue)
+            .help("Applies the default configuration."))
         .arg(Arg::new("config-path")
             .long("config-path")
-            .value_name("path")
+            .value_name("Path")
+            .action(ArgAction::Set)
             .help("Point to a new location of the configuration file."))
         .arg(Arg::new("save-config")
             .long("save-config")
@@ -41,19 +46,16 @@ fn argument_parser() -> ArgMatches {
             .long("size")
             .short('s')
             .value_name("Path")
-            .action(ArgAction::Set)
             .help("Check the size of a file or directory"))
         .arg(Arg::new("hash")
             .long("hash")
             .short('h')
             .value_name("Path")
-            .action(ArgAction::Set)
             .help("Hash a file"))
         .arg(Arg::new("guess")
             .long("guess")
             .short('g')
             .value_name("Guess")
-            .action(ArgAction::Set)
             .help("Guess a number from 0 - 10 for funsies"))
         .arg(Arg::new("dgrep")
             .long("dgrep")
@@ -142,23 +144,26 @@ fn main() {
     // Handle Configuration Updates
     update_config(&matches);
 
-    let dgrep_args: Vec<String> = matches.get_many("dgrep")
-        .expect("##==>>>> ERROR: Missing Values")
-        .cloned()
-        .collect();
-
-    let gotten_filename = &dgrep_args[2];
-    if Path::new(gotten_filename).exists() {
-        let config = Config::new(dgrep_args).unwrap_or_else(|error| {
-            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error.red());
-            process::exit(1);
-        });
-        if let Err(error) = dave_grep::run(config) {
-            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+    if matches.get_flag("dgrep") {
+        let dgrep_args: Vec<String> = matches.get_many("dgrep")
+            .expect("##==>>>> ERROR: Missing Values")
+            .cloned()
+            .collect();
+        
+        let gotten_filename = &dgrep_args[2];
+        if Path::new(gotten_filename).exists() {
+            let config = Config::new(dgrep_args).unwrap_or_else(|error| {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error.red());
+                process::exit(1);
+            });
+            if let Err(error) = dave_grep::run(config) {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        } else {
+            eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
         }
-    } else {
-        eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
     }
+
 
     if let Some(passed_directory) = matches.get_one::<String>("size") {
         let path = Path::new(passed_directory);
