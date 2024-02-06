@@ -43,6 +43,12 @@ fn argument_parser() -> ArgMatches {
             .value_name("Path")
             .action(ArgAction::Set)
             .help("Check the size of a file or directory"))
+        .arg(Arg::new("hash")
+            .long("hash")
+            .short('h')
+            .value_name("Path")
+            .action(ArgAction::Set)
+            .help("Hash a file"))
         .arg(Arg::new("guess")
             .long("guess")
             .short('g')
@@ -159,6 +165,17 @@ fn main() {
         if let Err(error) = get_file_size(path) {
             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             process::exit(1);
+        }
+    }
+
+    if let Some(passed_path) = matches.get_one::<String>("hash") {
+        let path = Path::new(passed_path);
+        if path.exists() {
+            if let Err(error) = hash_file(CONFIG.read().unwrap().hash_type(), passed_path.into()) {
+                eprintln!("##==>>>> ERROR: {}", error);
+            }
+        } else {
+            eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
         }
     }
 
