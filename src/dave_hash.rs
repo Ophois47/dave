@@ -63,15 +63,33 @@ pub struct Sha3_512Hash;
 impl Hasher for Md5Hash {
 	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
 		let mut md5_context = md5::Context::new();
-		let file = File::open(file)?;
-		let mut buf_reader = BufReader::new(file);
-		let mut contents = String::new();
+		let f = File::open(file.clone())?;
+		// Find Length of File
+		let file_length = f.metadata()?.len();
 
-		buf_reader.read_to_string(&mut contents)?;
-		md5_context.consume(contents);
+		// Decide on Reasonable Buffer Size
+		let buf_len = file_length.min(1_000_000) as usize;
+		let mut buffer = BufReader::with_capacity(buf_len, f);
+
+		loop {
+			// Get Chunk of File
+			let part = buffer.fill_buf()?;
+
+			// If Chunk Empty, EOF Reached
+			if part.is_empty() {
+				break;
+			}
+			// Add Chunk to Hasher
+			md5_context.consume(part);
+
+			// Tell Buffer Chunk Was Consumed
+			let part_len = part.len();
+			buffer.consume(part_len);
+		}
 
 		// Finalize md5.context + Put Into Digest
 		let md5_digest = md5_context.compute();
+
 		Ok(md5_digest.to_vec())
 	}
 }

@@ -179,10 +179,7 @@ fn main() {
             println!("{}", "##==> Path Exists! Continuing ...".green());
             match hash_file(CONFIG.read().unwrap().hash_type(), passed_path.into()) {
                 Ok(hash_result) => {
-                    match String::from_utf8(hash_result) {
-                        Ok(string) => println!("{}", string),
-                        Err(error) => eprintln!("##==>>>> ERROR: {}", error),
-                    }
+                    println!("{:?}", hash_result);
                 },
                 Err(error) => eprintln!("##==>>>> ERROR: {}", error),
             };

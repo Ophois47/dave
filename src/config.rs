@@ -26,7 +26,7 @@ lazy_static! {
 	static ref DEFAULT_CONFIG: serde_json::Value = json!({
 		"config_path": find_config_path(),
 		"root_path": find_root_path(),
-		"output_file_path": find_output_file(),
+		"output_file": find_output_file(),
 		"hash_type": HashType::Sha3_256,
 	});
 }
