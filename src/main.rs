@@ -136,10 +136,6 @@ fn main() {
     let matches = argument_parser();
 
     // Handle Options That Only Print Messages and Exit
-    /*if matches.get_flag("export-config") {
-        output.export_config();
-        std::process::exit(0);
-    }*/
 
     // Handle Configuration Updates
     update_config(&matches);
@@ -178,8 +174,8 @@ fn main() {
         if path.exists() {
             println!("{}", "##==> Path Exists! Continuing ...".green());
             match hash_file(CONFIG.read().unwrap().hash_type(), passed_path.into()) {
-                Ok(hash_result) => {
-                    println!("{:?}", hash_result);
+                Ok(_hash_result) => {
+                    // println!("#==>> Hex Output: {:x?}", hash_result);
                 },
                 Err(error) => eprintln!("##==>>>> ERROR: {}", error),
             };

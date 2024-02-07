@@ -89,7 +89,7 @@ impl Hasher for Md5Hash {
 
 		// Finalize md5.context + Put Into Digest
 		let md5_digest = md5_context.compute();
-
+		println!("##==>> MD5 Hash Value: {:x}", md5_digest);
 		Ok(md5_digest.to_vec())
 	}
 }
@@ -97,15 +97,34 @@ impl Hasher for Md5Hash {
 impl Hasher for Sha3_256Hash {
 	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
 		let mut hasher = sha3::Sha3_256::new();
-		let file = File::open(file)?;
-		let mut buf_reader = BufReader::new(file);
-		let mut contents = String::new();
+		let f = File::open(file)?;
+		// Find Length of File
+		let file_length = f.metadata()?.len();
 
-		buf_reader.read_to_string(&mut contents)?;
-		hasher.update(contents);
+		// Decide on Reasonable Buffer Size
+		let buf_len = file_length.min(1_000_000) as usize;
+		let mut buffer = BufReader::with_capacity(buf_len, f);
+
+		loop {
+			// Get Chunk of File
+			let part = buffer.fill_buf()?;
+
+			// If Chunk Empty, EOF Reached
+			if part.is_empty() {
+				break;
+			}
+
+			// Add Chunk to Hasher
+			hasher.update(part);
+
+			// Tell Buffer Chunk Was Consumed
+			let part_len = part.len();
+			buffer.consume(part_len);
+		}
 
 		// Finalize Hasher Object and Put Into Vec
 		let hash = hasher.finalize();
+		println!("##==>> Sha3-256 Hash Value: {:x}", hash);
 		Ok(hash.to_vec())
 	}
 }
@@ -113,15 +132,34 @@ impl Hasher for Sha3_256Hash {
 impl Hasher for Sha3_384Hash {
 	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
 		let mut hasher = sha3::Sha3_384::new();
-		let file = File::open(file)?;
-		let mut buf_reader = BufReader::new(file);
-		let mut contents = String::new();
-		
-		buf_reader.read_to_string(&mut contents)?;
-		hasher.update(contents);
+		let f = File::open(file)?;
+		// Find Length of File
+		let file_length = f.metadata()?.len();
+
+		// Decide on Reasonable Buffer Size
+		let buf_len = file_length.min(1_000_000) as usize;
+		let mut buffer = BufReader::with_capacity(buf_len, f);
+
+		loop {
+			// Get Chunk of File
+			let part = buffer.fill_buf()?;
+
+			// If Chunk Empty, EOF Reached
+			if part.is_empty() {
+				break;
+			}
+
+			// Add Chunk to Hasher
+			hasher.update(part);
+
+			// Tell Buffer Chunk Was Consumed
+			let part_len = part.len();
+			buffer.consume(part_len);
+		}
 
 		// Finalize Hasher Object and Put Into Vec
 		let hash = hasher.finalize();
+		println!("##==>> Sha3-384 Hash Value: {:x}", hash);
 		Ok(hash.to_vec())
 	}
 }
@@ -129,15 +167,34 @@ impl Hasher for Sha3_384Hash {
 impl Hasher for Sha3_512Hash {
 	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
 		let mut hasher = sha3::Sha3_512::new();
-		let file = File::open(file)?;
-		let mut buf_reader = BufReader::new(file);
-		let mut contents = String::new();
-		
-		buf_reader.read_to_string(&mut contents)?;
-		hasher.update(contents);
+		let f = File::open(file)?;
+		// Find Length of File
+		let file_length = f.metadata()?.len();
+
+		// Decide on Reasonable Buffer Size
+		let buf_len = file_length.min(1_000_000) as usize;
+		let mut buffer = BufReader::with_capacity(buf_len, f);
+
+		loop {
+			// Get Chunk of File
+			let part = buffer.fill_buf()?;
+
+			// If Chunk Empty, EOF Reached
+			if part.is_empty() {
+				break;
+			}
+
+			// Add Chunk to Hasher
+			hasher.update(part);
+
+			// Tell Buffer Chunk Was Consumed
+			let part_len = part.len();
+			buffer.consume(part_len);
+		}
 
 		// Finalize Hasher Object and Put Into Vec
 		let hash = hasher.finalize();
+		println!("##==>> Sha3-512 Hash Value: {:x}", hash);
 		Ok(hash.to_vec())
 	}
 }
