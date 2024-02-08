@@ -45,17 +45,17 @@ fn argument_parser() -> ArgMatches {
         .arg(Arg::new("size")
             .long("size")
             .short('s')
-            .value_name("Path")
+            .value_name("path")
             .help("Check the size of a file or directory"))
         .arg(Arg::new("hash")
             .long("hash")
             .short('h')
-            .value_name("Path")
+            .value_name("path")
             .help("Hash a file"))
         .arg(Arg::new("guess")
             .long("guess")
             .short('g')
-            .value_name("Guess")
+            .value_name("guess")
             .help("Guess a number from 0 - 10 for funsies"))
         .arg(Arg::new("dgrep")
             .long("dgrep")
@@ -65,8 +65,8 @@ fn argument_parser() -> ArgMatches {
             .num_args(3)
             .value_parser(value_parser!(String))
             .help("Behold my glorious implementation of grep in Rust.\nPass this function 'i' or 'insensitive' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search"))
-        .arg(Arg::new("dperceptron")
-            .long("dperceptron")
+        .arg(Arg::new("perceptron")
+            .long("perceptron")
             .short('p')
             .action(ArgAction::SetTrue)
             .help("Behold my glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
@@ -177,7 +177,7 @@ fn main() {
                 Ok(_hash_result) => {
                     // println!("#==>> Hex Output: {:x?}", hash_result);
                 },
-                Err(error) => eprintln!("##==>>>> ERROR: {}", error),
+                Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
             };
         } else {
             eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
@@ -192,7 +192,7 @@ fn main() {
         }
     }
 
-    if matches.get_flag("dperceptron") {
+    if matches.get_flag("perceptron") {
         if let Err(error) = daves_perceptron() {
             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             process::exit(1);
