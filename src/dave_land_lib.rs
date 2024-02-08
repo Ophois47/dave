@@ -30,7 +30,7 @@ impl fmt::Display for Command {
 }
 
 pub struct Object {
-	pub name: String,
+	pub labels: Vec<String>,
 	pub description: String,
 	pub location: Option<usize>,
 	pub destination: Option<usize>,
@@ -49,20 +49,24 @@ pub enum Distance {
 	UnknownObject,
 }
 
-const LOC_COM_CENTER: usize = 0;
-const LOC_MESS_HALL: usize = 1;
-const LOC_LANDING_PAD: usize = 2;
-const LOC_ARMORY: usize = 3;
-const LOC_PLAYER: usize = 4;
-// const LOC_PHOTO: usize = 5;
-const LOC_PANTS: usize = 6;
-// const LOC_RIFLE: usize = 7;
-const LOC_COPILOT: usize = 8;
-// const NORTH_TO_COMMAND_CENTER: usize = 9;
-// const SOUTH_TO_ARMORY: usize = 10;
-// const EAST_TO_MESS_HALL: usize = 11;
-// const WEST_TO_LANDING_PAD: usize = 12;
-const LOC_YOUR_ROOM: usize = 13;
+#[derive(PartialOrd, Ord, PartialEq, Eq, Debug)]
+pub enum AmbiguousOption<T> {
+	None,
+	Some(T),
+	Ambiguous,
+}
+
+const LOC_COMM_CENTER: usize = 0;
+const LOC_LANDING_PAD: usize = 1;
+const LOC_ARMORY: usize = 2;
+const LOC_PLAYER: usize = 3;
+// const LOC_PHOTO: usize = 4;
+const LOC_PANTS: usize = 5;
+// const LOC_RIFLE: usize = 6;
+const LOC_COPILOT: usize = 7;
+// const NORTH_TO_COMMAND_CENTER: usize = 8;
+// const SOUTH_TO_LANDING_PAD: usize = 9;
+// const WEST_TO_ARMORY: usize = 10;
 
 pub struct World {
 	pub objects: Vec<Object>,
@@ -73,109 +77,131 @@ impl World {
 		World {
 			objects: vec![
 				Object {
-					name: "Command Center".to_string(),
-					description: "the command center".to_string(),
+					labels: vec!["Command Center".into()],
+					description: "the command center".into(),
 					location: None,
 					destination: None,
 				},
 				Object {
-					name: "Mess Hall".to_string(),
-					description: "the mess hall".to_string(),
+					labels: vec!["Armory".into()],
+					description: "the armory".into(),
 					location: None,
 					destination: None,
 				},
 				Object {
-					name: "Landing Pad".to_string(),
-					description: "the landing pad".to_string(),
+					labels: vec!["Landing Pad".into()],
+					description: "the landing pad".into(),
 					location: None,
 					destination: None,
 				},
 				Object {
-					name: "Armory".to_string(),
-					description: "the armory".to_string(),
-					location: None,
+					labels: vec!["Yourself".into()],
+					description: "yourself".into(),
+					location: Some(LOC_COMM_CENTER),
 					destination: None,
 				},
 				Object {
-					name: "Your Room".to_string(),
-					description: "your room".to_string(),
-					location: None,
+					labels: vec!["Glossy Photo".into(), "Photo".into()],
+					description: "a glossy picture of a family. They look familiar ...".into(),
+					location: Some(LOC_COMM_CENTER),
 					destination: None,
 				},
 				Object {
-					name: "Yourself".to_string(),
-					description: "yourself".to_string(),
-					location: Some(LOC_COM_CENTER),
-					destination: None,
-				},
-				Object {
-					name: "Photo".to_string(),
-					description: "a picture of a family. They look familiar ...".to_string(),
-					location: Some(LOC_COM_CENTER),
-					destination: None,
-				},
-				Object {
-					name: "Rifle".to_string(),
-					description: "the M41A Pulse Rifle".to_string(),
-					location: Some(LOC_ARMORY),
-					destination: None,
-				},
-				Object {
-					name: "Copilot".to_string(),
-					description: "your copilot, dead on the floor".to_string(),
-					location: Some(LOC_MESS_HALL),
-					destination: None,
-				},
-				Object {
-					name: "Pen".to_string(),
-					description: "a pen".to_string(),
+					labels: vec!["Wrinkled Photo".into(), "Photo".into()],
+					description: "a wrinkled picture of a woman. She is crying".into(),
 					location: Some(LOC_COPILOT),
 					destination: None,
 				},
 				Object {
-					name: "Tater Tot".to_string(),
-					description: "a cold tater tot".to_string(),
+					labels: vec!["Rifle".into()],
+					description: "the M41A Pulse Rifle".into(),
+					location: Some(LOC_ARMORY),
+					destination: None,
+				},
+				Object {
+					labels: vec!["Copilot".into()],
+					description: "your copilot, dead on the floor".into(),
+					location: Some(LOC_MESS_HALL),
+					destination: None,
+				},
+				Object {
+					labels: vec!["Pen".into()],
+					description: "a pen".into(),
+					location: Some(LOC_COPILOT),
+					destination: None,
+				},
+				Object {
+					labels: vec!["Tater Tot".into()],
+					description: "a cold tater tot".into(),
 					location: Some(LOC_PANTS),
 					destination: None,
 				},
 				Object {
-					name: "North".to_string(),
-					description: "north leads to the command center".to_string(),
-					location: Some(LOC_YOUR_ROOM),
-					destination: Some(LOC_COM_CENTER),
-				},
-				Object {
-					name: "South".to_string(),
-					description: "south leads to the armory".to_string(),
-					location: Some(LOC_COM_CENTER),
+					labels: vec!["South".into()],
+					description: "a passage south to the armory".into(),
+					location: Some(LOC_COMM_CENTER),
 					destination: Some(LOC_ARMORY),
 				},
 				Object {
-					name: "East".to_string(),
-					description: "east leads to the mess hall".to_string(),
-					location: Some(LOC_COM_CENTER),
-					destination: Some(LOC_MESS_HALL),
+					labels: vec!["North".into()],
+					description: "a passage north to the comm center".into(),
+					location: Some(LOC_ARMORY),
+					destination: Some(LOC_COMM_CENTER),
 				},
 				Object {
-					name: "West".to_string(),
-					description: "west leads to the landing pad".to_string(),
-					location: Some(LOC_COM_CENTER),
+					labels: vec!["South".into()],
+					description: "a passage south to the landing pad".into(),
+					location: Some(LOC_ARMORY),
 					destination: Some(LOC_LANDING_PAD),
+				},
+				Object {
+					labels: vec!["North".into()],
+					description: "a passage north to the armory".into(),
+					location: Some(LOC_LANDING_PAD),
+					destination: Some(LOC_ARMORY),
+				},
+				Object {
+					labels: vec!["North".into(), "East".into(), "West".into()],
+					description: "a bulkhead covered in switchpanels and gauges".into(),
+					location: Some(LOC_COMM_CENTER),
+					destination: None,
+				},
+				Object {
+					labels: vec!["East".into(), "West".into()],
+					description: "a empty wall where rifles were once displayed".into(),
+					location: Some(LOC_ARMORY),
+					destination: None,
+				},
+				Object {
+					labels: vec!["South".into(), "East".into(), "West".into()],
+					description: "an open landing pad with a shuttle waiting. Hopefully it works".into(),
+					location: Some(LOC_LANDING_PAD),
+					destination: None,
 				},
 			],
 		}
 	}
 
-	fn object_has_name(&self, object: &Object, noun: &str) -> bool {
-		*noun == object.name.to_lowercase()
+	fn object_has_label(&self, object: &Object, noun: &str) -> bool {
+		let mut result: bool = false;
+		for (_, label) in object.labels.iter().enumerate() {
+			if label.to_lowercase() == noun {
+				result = true;
+				break;
+			}
+		}
+		result
 	}
 
-	fn get_object_index(&self, noun: &str, from: Option<usize>, max_distance: Distance) -> Option<usize> {
-		let mut result: Option<usize> = None;
+	fn get_object_index(&self, noun: &str, from: Option<usize>, max_distance: Distance) -> AmbiguousOption<usize> {
+		let mut result: AmbiguousOption<usize> = AmbiguousOption::None;
 		for (position, object) in self.objects.iter().enumerate() {
-			if self.object_has_name(&object, noun) && self.get_distance(from, Some(position)) <= max_distance {
-				result = Some(position);
-				break;
+			if self.object_has_label(object, noun) && self.get_distance(from, Some(position)) <= max_distance {
+				if result == AmbiguousOption::None {
+					result = AmbiguousOption::Some(position);
+				} else {
+					result = AmbiguousOption::Ambiguous;
+				}
 			}
 		}
 		result
@@ -186,9 +212,13 @@ impl World {
 		let obj_not_here = self.get_object_index(noun, Some(LOC_PLAYER), Distance::NotHere);
 
 		match (obj_over_there, obj_not_here) {
-			(None, None) => (format!("I don't understand {}.\n", message), None),
-			(None, Some(_)) => (format!("You don't see any '{}' here.\n", noun), None),
-			_ => (String::new(), obj_over_there),
+			(AmbiguousOption::None, AmbiguousOption::None) => (format!("I don't understand {}.\n", message), None),
+			(AmbiguousOption::None, AmbiguousOption::Some(_)) => (format!("You don't see any '{}' here.\n", noun), None),
+			(AmbiguousOption::Ambiguous, _) | (AmbiguousOption::None, AmbiguousOption::Ambiguous) => (
+				format!("Please be more specific about which {} you mean.\n", noun),
+				None,
+			),
+			(AmbiguousOption::Some(index), _) => (String::new(), Some(index)),
 		}
 	}
 
@@ -228,11 +258,11 @@ impl World {
                 let (list_string, _) = self.list_objects_at_location(self.objects[LOC_PLAYER].location.unwrap());
                 format!(
                     "{}\nYou are in {}.\n",
-                    self.objects[self.objects[LOC_PLAYER].location.unwrap()].name,
+                    self.objects[self.objects[LOC_PLAYER].location.unwrap()].labels[0],
                     self.objects[self.objects[LOC_PLAYER].location.unwrap()].description
                 ) + list_string.as_str()
             }
-            _ => format!("I don't understand what you want to see.\n"),
+            _ => format!("I don't understand what you want to see.\n".to_string()),
         }
     }
 
@@ -368,19 +398,19 @@ impl World {
                 format!("I don't understand what you want to {}.\n", command),
                 None,
             ),
-            (Some(_), None, None) => (
+            (Some(_), AmbiguousOption::None, AmbiguousOption::None) => (
                 format!("I don't understand what you want to {}.\n", command),
                 None,
             ),
-            (Some(from_idx), None, Some(_)) if from_idx == LOC_PLAYER => {
+            (Some(from_idx), AmbiguousOption::None, _) if from_idx == LOC_PLAYER => {
                 (format!("You are not holding any {}.\n", noun), None)
             }
-            (Some(from_idx), None, Some(_)) => (
-                format!("There appears to be no {} you can get from {}.\n", noun, self.objects[from_idx].name),
+            (Some(from_idx), AmbiguousOption::None, _) => (
+                format!("There appears to be no {} you can get from {}.\n", noun, self.objects[from_idx].labels[0]),
                 None,
             ),
             (Some(from_idx), Some(object_held_idx), _) if object_held_idx == from_idx => (
-                format!("You should not be doing that to {}.\n", self.objects[object_held_idx].name),
+                format!("You should not be doing that to {}.\n", self.objects[object_held_idx].labels[0]),
                 None,
             ),
             _ => ("".to_string(), object_held),
