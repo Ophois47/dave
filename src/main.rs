@@ -15,8 +15,9 @@ use std::time::Instant;
 use davelib::config::*;
 use davelib::dave_grep;
 use davelib::dave_grep::Config;
-use davelib::dave_hash::*;
 use davelib::dave_guess::guess_number;
+use davelib::dave_hash::*;
+use davelib::dave_land::dave_game_loop;
 use davelib::dave_perceptron::daves_perceptron;
 use davelib::utils::*;
 use davelib::release;
@@ -52,6 +53,12 @@ fn argument_parser() -> ArgMatches {
             .short('h')
             .value_name("path")
             .help("Hash a file"))
+        .arg(Arg::new("hash-type")
+            .long("hash-type")
+            .default_value("sha3-256")
+            .value_name("hashing algorithm")
+            .value_parser(["md5", "sha3-256", "sha3-384", "sha3-512"])
+            .help("Chooses which hashing algorithm the program will use. MD5, Sha3-256, Sha3-384 or Sha3-512"))
         .arg(Arg::new("guess")
             .long("guess")
             .short('g')
@@ -70,12 +77,10 @@ fn argument_parser() -> ArgMatches {
             .short('p')
             .action(ArgAction::SetTrue)
             .help("Behold my glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
-        .arg(Arg::new("hash-type")
-            .long("hash-type")
-            .default_value("sha3-256")
-            .value_name("hashing algorithm")
-            .value_parser(["md5", "sha3-256", "sha3-384", "sha3-512"])
-            .help("Chooses which hashing algorithm the program will use. MD5, Sha3-256, Sha3-384 or Sha3-512"))
+        .arg(Arg::new("dave-land")
+            .long("dave-land")
+            .action(ArgAction::SetTrue)
+            .help("Dive into a wonderful world full of whimsy and adventure.\nThis is a text based adventure game by Dave"))
         .get_matches()
 }
 
@@ -160,7 +165,6 @@ fn main() {
         }
     }
 
-
     if let Some(passed_directory) = matches.get_one::<String>("size") {
         let path = Path::new(passed_directory);
         if let Err(error) = get_file_size(path) {
@@ -196,6 +200,12 @@ fn main() {
         if let Err(error) = daves_perceptron() {
             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             process::exit(1);
+        }
+    }
+
+    if matches.get_flag("dave-land") {
+        if let Err(error) = dave_game_loop() {
+            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
         }
     }
 
