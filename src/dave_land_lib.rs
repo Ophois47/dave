@@ -1,8 +1,23 @@
 use serde::{Deserialize, Serialize};
+use serde::de::{self, Deserializer, Error, MapAccess, SeqAccess, Visitor};
+use serde::ser::{SerializeStruct, Serializer};
+use std::error;
 use std::fmt;
 use std::fs::read_to_string;
 use std::io::{self, Write};
 use std::path::Path;
+
+const LOC_COMM_CENTER: usize = 0;
+const LOC_ARMORY: usize = 1;
+const LOC_LANDING_PAD: usize = 2;
+const LOC_PLAYER: usize = 3;
+// const LOC_PHOTO: usize = 4;
+const LOC_PANTS: usize = 5;
+// const LOC_RIFLE: usize = 6;
+const LOC_COPILOT: usize = 7;
+// const NORTH_TO_COMMAND_CENTER: usize = 8;
+// const SOUTH_TO_LANDING_PAD: usize = 9;
+// const WEST_TO_ARMORY: usize = 10;
 
 pub enum Command {
 	Ask(String),
@@ -34,12 +49,19 @@ impl fmt::Display for Command {
 	}
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Object {
-	pub labels: Vec<String>,
-	pub description: String,
-	pub location: Option<usize>,
-	pub destination: Option<usize>,
+#[derive(Debug)]
+pub enum ParseError {
+	UnknownName(String),
+}
+
+impl error::Error for ParseError {}
+
+impl fmt::Display for ParseError {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			ParseError::UnknownName(message) => write!(f, "{}", message),
+		}
+	}
 }
 
 #[derive(PartialOrd, Ord, PartialEq, Eq, Debug)]
@@ -62,26 +84,251 @@ pub enum AmbiguousOption<T> {
 	Ambiguous,
 }
 
-const LOC_COMM_CENTER: usize = 0;
-const LOC_ARMORY: usize = 1;
-const LOC_LANDING_PAD: usize = 2;
-const LOC_PLAYER: usize = 3;
-// const LOC_PHOTO: usize = 4;
-const LOC_PANTS: usize = 5;
-// const LOC_RIFLE: usize = 6;
-const LOC_COPILOT: usize = 7;
-// const NORTH_TO_COMMAND_CENTER: usize = 8;
-// const SOUTH_TO_LANDING_PAD: usize = 9;
-// const WEST_TO_ARMORY: usize = 10;
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Object {
+	pub labels: Vec<String>,
+	pub description: String,
+	pub location: Option<usize>,
+	pub destination: Option<usize>,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct SavedObject {
+	pub labels: Vec<String>,
+	pub description: String,
+	pub location: String,
+	pub destination: String,
+}
+
+#[derive(Debug)]
 pub struct World {
 	pub objects: Vec<Object>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SavedWorld {
+	pub objects: Vec<SavedObject>,
+}
+
+
 impl Default for World {
 	fn default() -> Self {
 		Self::new()
+	}
+}
+
+impl SavedWorld {
+	fn new(new_objects: Vec<SavedObject>) -> SavedWorld {
+		SavedWorld {
+			objects: new_objects,
+		}
+	}
+}
+
+impl Serialize for World {
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		S: Serializer
+	{
+		let serializeable_struct: SavedWorld = SavedWorld::from(self);
+
+		// 1 is Number of Fields in Struct
+		let mut state = serializer.serialize_struct("SavedWorld", 1)?;
+		state.serialize_field("objects", &serializeable_struct.objects)?;
+		state.end()
+	}
+}
+
+impl<'de> Deserialize<'de> for World {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        enum Field {
+            Objects,
+        }
+ 
+        impl<'de> Deserialize<'de> for Field {
+            fn deserialize<D>(deserializer: D) -> Result<Field, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                struct FieldVisitor;
+ 
+                impl<'de> Visitor<'de> for FieldVisitor {
+                    type Value = Field;
+ 
+                    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                        formatter.write_str("`objects`")
+                    }
+ 
+                    fn visit_str<E>(self, value: &str) -> Result<Field, E>
+                    where
+                        E: de::Error,
+                    {
+                        match value {
+                            "objects" => Ok(Field::Objects),
+                            _ => Err(de::Error::unknown_field(value, FIELDS)),
+                        }
+                    }
+                }
+ 
+                deserializer.deserialize_identifier(FieldVisitor)
+            }
+        }
+ 
+        struct SavedWorldVisitor;
+ 
+        impl<'de> Visitor<'de> for SavedWorldVisitor {
+            type Value = SavedWorld;
+ 
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("struct SavedWorld")
+            }
+ 
+            fn visit_seq<V>(self, mut seq: V) -> Result<SavedWorld, V::Error>
+            where
+                V: SeqAccess<'de>,
+            {
+                let objects = seq
+                    .next_element()?
+                    .ok_or_else(|| de::Error::invalid_length(1, &self))?;
+                Ok(SavedWorld::new(objects))
+            }
+            fn visit_map<V>(self, mut map: V) -> Result<SavedWorld, V::Error>
+            where
+                V: MapAccess<'de>,
+            {
+                let mut objects = None;
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::Objects => {
+                            if objects.is_some() {
+                                return Err(de::Error::duplicate_field("objects"));
+                            }
+                            objects = Some(map.next_value()?);
+                        }
+                    }
+                }
+                let objects = objects.ok_or_else(|| de::Error::missing_field("objects"))?;
+                Ok(SavedWorld::new(objects))
+            }
+        }
+ 
+        const FIELDS: &[&str] = &["objects"];
+        let internal_extract = deserializer.deserialize_struct("World", FIELDS, SavedWorldVisitor);
+        match internal_extract {
+            Ok(extracted_val) => {
+                let external_val = extracted_val.try_into();
+                match external_val {
+                    Ok(result_val) => Ok(result_val),
+                    // From here: https://serde.rs/convert-error.html
+                    // But that lacks context, this one is better:
+                    // https://stackoverflow.com/questions/66230715/make-my-own-error-for-serde-json-deserialize
+                    Err(_) => external_val.map_err(D::Error::custom),
+                }
+            }
+            Err(err_val) => Err(err_val),
+        }
+    }
+}
+
+impl From<&World> for SavedWorld {
+	fn from(value: &World) -> Self {
+		let mut new_vec_of_objects: Vec<SavedObject> = Vec::new();
+
+		for item in &value.objects {
+			new_vec_of_objects.push(SavedObject {
+				labels: item.labels.clone(),
+				description: item.description.to_string(),
+				location: match item.location {
+					Some(location) => value.objects[location].labels[0].to_string(),
+					None => "".to_string(),
+				},
+				destination: match item.destination {
+					Some(destination) => value.objects[destination].labels[0].to_string(),
+					None => "".to_string(),
+				},
+			});
+		}
+
+		SavedWorld {
+			objects: new_vec_of_objects,
+		}
+	}
+}
+
+impl Object {
+	fn new(
+		new_labels: Vec<String>,
+		new_description: String,
+		new_location: Option<usize>,
+		new_destination: Option<usize>,
+	) -> Object {
+		Object {
+			labels: new_labels,
+			description: new_description,
+			location: new_location,
+			destination: new_destination,
+		}
+	}
+}
+
+impl TryInto<World> for SavedWorld {
+	type Error = ParseError;
+
+	fn try_into(self) -> Result<World, Self::Error> {
+		let mut new_vec_of_objects: Vec<Object> = Vec::new();
+
+		'items: for item in &self.objects {
+			let mut new_object = Object::new(
+				item.labels.clone(),
+				item.description.to_string(),
+				None,
+				None,
+			);
+
+			let mut found_location: bool = item.location.is_empty();
+			let mut found_destination: bool = item.destination.is_empty();
+
+			for (position, internal_item) in self.objects.iter().enumerate() {
+				if item.location == internal_item.labels[0] {
+					new_object.location = Some(position);
+					found_location = true;
+				}
+				if item.destination == internal_item.labels[0] {
+					new_object.destination = Some(position);
+					found_destination = true
+				}
+				if found_location && found_destination {
+					new_vec_of_objects.push(new_object);
+					continue 'items;
+				}
+			}
+
+			if !found_location {
+				return Err(ParseError::UnknownName(format!(
+					"Unknown Location: '{}'",
+					item.location
+				)));
+			}
+
+			if !found_destination {
+				return Err(ParseError::UnknownName(format!(
+					"Unknown Destination: '{}'",
+					item.destination
+				)));
+			}
+
+			new_vec_of_objects.push(new_object);
+			return Err(ParseError::UnknownName("How did we get here?".into()));
+		}
+
+		let result_world = World {
+			objects: new_vec_of_objects,
+		};
+
+		Ok(result_world)
 	}
 }
 
