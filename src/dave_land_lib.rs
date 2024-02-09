@@ -7,17 +7,7 @@ use std::fs::read_to_string;
 use std::io::{self, Write};
 use std::path::Path;
 
-const LOC_COMM_CENTER: usize = 0;
-const LOC_ARMORY: usize = 1;
-const LOC_LANDING_PAD: usize = 2;
-const LOC_PLAYER: usize = 3;
-// const LOC_PHOTO: usize = 4;
-const LOC_PANTS: usize = 5;
-// const LOC_RIFLE: usize = 6;
-const LOC_COPILOT: usize = 7;
-// const NORTH_TO_COMMAND_CENTER: usize = 8;
-// const SOUTH_TO_LANDING_PAD: usize = 9;
-// const WEST_TO_ARMORY: usize = 10;
+const LOC_PLAYER: usize = 0;
 
 pub enum Command {
 	Ask(String),
@@ -90,17 +80,117 @@ pub struct Object {
 	pub description: String,
 	pub location: Option<usize>,
 	pub destination: Option<usize>,
+	pub prospect: Option<usize>,
+	pub details: String,
+	pub contents: String,
+	pub text_go: String,
+	pub weight: isize,
+	pub capacity: isize,
+	pub health: isize,
+}
+
+const DEF_PROSPECT: &str = "";
+const DEF_DETAILS: &str = "You see nothing special.";
+const DEF_CONTENTS: &str = "You see";
+const DEF_TEXT_GO: &str = "You can't get much closer than this.";
+const DEF_WEIGHT: isize = 99;
+const DEF_CAPACITY: isize = 0;
+const DEF_HEALTH: isize = 0;
+
+pub fn default_prospect() -> String {
+    DEF_PROSPECT.into()
+}
+
+pub fn is_default_prospect(value: &str) -> bool {
+    value == DEF_PROSPECT
+}
+
+pub fn default_details() -> String {
+    DEF_DETAILS.into()
+}
+
+pub fn is_default_details(value: &str) -> bool {
+    value == DEF_DETAILS
+}
+
+pub fn default_contents() -> String {
+    DEF_CONTENTS.into()
+}
+
+pub fn is_default_contents(value: &str) -> bool {
+    value == DEF_CONTENTS
+}
+
+pub fn default_text_go() -> String {
+    DEF_TEXT_GO.into()
+}
+
+pub fn is_default_text_go(value: &str) -> bool {
+    value == DEF_TEXT_GO
+}
+
+pub fn default_weight() -> isize {
+    DEF_WEIGHT
+}
+
+pub fn is_default_weight(value: &isize) -> bool {
+    *value == DEF_WEIGHT
+}
+
+pub fn default_capacity() -> isize {
+    DEF_CAPACITY
+}
+
+pub fn is_default_capacity(value: &isize) -> bool {
+    *value == DEF_CAPACITY
+}
+
+pub fn default_health() -> isize {
+    DEF_HEALTH
+}
+
+pub fn is_default_health(value: &isize) -> bool {
+    *value == DEF_HEALTH
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct SavedObject {
-	pub labels: Vec<String>,
-	pub description: String,
-	#[serde(default, skip_serializing_if = "String::is_empty")]
-	pub location: String,
-	#[serde(default, skip_serializing_if = "String::is_empty")]
-	pub destination: String,
+    pub labels: Vec<String>,
+    pub description: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub location: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub destination: String,
+    #[serde(
+        default = "default_prospect",
+        skip_serializing_if = "is_default_prospect"
+    )]
+    pub prospect: String,
+    #[serde(
+        default = "default_details",
+        skip_serializing_if = "is_default_details"
+    )]
+    pub details: String,
+    #[serde(
+        default = "default_contents",
+        skip_serializing_if = "is_default_contents"
+    )]
+    pub contents: String,
+    #[serde(
+        default = "default_text_go",
+        skip_serializing_if = "is_default_text_go"
+    )]
+    pub text_go: String,
+    #[serde(default = "default_weight", skip_serializing_if = "is_default_weight")]
+    pub weight: isize,
+    #[serde(
+        default = "default_capacity",
+        skip_serializing_if = "is_default_capacity"
+    )]
+    pub capacity: isize,
+    #[serde(default = "default_health", skip_serializing_if = "is_default_health")]
+    pub health: isize,
 }
 
 #[derive(Debug)]
@@ -113,7 +203,6 @@ pub struct World {
 pub struct SavedWorld {
 	pub objects: Vec<SavedObject>,
 }
-
 
 impl Default for World {
 	fn default() -> Self {
@@ -253,6 +342,16 @@ impl From<&World> for SavedWorld {
 					Some(destination) => value.objects[destination].labels[0].to_string(),
 					None => "".to_string(),
 				},
+				prospect: match item.prospect {
+					Some(prospect) => value.objects[prospect].labels[0].to_string(),
+					None => "".to_string(),
+				},
+				details: item.details.to_string(),
+				contents: item.contents.to_string(),
+				text_go: item.text_go.to_string(),
+				weight: item.weight,
+				capacity: item.capacity,
+				health: item.health,
 			});
 		}
 
@@ -268,12 +367,26 @@ impl Object {
 		new_description: String,
 		new_location: Option<usize>,
 		new_destination: Option<usize>,
+		new_prospect: Option<usize>,
+		new_details: String,
+		new_contents: String,
+		new_text_go: String,
+		new_weight: isize,
+		new_capacity: isize,
+		new_health: isize,
 	) -> Object {
 		Object {
 			labels: new_labels,
 			description: new_description,
 			location: new_location,
 			destination: new_destination,
+			prospect: new_prospect,
+			details: new_details,
+			contents: new_contents,
+			text_go: new_text_go,
+			weight: new_weight,
+			capacity: new_capacity,
+			health: new_health,
 		}
 	}
 }
@@ -290,10 +403,18 @@ impl TryInto<World> for SavedWorld {
 				item.description.to_string(),
 				None,
 				None,
+				None,
+				item.details.to_string(),
+				item.contents.to_string(),
+				item.text_go.to_string(),
+				item.weight,
+				item.capacity,
+				item.health,
 			);
 
 			let mut found_location: bool = item.location.is_empty();
 			let mut found_destination: bool = item.destination.is_empty();
+			let mut found_prospect: bool = item.prospect.is_empty();
 
 			for (position, internal_item) in self.objects.iter().enumerate() {
 				if item.location == internal_item.labels[0] {
@@ -302,9 +423,19 @@ impl TryInto<World> for SavedWorld {
 				}
 				if item.destination == internal_item.labels[0] {
 					new_object.destination = Some(position);
-					found_destination = true
+					found_destination = true;
+
+					// If no prospect is given then use destination
+					if item.prospect.len() == 0 {
+						new_object.prospect = Some(position);
+						found_prospect = true;
+					}
 				}
-				if found_location && found_destination {
+				if item.prospect == internal_item.labels[0] {
+					new_object.prospect = Some(position);
+					found_prospect = true;
+				}
+				if found_location && found_destination && found_prospect {
 					new_vec_of_objects.push(new_object);
 					continue 'items;
 				}
@@ -324,6 +455,13 @@ impl TryInto<World> for SavedWorld {
 				)));
 			}
 
+			if !found_prospect {
+				return Err(ParseError::UnknownName(format!(
+					"Unknown Prospect: '{}'",
+					item.prospect
+				)))
+			}
+
 			new_vec_of_objects.push(new_object);
 			return Err(ParseError::UnknownName("How did we get here?".into()));
 		}
@@ -338,118 +476,7 @@ impl TryInto<World> for SavedWorld {
 
 impl World {
 	pub fn new() -> Self {
-		World {
-			objects: vec![
-				Object {
-					labels: vec!["Command Center".into()],
-					description: "the command center".into(),
-					location: None,
-					destination: None,
-				},
-				Object {
-					labels: vec!["Armory".into()],
-					description: "the armory".into(),
-					location: None,
-					destination: None,
-				},
-				Object {
-					labels: vec!["Landing Pad".into()],
-					description: "the landing pad".into(),
-					location: None,
-					destination: None,
-				},
-				Object {
-					labels: vec!["Yourself".into()],
-					description: "yourself".into(),
-					location: Some(LOC_COMM_CENTER),
-					destination: None,
-				},
-				Object {
-					labels: vec!["Glossy Photo".into(), "Photo".into(), "Picture".into()],
-					description: "a glossy picture of a family. They look familiar ...".into(),
-					location: Some(LOC_COMM_CENTER),
-					destination: None,
-				},
-				Object {
-					labels: vec!["Wrinkled Photo".into(), "Photo".into(), "Picture".into()],
-					description: "a wrinkled picture of a woman. She is crying".into(),
-					location: Some(LOC_COPILOT),
-					destination: None,
-				},
-				Object {
-					labels: vec!["the M41A Pulse Rifle".into(), "Rifle".into()],
-					description: "a single M41A Pulse Rifle with an ammo counter that says 56".into(),
-					location: Some(LOC_ARMORY),
-					destination: None,
-				},
-				Object {
-					labels: vec!["Copilot".into()],
-					description: "your copilot".into(),
-					location: Some(LOC_LANDING_PAD),
-					destination: None,
-				},
-				Object {
-					labels: vec!["Pen".into()],
-					description: "a pen".into(),
-					location: Some(LOC_COPILOT),
-					destination: None,
-				},
-				Object {
-					labels: vec!["Tater".into(), "Tot".into(), "Tater Tot".into()],
-					description: "a cold tater tot".into(),
-					location: Some(LOC_PANTS),
-					destination: None,
-				},
-				Object {
-					labels: vec!["Pants".into(), "Camo Pants".into(), "Slacks".into(), "Trousers".into()],
-					description: "a pair of black, white and grey camouflaged pants".into(),
-					location: Some(LOC_ARMORY),
-					destination: None,
-				},
-				Object {
-					labels: vec!["South".into()],
-					description: "a passage south to the armory".into(),
-					location: Some(LOC_COMM_CENTER),
-					destination: Some(LOC_ARMORY),
-				},
-				Object {
-					labels: vec!["North".into()],
-					description: "a passage north to the comm center".into(),
-					location: Some(LOC_ARMORY),
-					destination: Some(LOC_COMM_CENTER),
-				},
-				Object {
-					labels: vec!["South".into()],
-					description: "a passage south to the landing pad".into(),
-					location: Some(LOC_ARMORY),
-					destination: Some(LOC_LANDING_PAD),
-				},
-				Object {
-					labels: vec!["North".into()],
-					description: "a passage north to the armory".into(),
-					location: Some(LOC_LANDING_PAD),
-					destination: Some(LOC_ARMORY),
-				},
-				Object {
-					labels: vec!["North".into(), "East".into(), "West".into()],
-					description: "a bulkhead covered in blinking screens, switch-panels, gauges and communications technology".into(),
-					location: Some(LOC_COMM_CENTER),
-					destination: None,
-				},
-				Object {
-					labels: vec!["East".into(), "West".into()],
-					description: "an empty wall where many rifles were once stored and displayed".into(),
-					location: Some(LOC_ARMORY),
-					destination: None,
-				},
-				Object {
-					labels: vec!["South".into(), "East".into(), "West".into()],
-					description: "a large landing pad with a UD-4 'Cheyenne' Dropship nestled in the middle of it. The ramp is extended. Hopefully it flies".into(),
-					location: Some(LOC_LANDING_PAD),
-					destination: None,
-				},
-			],
-		}
+		World { objects: vec![] }
 	}
 
 	pub fn read_from_file(game_file: &str) -> Result<World, std::io::Error> {
@@ -519,7 +546,7 @@ impl World {
 		for (position, object) in self.objects.iter().enumerate() {
 			if position != LOC_PLAYER && self.is_holding(Some(location), Some(position)) {
 				if count == 0 {
-					output += "You see:\n";
+					output = output + &format!("{}:\n", self.objects[location].contents);
 				}
 				count += 1;
 				output = output + &format!("{}\n", object.description);
@@ -557,38 +584,64 @@ impl World {
 	pub fn do_look(&self, noun: &str) -> String {
         match noun {
             "around" | "" => {
-                let (list_string, _) = self.list_objects_at_location(self.objects[LOC_PLAYER].location.unwrap());
+                let (list_string, _) = self.list_objects_at_location(self.objects[LOC_PLAYER].location.expect("Failed on List_Objects_At_Location"));
                 format!(
                     "{}\nYou are in {}.\n",
                     self.objects[self.objects[LOC_PLAYER].location.unwrap()].labels[0],
                     self.objects[self.objects[LOC_PLAYER].location.unwrap()].description
                 ) + list_string.as_str()
             }
-            _ => format!("I don't understand what you want to look at.\n"),
+            _ => {
+            	let (output_vis, obj_opt) = self.get_visible("what you want to look at", noun);
+            	let player_to_obj = self.get_distance(Some(LOC_PLAYER), obj_opt);
+
+            	match (player_to_obj, obj_opt) {
+            		(Distance::HereContained, _) => {
+            			output_vis + "Hard to see, you should try to get closer first.\n"
+            		}
+            		(Distance::OverThere, _) => output_vis + "Too far away, move closer.\n",
+            		(Distance::NotHere, _) => {
+            			output_vis + &format!("You don't see any '{}' here.\n", noun)
+            		}
+            		(Distance::UnknownObject, _) => output_vis,
+            		(Distance::Location, Some(obj_idx)) => {
+            			let (list_string, _) = self.list_objects_at_location(self.objects[LOC_PLAYER].location.unwrap());
+            			output_vis + &format!("{}\n{}\n", self.objects[obj_idx].details, list_string)
+            		}
+            		(_, Some(obj_idx)) => {
+            			let (list_string, _) = self.list_objects_at_location(self.objects[obj_idx].location.unwrap());
+            			output_vis + &format!("{}\n{}\n", self.objects[obj_idx].details, list_string)
+            		}
+            		(_, None) => {
+            			// Should Never Be
+            			output_vis + "How does one look at nothing?!\n"
+            		}
+            	}
+            }
         }
+    }
+
+    fn move_player(&mut self, obj_opt: Option<usize>) -> String {
+    	let go_string = format!("{}\n", self.objects[obj_opt.unwrap()].text_go);
+    	let obj_dst = obj_opt.and_then(|a| self.objects[a].destination);
+    	if obj_dst != None {
+    		self.objects[LOC_PLAYER].location = obj_dst;
+    		go_string + "\n" + &self.do_look("around")
+    	} else {
+    		go_string
+    	}
     }
 
 	pub fn do_go(&mut self, noun: &str) -> String {
 		let (output_vis, obj_opt) = self.get_visible("where you want to go", noun);
 
 		match self.get_distance(Some(LOC_PLAYER), obj_opt) {
-			Distance::OverThere => {
-				self.objects[LOC_PLAYER].location = obj_opt;
-				"OK.\n\n".to_string() + &self.do_look("around")
-			}
+			Distance::OverThere => self.move_player(obj_opt),
 			Distance::NotHere => {
 				format!("You don't see any {} here.\n", noun)
 			}
 			Distance::UnknownObject => output_vis,
-			_ => {
-				let obj_dst = obj_opt.and_then(|a| self.objects[a].destination);
-				if obj_dst.is_some() {
-					self.objects[LOC_PLAYER].location = obj_dst;
-					"OK.\n\n".to_string() + &self.do_look("around")
-				} else {
-					"You are not able to go further in that direction.\n".to_string()
-				}
-			}
+			_ => self.move_player(obj_opt),
 		}
 	}
 
@@ -612,7 +665,7 @@ impl World {
 	}
 
 	pub fn do_get(&mut self, noun: &String) -> String {
-		let (output_vis, obj_opt) = self.get_visible("where do you want to go", noun);
+		let (output_vis, obj_opt) = self.get_visible("what you want to get", noun);
 		let player_to_obj = self.get_distance(Some(LOC_PLAYER), obj_opt);
 
 		match (player_to_obj, obj_opt) {
@@ -625,8 +678,8 @@ impl World {
 			_ => {
 				let obj_loc = obj_opt.and_then(|a| self.objects[a].location);
 
-				if obj_loc == Some(LOC_COPILOT) {
-					output_vis + &format!("You should ask {} nicely.\n", self.objects[LOC_COPILOT].labels[0])
+				if obj_loc.is_some() && self.objects[obj_loc.unwrap()].health > 0 {
+					output_vis + &format!("You should ask {} nicely.\n", self.objects[obj_loc.unwrap()].labels[0])
 				} else {
 					self.move_object(obj_opt, Some(LOC_PLAYER))
 				}
@@ -652,7 +705,7 @@ impl World {
 				format!("You drop {}.\n", self.objects[obj_opt_idx].labels[0])
 			}
 			(Some(obj_opt_idx), _, Some(to_idx), _) if to_idx != LOC_PLAYER => {
-				if to_idx == LOC_COPILOT {
+				if self.objects[to_idx].health > 0 {
 					format!("You give {} to {}.\n", self.objects[obj_opt_idx].labels[0], self.objects[to_idx].labels[0])
 				} else {
 					format!("You put {} in {}.\n", self.objects[obj_opt_idx].labels[0], self.objects[to_idx].labels[0])
@@ -671,13 +724,29 @@ impl World {
 		}
 	}
 
+	fn weight_of_contents(&self, container: usize) -> isize {
+		let mut sum: isize = 0;
+		for (position, object) in self.objects.iter().enumerate() {
+			if self.is_holding(Some(container), Some(position)) {
+				sum += object.weight;
+			}
+		}
+		sum
+	}
+
 	pub fn move_object(&mut self, obj_opt: Option<usize>, to: Option<usize>) -> String {
 		let obj_loc = obj_opt.and_then(|a| self.objects[a].location);
 
 		match (obj_opt, obj_loc, to) {
-			(None, _, _) => format!(""),
-			(Some(_), _, None) => format!("There is nobody to give that to.\n"),
-			(Some(_), None, Some(_)) => format!("This is way too heavy.\n"),
+			(None, _, _) => String::new(),
+			(Some(_), _, None) => "There is nobody to give that to.\n".to_string(),
+			(Some(_), None, Some(_)) => "This is way too heavy.\n".to_string(),
+			(Some(obj_idx), Some(_), Some(to_idx)) if self.objects[obj_idx].weight > self.objects[to_idx].capacity => {
+				"That is way too heavy.\n".to_string()
+			}
+			(Some(obj_idx), Some(_), Some(to_idx)) if self.objects[obj_idx].weight + self.weight_of_contents(to_idx) > self.objects[to_idx].capacity => {
+				"That would become too heavy.\n".to_string()
+			}
 			(Some(obj_idx), Some(_), Some(to_idx)) => {
 				let output = self.describe_move(obj_opt, to);
 				self.objects[obj_idx].location = Some(to_idx);
@@ -729,8 +798,8 @@ impl World {
 	pub fn actor_here(&self) -> Option<usize> {
 		let mut actor_loc: Option<usize> = None;
 
-		for (position, _) in self.objects.iter().enumerate() {
-			if self.is_holding(self.objects[LOC_PLAYER].location, Some(position)) && position == LOC_COPILOT {
+		for (position, object) in self.objects.iter().enumerate() {
+			if self.is_holding(self.objects[LOC_PLAYER].location, Some(position)) && position == LOC_PLAYER && object.health > 0 {
 				actor_loc = Some(position);
 			}
 		}
@@ -742,7 +811,7 @@ impl World {
 
         if from_opt.is_some() && to_opt.is_some() {
         	for (position, object) in self.objects.iter().enumerate() {
-        		if self.is_holding(from_opt, Some(position)) && object.destination == to_opt {
+        		if self.is_holding(from_opt, Some(position)) && object.prospect == to_opt {
         			result = Some(position);
         			break;
         		}
