@@ -10,6 +10,7 @@ pub enum Command {
 	Inventory,
 	Look(String),
 	Quit,
+	Help,
 	Unknown(String),
 }
 
@@ -24,6 +25,7 @@ impl fmt::Display for Command {
 			Command::Inventory => write!(f, "inventory"),
 			Command::Look(_) => write!(f, "look"),
 			Command::Quit => write!(f, "quit"),
+			Command::Help => write!(f, "help"),
 			Command::Unknown(_) => write!(f, "unknown"),
 		}
 	}
@@ -57,8 +59,8 @@ pub enum AmbiguousOption<T> {
 }
 
 const LOC_COMM_CENTER: usize = 0;
-const LOC_LANDING_PAD: usize = 1;
-const LOC_ARMORY: usize = 2;
+const LOC_ARMORY: usize = 1;
+const LOC_LANDING_PAD: usize = 2;
 const LOC_PLAYER: usize = 3;
 // const LOC_PHOTO: usize = 4;
 const LOC_PANTS: usize = 5;
@@ -113,14 +115,14 @@ impl World {
 					destination: None,
 				},
 				Object {
-					labels: vec!["Rifle".into()],
-					description: "the M41A Pulse Rifle".into(),
+					labels: vec!["M41A Pulse Rifle".into()],
+					description: "a single M41A Pulse Rifle with an ammo counter that says 56".into(),
 					location: Some(LOC_ARMORY),
 					destination: None,
 				},
 				Object {
 					labels: vec!["Copilot".into()],
-					description: "your copilot, dead on the floor".into(),
+					description: "your copilot, standing at the bottom of the open ramp".into(),
 					location: Some(LOC_LANDING_PAD),
 					destination: None,
 				},
@@ -134,6 +136,12 @@ impl World {
 					labels: vec!["Tater Tot".into()],
 					description: "a cold tater tot".into(),
 					location: Some(LOC_PANTS),
+					destination: None,
+				},
+				Object {
+					labels: vec!["Camo Pants".into()],
+					description: "a pair of black, white and grey camouflaged pants".into(),
+					location: Some(LOC_ARMORY),
 					destination: None,
 				},
 				Object {
@@ -162,19 +170,19 @@ impl World {
 				},
 				Object {
 					labels: vec!["North".into(), "East".into(), "West".into()],
-					description: "a bulkhead covered in switchpanels and gauges".into(),
+					description: "a bulkhead covered in blinking screens, switch-panels, gauges and communications technology".into(),
 					location: Some(LOC_COMM_CENTER),
 					destination: None,
 				},
 				Object {
 					labels: vec!["East".into(), "West".into()],
-					description: "a empty wall where rifles were once displayed".into(),
+					description: "an empty wall where many rifles were once stored and displayed".into(),
 					location: Some(LOC_ARMORY),
 					destination: None,
 				},
 				Object {
 					labels: vec!["South".into(), "East".into(), "West".into()],
-					description: "an open landing pad with a shuttle waiting. Hopefully it works".into(),
+					description: "a large landing pad with a UD-4 'Cheyenne' Dropship nestled in the middle of it. The ramp is extended. Hopefully it flies".into(),
 					location: Some(LOC_LANDING_PAD),
 					destination: None,
 				},
@@ -248,7 +256,19 @@ impl World {
 			Command::Inventory => self.do_inventory(),
 			Command::Look(noun) => self.do_look(noun),
 			Command::Quit => format!("Quitting ...\nThank you for playing!"),
-			Command::Unknown(input_str) => format!("I don't even know how to '{}'.", input_str),
+			Command::Help => format!(
+				"You can:\n \
+				Look - see what is around you\n \
+				Go - travel to a nearby location\n \
+				Get - pickup an item\n \
+				Give - give an item to someone or something else\n \
+				Drop - drop an item currently in your inventory\n \
+				Inventory - Check your current inventory\n \
+				Ask - speak with someone nearby\n \
+				Help - prints this screen\n \
+				Quit - leave the game"
+			),
+			Command::Unknown(input_str) => format!("What do you mean by '{}'?", input_str),
 		}
 	}
 
@@ -262,7 +282,7 @@ impl World {
                     self.objects[self.objects[LOC_PLAYER].location.unwrap()].description
                 ) + list_string.as_str()
             }
-            _ => format!("I don't understand what you want to see.\n"),
+            _ => format!("I don't understand what you want to look at.\n"),
         }
     }
 
@@ -318,7 +338,7 @@ impl World {
 			(Distance::Held, Some(object_idx)) => {
 				output_vis + &format!("You already have {}.\n", self.objects[object_idx].description)
 			}
-			(Distance::OverThere, _) => output_vis + "Too far away, move closer please.\n",
+			(Distance::OverThere, _) => output_vis + "Too far away, move closer.\n",
 			(Distance::UnknownObject, _) => output_vis,
 			_ => {
 				let obj_loc = obj_opt.and_then(|a| self.objects[a].location);
@@ -410,18 +430,12 @@ impl World {
                 None,
             ),
             (Some(from_idx), AmbiguousOption::Some(object_held_idx), _) if object_held_idx == from_idx => {
-                (format!(
-                        "You should not be doing that to {}.\n",
-                        self.objects[object_held_idx].labels[0]
-                    ),
+                (format!("You should not be doing that to {}.\n", self.objects[object_held_idx].labels[0]),
                     None,
                 )
             }
             (Some(_), AmbiguousOption::Ambiguous, _) => (
-                format!(
-                    "Please be more specific about which {} you want to {}.\n",
-                    noun, command
-                ),
+                format!("Please be more specific about which {} you want to {}.\n", noun, command),
                 None,
             ),
             (Some(_), AmbiguousOption::Some(object_held_idx), _) => {
@@ -441,25 +455,19 @@ impl World {
 		actor_loc
 	}
 
-	fn get_passage_index(&self, from: Option<usize>, to: Option<usize>) -> Option<usize> {
+	fn get_passage_index(&self, from_opt: Option<usize>, to_opt: Option<usize>) -> Option<usize> {
         let mut result: Option<usize> = None;
 
-        match (from, to) {
-            (Some(from), Some(to)) => {
-                for (pos, object) in self.objects.iter().enumerate() {
-                    let obj_loc = object.location;
-                    let obj_dest = object.destination;
-                    match (obj_loc, obj_dest) {
-                        (Some(location), Some(destination)) if location == from && destination == to => {
-                            result = Some(pos);
-                            break;
-                        }
-                        _ => continue,
-                    }
-                }
-                result
-            }
-            _ => result,
+        if from_opt.is_some() && to_opt.is_some() {
+        	for (position, object) in self.objects.iter().enumerate() {
+        		if self.is_holding(from_opt, Some(position)) && object.destination == to_opt {
+        			result = Some(position);
+        			break;
+        		}
+        	}
+        	result
+        } else {
+        	result
         }
     }
 
@@ -514,6 +522,7 @@ pub fn parse(input_str: String) -> Command {
         "go" => Command::Go(noun),
         "inventory" => Command::Inventory,
         "look" => Command::Look(noun),
+        "help" => Command::Help,
         "quit" => Command::Quit,
         _ => Command::Unknown(input_str.trim().to_string()),
     }
