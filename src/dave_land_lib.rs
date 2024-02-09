@@ -1,5 +1,8 @@
+use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::fs::read_to_string;
 use std::io::{self, Write};
+use std::path::Path;
 
 pub enum Command {
 	Ask(String),
@@ -31,6 +34,7 @@ impl fmt::Display for Command {
 	}
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Object {
 	pub labels: Vec<String>,
 	pub description: String,
@@ -70,8 +74,15 @@ const LOC_COPILOT: usize = 7;
 // const SOUTH_TO_LANDING_PAD: usize = 9;
 // const WEST_TO_ARMORY: usize = 10;
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct World {
 	pub objects: Vec<Object>,
+}
+
+impl Default for World {
+	fn default() -> Self {
+		Self::new()
+	}
 }
 
 impl World {
@@ -139,7 +150,7 @@ impl World {
 					destination: None,
 				},
 				Object {
-					labels: vec!["Camo Pants".into()],
+					labels: vec!["Pants".into(), "Camo Pants".into(), "Slacks".into(), "Trousers".into()],
 					description: "a pair of black, white and grey camouflaged pants".into(),
 					location: Some(LOC_ARMORY),
 					destination: None,
@@ -187,6 +198,26 @@ impl World {
 					destination: None,
 				},
 			],
+		}
+	}
+
+	pub fn read_from_file(game_file: &str) -> Result<World, std::io::Error> {
+		let game_file_path = Path::new(game_file);
+		let game_file_data_res = read_to_string(game_file_path);
+
+		match game_file_data_res {
+			Ok(game_file_data) => {
+				// Read (deserialize) a World struct from the game_file string
+				let deserialized_ron_result: Result<World, ron::error::SpannedError> = ron::from_str(&game_file_data);
+				match deserialized_ron_result {
+					Ok(deserialized_ron) => Ok(deserialized_ron),
+					Err(de_err_str) => Err(std::io::Error::new(
+						std::io::ErrorKind::Other,
+						de_err_str.to_string(),
+					)),
+				}
+			}
+			Err(file_error) => Err(file_error),
 		}
 	}
 

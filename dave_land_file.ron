@@ -1,0 +1,94 @@
+World (
+	objects: [
+		(labels : ["Command Center"],
+		 description : "the command center",
+		 location : None,
+		 destination : None
+		),
+		(labels : ["Armory"],
+		 description : "the armory",
+		 location : None,
+		 destination : None
+		),
+		(labels : ["Landing Pad"],
+		 description : "the landing pad",
+		 location : None,
+		 destination : None
+		),
+		(labels : ["Yourself"],
+		 description : "yourself",
+		 location : Some(0),
+		 destination : None
+		),
+		(labels : ["Glossy Photo","Photo","Picture"],
+		 description : "a glossy picture of a family. They look familiar ...",
+		 location : Some(0),
+		 destination : None
+		),
+		(labels : ["Wrinkled Photo","Photo","Picture"],
+		 description : "a wrinkled picture of a woman. She is crying",
+		 location : Some(7),
+		 destination : None
+		),
+		(labels : ["the M41A Pulse Rifle","Rifle"],
+		 description : "a single M41A Pulse Rifle with an ammo counter that says 56",
+		 location : Some(1),
+		 destination : None
+		),
+		(labels : ["Copilot"],
+		 description : "your copilot",
+		 location : Some(2),
+		 destination : None
+		),
+		(labels : ["Pen"],
+		 description : "a pen",
+		 location : Some(7),
+		 destination : None
+		),
+		(labels : ["Tater","Tot","Tater Tot"],
+		 description : "a cold tater tot",
+		 location : Some(5),
+		 destination : None
+		),
+		(labels : ["Pants","Camo Pants","Slacks","Trousers"],
+		 description : "a pair of black, white and grey camouflaged pants",
+		 location : Some(1),
+		 destination : None
+		),
+		(labels : ["South"],
+		 description : "a passage south to the armory",
+		 location : Some(0),
+		 destination : Some(1)
+		),
+		(labels : ["North"],
+		 description : "a passage north to the comm center",
+		 location : Some(1),
+		 destination : Some(0)
+		),
+		(labels : ["South"],
+		 description : "a passage south to the landing pad",
+		 location : Some(1),
+		 destination : Some(2)
+		),
+		(labels : ["North"],
+		 description : "a passage north to the armory",
+		 location : Some(2),
+		 destination : Some(1)
+		),
+		(labels : ["North","East","West"],
+		 description : "a bulkhead covered in blinking screens, switch-panels, gauges and communications technology",
+		 location : Some(0),
+		 destination : None
+		),
+		(labels : ["East","West"],
+		 description : "an empty wall where many rifles were once stored and displayed",
+		 location : Some(1),
+		 destination : None
+		),
+		(labels : ["South","East","West"],
+		 description : "a large landing pad with a UD-4 \'Cheyenne\' Dropship nestled in the middle of it. The ramp is extended. Hopefully it flies",
+		 location : Some(2),
+		 destination : None
+		)
+	]
+)
