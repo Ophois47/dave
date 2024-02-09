@@ -584,11 +584,11 @@ impl World {
 	pub fn do_look(&self, noun: &str) -> String {
         match noun {
             "around" | "" => {
-                let (list_string, _) = self.list_objects_at_location(self.objects[LOC_PLAYER].location.expect("Failed on List_Objects_At_Location"));
+                let (list_string, _) = self.list_objects_at_location(self.objects[LOC_PLAYER].location.unwrap());
                 format!(
                     "{}\nYou are in {}.\n",
                     self.objects[self.objects[LOC_PLAYER].location.unwrap()].labels[0],
-                    self.objects[self.objects[LOC_PLAYER].location.unwrap()].description
+                    self.objects[self.objects[LOC_PLAYER].location.unwrap()].description,
                 ) + list_string.as_str()
             }
             _ => {
@@ -690,7 +690,7 @@ impl World {
 	pub fn do_inventory(&self) -> String {
 		let (list_string, count) = self.list_objects_at_location(LOC_PLAYER);
 		if count == 0 {
-			format!("You have nothing in your inventory.\n")
+			"You have nothing in your inventory.\n".to_string()
 		} else {
 			list_string
 		}
@@ -756,17 +756,17 @@ impl World {
 	}
 
 	pub fn get_possession(
-		&mut self,
-		from: Option<usize>,
-		command: Command,
-		noun: &String,
-	) -> (String, Option<usize>) {
-		let object_held = self.get_object_index(noun, from, Distance::HeldContained);
-		let object_not_here = self.get_object_index(noun, from, Distance::NotHere);
+        &mut self,
+        from: Option<usize>,
+        command: Command,
+        noun: &str,
+    ) -> (String, Option<usize>) {
+        let object_held = self.get_object_index(noun, from, Distance::HeldContained);
+        let object_not_here = self.get_object_index(noun, from, Distance::NotHere);
 
-		match (from, object_held, object_not_here) {
+        match (from, object_held, object_not_here) {
             (None, _, _) => (
-                format!("I don't understand what you want to {}.\n", command),
+            	format!("I don't understand what you want to {}.\n", command),
                 None,
             ),
             (Some(_), AmbiguousOption::None, AmbiguousOption::None) => (
@@ -777,23 +777,30 @@ impl World {
                 (format!("You are not holding any {}.\n", noun), None)
             }
             (Some(from_idx), AmbiguousOption::None, _) => (
-                format!("There appears to be no {} you can get from {}.\n", noun, self.objects[from_idx].labels[0]),
+                format!(
+                    "There appears to be no {} you can get from {}.\n",
+                    noun, self.objects[from_idx].labels[0]
+                ),
                 None,
             ),
             (Some(from_idx), AmbiguousOption::Some(object_held_idx), _) if object_held_idx == from_idx => {
-                (format!("You should not be doing that to {}.\n", self.objects[object_held_idx].labels[0]),
+                (
+                    format!("You should not be doing that to {}.\n", self.objects[object_held_idx].labels[0]),
                     None,
                 )
             }
             (Some(_), AmbiguousOption::Ambiguous, _) => (
-                format!("Please be more specific about which {} you want to {}.\n", noun, command),
+                format!(
+                    "Please be more specific about which {} you want to {}.\n",
+                    noun, command
+                ),
                 None,
             ),
             (Some(_), AmbiguousOption::Some(object_held_idx), _) => {
                 ("".to_string(), Some(object_held_idx))
             }
         }
-	}
+    }
 
 	pub fn actor_here(&self) -> Option<usize> {
 		let mut actor_loc: Option<usize> = None;
@@ -881,7 +888,6 @@ pub fn parse(input_str: String) -> Command {
 
 pub fn get_input() -> Command {
 	// Prompt
-	println!("");
 	print!("> ");
 	io::stdout().flush().unwrap();
 
@@ -890,7 +896,7 @@ pub fn get_input() -> Command {
 	io::stdin()
 		.read_line(&mut input_str)
 		.expect("Failed to Read Your Command");
-	println!("");
+	println!();
 
 	// Parse and Return
 	parse(input_str)
