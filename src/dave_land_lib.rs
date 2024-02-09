@@ -121,7 +121,7 @@ impl World {
 				Object {
 					labels: vec!["Copilot".into()],
 					description: "your copilot, dead on the floor".into(),
-					location: Some(LOC_MESS_HALL),
+					location: Some(LOC_LANDING_PAD),
 					destination: None,
 				},
 				Object {
@@ -262,7 +262,7 @@ impl World {
                     self.objects[self.objects[LOC_PLAYER].location.unwrap()].description
                 ) + list_string.as_str()
             }
-            _ => format!("I don't understand what you want to see.\n".to_string()),
+            _ => format!("I don't understand what you want to see.\n"),
         }
     }
 
@@ -324,7 +324,7 @@ impl World {
 				let obj_loc = obj_opt.and_then(|a| self.objects[a].location);
 
 				if obj_loc == Some(LOC_COPILOT) {
-					output_vis + &format!("You should ask {} nicely.\n", self.objects[LOC_COPILOT].name)
+					output_vis + &format!("You should ask {} nicely.\n", self.objects[LOC_COPILOT].labels[0])
 				} else {
 					self.move_object(obj_opt, Some(LOC_PLAYER))
 				}
@@ -347,22 +347,22 @@ impl World {
 
 		match (obj_opt, obj_loc, to, player_loc) {
 			(Some(obj_opt_idx), _, Some(to_idx), Some(player_loc_idx)) if to_idx == player_loc_idx => {
-				format!("You drop {}.\n", self.objects[obj_opt_idx].name)
+				format!("You drop {}.\n", self.objects[obj_opt_idx].labels[0])
 			}
 			(Some(obj_opt_idx), _, Some(to_idx), _) if to_idx != LOC_PLAYER => {
 				if to_idx == LOC_COPILOT {
-					format!("You give {} to {}.\n", self.objects[obj_opt_idx].name, self.objects[to_idx].name)
+					format!("You give {} to {}.\n", self.objects[obj_opt_idx].labels[0], self.objects[to_idx].labels[0])
 				} else {
-					format!("You put {} in {}.\n", self.objects[obj_opt_idx].name, self.objects[to_idx].name)
+					format!("You put {} in {}.\n", self.objects[obj_opt_idx].labels[0], self.objects[to_idx].labels[0])
 				}
 			}
 			(Some(obj_opt_idx), Some(obj_loc_idx), _, Some(player_loc_idx)) if obj_loc_idx == player_loc_idx => {
-				format!("You pick up {}.\n", self.objects[obj_opt_idx].name)
+				format!("You pick up {}.\n", self.objects[obj_opt_idx].labels[0])
 			}
 			(Some(obj_opt_idx), Some(obj_loc_idx), _, _) => format!(
 				"You get {} from {}.\n",
-				self.objects[obj_opt_idx].name,
-				self.objects[obj_loc_idx].name,
+				self.objects[obj_opt_idx].labels[0],
+				self.objects[obj_loc_idx].labels[0],
 			),
 			// This arm should never be hit
 			(None, _, _, _) | (_, None, _, _) => format!("How can you drop nothing?\n"),
@@ -409,11 +409,24 @@ impl World {
                 format!("There appears to be no {} you can get from {}.\n", noun, self.objects[from_idx].labels[0]),
                 None,
             ),
-            (Some(from_idx), Some(object_held_idx), _) if object_held_idx == from_idx => (
-                format!("You should not be doing that to {}.\n", self.objects[object_held_idx].labels[0]),
+            (Some(from_idx), AmbiguousOption::Some(object_held_idx), _) if object_held_idx == from_idx => {
+                (format!(
+                        "You should not be doing that to {}.\n",
+                        self.objects[object_held_idx].labels[0]
+                    ),
+                    None,
+                )
+            }
+            (Some(_), AmbiguousOption::Ambiguous, _) => (
+                format!(
+                    "Please be more specific about which {} you want to {}.\n",
+                    noun, command
+                ),
                 None,
             ),
-            _ => ("".to_string(), object_held),
+            (Some(_), AmbiguousOption::Some(object_held_idx), _) => {
+                ("".to_string(), Some(object_held_idx))
+            }
         }
 	}
 
@@ -481,23 +494,29 @@ impl World {
 }
 
 pub fn parse(input_str: String) -> Command {
-	let lc_input_str = input_str.to_lowercase();
-	let mut split_input_iter = lc_input_str.trim().split_whitespace();
-
-	let verb = split_input_iter.next().unwrap_or_default().to_string();
-	let noun = split_input_iter.next().unwrap_or_default().to_string();
-
-	match verb.as_str() {
-		"ask"  		=> Command::Ask(noun),
-		"drop" 		=> Command::Drop(noun),
-		"get"  		=> Command::Get(noun),
-		"give" 		=> Command::Give(noun),
-		"go"   		=> Command::Go(noun),
-		"inventory" => Command::Inventory,
-		"look" 		=> Command::Look(noun),
-		"quit" 		=> Command::Quit,
-		_      		=> Command::Unknown(input_str.trim().to_string()),
-	}
+    let lc_input_str = input_str.to_lowercase();
+    let mut split_input_iter = lc_input_str.split_whitespace();
+ 
+    let verb = split_input_iter.next().unwrap_or_default().to_string();
+    let noun = split_input_iter.fold("".to_string(), |accum, item| {
+        if accum.is_empty() {
+            accum + item
+        } else {
+            accum + " " + item
+        }
+    });
+ 
+    match verb.as_str() {
+        "ask" => Command::Ask(noun),
+        "drop" => Command::Drop(noun),
+        "get" => Command::Get(noun),
+        "give" => Command::Give(noun),
+        "go" => Command::Go(noun),
+        "inventory" => Command::Inventory,
+        "look" => Command::Look(noun),
+        "quit" => Command::Quit,
+        _ => Command::Unknown(input_str.trim().to_string()),
+    }
 }
 
 pub fn get_input() -> Command {
