@@ -2,93 +2,76 @@ World (
 	objects: [
 		(labels : ["Command Center"],
 		 description : "the command center",
-		 location : None,
-		 destination : None
 		),
 		(labels : ["Armory"],
 		 description : "the armory",
-		 location : None,
-		 destination : None
 		),
 		(labels : ["Landing Pad"],
 		 description : "the landing pad",
-		 location : None,
-		 destination : None
 		),
 		(labels : ["Yourself"],
 		 description : "yourself",
-		 location : Some(0),
-		 destination : None
+		 location : "Command Center",
 		),
 		(labels : ["Glossy Photo","Photo","Picture"],
 		 description : "a glossy picture of a family. They look familiar ...",
-		 location : Some(0),
-		 destination : None
+		 location : "Command Center",
 		),
 		(labels : ["Wrinkled Photo","Photo","Picture"],
 		 description : "a wrinkled picture of a woman. She is crying",
-		 location : Some(7),
-		 destination : None
+		 location : "Copilot",
 		),
 		(labels : ["the M41A Pulse Rifle","Rifle"],
 		 description : "a single M41A Pulse Rifle with an ammo counter that says 56",
-		 location : Some(1),
-		 destination : None
+		 location : "Armory",
 		),
 		(labels : ["Copilot"],
 		 description : "your copilot",
-		 location : Some(2),
-		 destination : None
+		 location : "Landing Pad",
 		),
 		(labels : ["Pen"],
 		 description : "a pen",
-		 location : Some(7),
-		 destination : None
+		 location : "Copilot",
 		),
 		(labels : ["Tater","Tot","Tater Tot"],
 		 description : "a cold tater tot",
-		 location : Some(5),
-		 destination : None
+		 location : "Pants",
 		),
 		(labels : ["Pants","Camo Pants","Slacks","Trousers"],
 		 description : "a pair of black, white and grey camouflaged pants",
-		 location : Some(1),
-		 destination : None
+		 location : "Armory",
 		),
 		(labels : ["South"],
 		 description : "a passage south to the armory",
-		 location : Some(0),
-		 destination : Some(1)
+		 location : "Command Center",
+		 destination : "Armory",
 		),
 		(labels : ["North"],
 		 description : "a passage north to the comm center",
-		 location : Some(1),
-		 destination : Some(0)
+		 location : "Armory",
+		 destination : "Command Center",
 		),
 		(labels : ["South"],
 		 description : "a passage south to the landing pad",
-		 location : Some(1),
-		 destination : Some(2)
+		 location : "Armory",
+		 destination : "Landing Pad",
 		),
 		(labels : ["North"],
 		 description : "a passage north to the armory",
-		 location : Some(2),
-		 destination : Some(1)
+		 location : "Landing Pad",
+		 destination : "Armory",
 		),
 		(labels : ["North","East","West"],
 		 description : "a bulkhead covered in blinking screens, switch-panels, gauges and communications technology",
-		 location : Some(0),
-		 destination : None
+		 location : "Command Center",
 		),
 		(labels : ["East","West"],
 		 description : "an empty wall where many rifles were once stored and displayed",
-		 location : Some(1),
-		 destination : None
+		 location : "Armory",
 		),
 		(labels : ["South","East","West"],
 		 description : "a large landing pad with a UD-4 \'Cheyenne\' Dropship nestled in the middle of it. The ramp is extended. Hopefully it flies",
-		 location : Some(2),
-		 destination : None
+		 location : "Landing Pad",
 		)
 	]
 )
