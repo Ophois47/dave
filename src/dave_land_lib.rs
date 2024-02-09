@@ -103,26 +103,26 @@ impl World {
 					destination: None,
 				},
 				Object {
-					labels: vec!["Glossy Photo".into(), "Photo".into()],
+					labels: vec!["Glossy Photo".into(), "Photo".into(), "Picture".into()],
 					description: "a glossy picture of a family. They look familiar ...".into(),
 					location: Some(LOC_COMM_CENTER),
 					destination: None,
 				},
 				Object {
-					labels: vec!["Wrinkled Photo".into(), "Photo".into()],
+					labels: vec!["Wrinkled Photo".into(), "Photo".into(), "Picture".into()],
 					description: "a wrinkled picture of a woman. She is crying".into(),
 					location: Some(LOC_COPILOT),
 					destination: None,
 				},
 				Object {
-					labels: vec!["M41A Pulse Rifle".into()],
+					labels: vec!["the M41A Pulse Rifle".into(), "Rifle".into()],
 					description: "a single M41A Pulse Rifle with an ammo counter that says 56".into(),
 					location: Some(LOC_ARMORY),
 					destination: None,
 				},
 				Object {
 					labels: vec!["Copilot".into()],
-					description: "your copilot, standing at the bottom of the open ramp".into(),
+					description: "your copilot".into(),
 					location: Some(LOC_LANDING_PAD),
 					destination: None,
 				},
@@ -133,7 +133,7 @@ impl World {
 					destination: None,
 				},
 				Object {
-					labels: vec!["Tater Tot".into()],
+					labels: vec!["Tater".into(), "Tot".into(), "Tater Tot".into()],
 					description: "a cold tater tot".into(),
 					location: Some(LOC_PANTS),
 					destination: None,
@@ -258,13 +258,13 @@ impl World {
 			Command::Quit => format!("Quitting ...\nThank you for playing!"),
 			Command::Help => format!(
 				"You can:\n \
-				Look - see what is around you\n \
-				Go - travel to a nearby location\n \
-				Get - pickup an item\n \
+				Look - see what is around you. Try typing \"look around\"\n \
+				Go - travel to a nearby location. Try typing \"go south\" or \"go north\"\n \
+				Get - pickup an item. Try typing \"get <item name>\"\n \
 				Give - give an item to someone or something else\n \
-				Drop - drop an item currently in your inventory\n \
+				Drop - drop an item currently in your inventory. Try typing \"drop <item name>\"\n \
 				Inventory - Check your current inventory\n \
-				Ask - speak with someone nearby\n \
+				Ask - speak with someone nearby. Try typing \"ask <entity>\"\n \
 				Help - prints this screen\n \
 				Quit - leave the game"
 			),
@@ -304,7 +304,7 @@ impl World {
 					self.objects[LOC_PLAYER].location = obj_dst;
 					"OK.\n\n".to_string() + &self.do_look("around")
 				} else {
-					"You can't get much closer than this.\n".to_string()
+					"You are not able to go further in that direction.\n".to_string()
 				}
 			}
 		}
