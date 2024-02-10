@@ -32,7 +32,7 @@ fn argument_parser() -> ArgMatches {
             .help("Applies the default configuration."))
         .arg(Arg::new("config-path")
             .long("config-path")
-            .value_name("Path")
+            .value_name("path")
             .action(ArgAction::Set)
             .help("Point to a new location of the configuration file."))
         .arg(Arg::new("save-config")

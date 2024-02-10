@@ -90,9 +90,9 @@ pub struct Object {
 }
 
 const DEF_PROSPECT: &str = "";
-const DEF_DETAILS: &str = "You see nothing special.";
-const DEF_CONTENTS: &str = "You see";
-const DEF_TEXT_GO: &str = "You can't get much closer than this.";
+const DEF_DETAILS: &str = "\nYou see nothing special.";
+const DEF_CONTENTS: &str = "\nYou see";
+const DEF_TEXT_GO: &str = "\nYou can't get much closer than this.";
 const DEF_WEIGHT: isize = 99;
 const DEF_CAPACITY: isize = 0;
 const DEF_HEALTH: isize = 0;
@@ -564,7 +564,7 @@ impl World {
 			Command::Go(noun) => self.do_go(noun),
 			Command::Inventory => self.do_inventory(),
 			Command::Look(noun) => self.do_look(noun),
-			Command::Quit => format!("Quitting ...\nThank you for playing!"),
+			Command::Quit => format!("Quitting ...\nThank you for playing! - David Petnick"),
 			Command::Help => format!(
 				"You can:\n \
 				Look - see what is around you. Try typing \"look around\"\n \
