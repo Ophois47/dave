@@ -29,20 +29,20 @@ fn argument_parser() -> ArgMatches {
         .arg(Arg::new("defaults")
             .long("defaults")
             .action(ArgAction::SetTrue)
-            .help("Applies the default configuration."))
+            .help("Applies the default configuration"))
         .arg(Arg::new("config-path")
             .long("config-path")
             .value_name("path")
             .action(ArgAction::Set)
-            .help("Point to a new location of the configuration file."))
+            .help("Point to a new location of the configuration file"))
         .arg(Arg::new("save-config")
             .long("save-config")
             .action(ArgAction::SetTrue)
-            .help("Write this configuration to it's default location or the path specified by --config-path."))
+            .help("Write this configuration to it's default location or the path specified by --config-path"))
         .arg(Arg::new("export-config")
             .long("export-config")
             .action(ArgAction::SetTrue)
-            .help("Export configuration file in the selected output format."))
+            .help("Export configuration file in the selected output format"))
         .arg(Arg::new("size")
             .long("size")
             .short('s')
@@ -58,7 +58,7 @@ fn argument_parser() -> ArgMatches {
             .default_value("sha3-256")
             .value_name("hashing algorithm")
             .value_parser(["md5", "sha3-256", "sha3-384", "sha3-512"])
-            .help("Chooses which hashing algorithm the program will use. MD5, Sha3-256, Sha3-384 or Sha3-512"))
+            .help("Chooses which hashing algorithm the program will use"))
         .arg(Arg::new("guess")
             .long("guess")
             .short('g')
@@ -71,22 +71,22 @@ fn argument_parser() -> ArgMatches {
             .value_names(["[options]", "[pattern]", "[file]"])
             .num_args(3)
             .value_parser(value_parser!(String))
-            .help("Behold my glorious implementation of grep in Rust.\nPass this function 'i' or 'insensitive' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search"))
+            .help("Behold Dave's glorious implementation of grep in Rust.\nPass this function 'i' or 'insensitive' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search"))
         .arg(Arg::new("perceptron")
             .long("perceptron")
             .short('p')
             .action(ArgAction::SetTrue)
-            .help("Behold my glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
+            .help("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .arg(Arg::new("dave-land")
             .long("dave-land")
             .action(ArgAction::SetTrue)
-            .help("Dive into a wonderful world full of whimsy and adventure.\nThis is a text based adventure game by Dave"))
+            .help("This is a text based adventure game by Dave"))
         .get_matches()
 }
 
 fn update_config<'a>(matches: &ArgMatches) {
     // Setup Config
-    let mut writer = CONFIG.write().expect("WOMP WOMP");
+    let mut writer = CONFIG.write().unwrap();
     if matches.get_flag("defaults") {
         *writer = DaveConfig::default();
     }
