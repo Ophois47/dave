@@ -1,0 +1,12 @@
+digraph map {
+	CommandCenter -> Armory
+	Armory -> CommandCenter
+	Armory -> LandingPad
+	LandingPad -> Armory
+	LandingPad -> LandingPad
+	LandingPad -> SulacoHanger [style=dashed]
+	SulacoHanger -> SulacoHanger
+	SulacoHanger -> Landing [style=dashed]
+	SulacoHanger -> SulacoMessHall
+	SulacoHanger -> SulacoBarracks
+}
