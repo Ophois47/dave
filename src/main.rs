@@ -26,19 +26,21 @@ fn argument_parser() -> ArgMatches {
     Command::new(release::DISPLAY_NAME)
         .version(release::VERSION_STR)
         .about(release::DISPLAY_DESCRIPTION)
-        .arg(Arg::new("defaults")
-            .long("defaults")
-            .action(ArgAction::SetTrue)
-            .help("Applies the default configuration"))
-        .arg(Arg::new("config-path")
-            .long("config-path")
-            .value_name("path")
-            .num_args(1)
-            .help("Point to a new location of the configuration file"))
-        .arg(Arg::new("save-config")
-            .long("save-config")
-            .action(ArgAction::SetTrue)
-            .help("Write this configuration to it's default location or the path specified by --config-path"))
+        .subcommand(Command::new("config")
+            .about("Save or set default settings for config file, along with the path")
+            .arg(Arg::new("defaults")
+                .long("defaults")
+                .action(ArgAction::SetTrue)
+                .help("Applies the default configuration"))
+            .arg(Arg::new("config-path")
+                .long("config-path")
+                .value_name("path")
+                .num_args(1)
+                .help("Point to a new location of the configuration file"))
+            .arg(Arg::new("save-config")
+                .long("save-config")
+                .action(ArgAction::SetTrue)
+                .help("Write this configuration to it's default location or the path specified by --config-path")))
         .arg(Arg::new("size")
             .long("size")
             .short('s')
@@ -142,8 +144,31 @@ fn main() {
 
     // Handle Options That Only Print Messages and Exit
 
-    // Handle Configuration Updates
-    update_config(&matches);
+    match matches.subcommand() {
+        Some(("config", _m)) => {
+            // Handle Configuration Updates
+            update_config(&matches);
+        },
+        Some(("hash", _m)) => {
+            if let Some(passed_path) = matches.get_one::<String>("path") {
+                let path = Path::new(passed_path);
+                if path.exists() {
+                    println!("{}", "##==> Path Exists! Continuing ...".green());
+                    match hash_file(CONFIG.read().unwrap().hash_type(), passed_path.into()) {
+                    Ok(_hash_result) => {
+                        // println!("#==>> Hex Output: {:x?}", hash_result);
+                    },
+                    Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
+                    };
+                } else {
+                    eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
+                }
+            }
+        },
+        _ => {
+            eprintln!("{}", "##==>> Warning! A valid path must be passed to the program".yellow());
+        },
+    }
 
     if matches.contains_id("dgrep") {
         let dgrep_args: Vec<String> = matches.get_many("dgrep")
@@ -171,28 +196,6 @@ fn main() {
             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             process::exit(1);
         }
-    }
-
-    match matches.subcommand() {
-        Some(("hash", _m)) => {
-            if let Some(passed_path) = matches.get_one::<String>("path") {
-                let path = Path::new(passed_path);
-                if path.exists() {
-                    println!("{}", "##==> Path Exists! Continuing ...".green());
-                    match hash_file(CONFIG.read().unwrap().hash_type(), passed_path.into()) {
-                    Ok(_hash_result) => {
-                        // println!("#==>> Hex Output: {:x?}", hash_result);
-                    },
-                    Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
-                    };
-                } else {
-                    eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
-                }
-            }
-        },
-        _ => {
-            eprintln!("{}", "##==>> Warning! A valid path must be passed to the program".yellow());
-        },
     }
 
     if let Some(passed_value) = matches.get_one::<String>("guess") {
