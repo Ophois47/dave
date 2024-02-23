@@ -1,9 +1,46 @@
+//
+// Dave Land
+//
+// A game by David Petnick
+//
+// Contains a vector of game objects that describe the game world
+// Objects can have the following fields:
+//      labels      : A list of names that can be used to refer to this object.
+//                    The first label must be globally unique.
+//                  : Vec<String>
+//                  : Required
+//                  : ["dave", "rules"]
+//      description : A short description of the object. Appears to describe
+//                    the object when using the 'look' command to see objects
+//                    present in a location.
+//                  : String
+//                  : Required
+//                  : "the armory"
+//      location    : When present indicates that this is an object (or path)
+//                    in the game. Lists the name of the location where this
+//                    object is located. If present, must contain the name of
+//                    an existing object in the game. If blank (""), or not
+//                    present, the object is a location in the 'world.'
+//                  : String
+//                  : Required
+//                  : "Armory"
+//      destination : When present indicates that this object is a path from
+//                    one game location to another. Contains the name of the
+//                    location to which this path will move the player if
+//                    followed. If present, must contain the name of an
+//                    existing object in the game. Note that paths are one way
+//                    if a two way passage is desired, two objects must be used
+//                    to indicate each direction.
+//                  : String
+//                  : Required
+//                  : "Command Center"
+
 World (
 	objects: [
 		(labels : ["Yourself"],
 		 description : "yourself",
 		 location : "Command Center",
-		 details : "You look down at yourself. What does it even mean to be human? You see green flight suit on your body, with a large tear in the front. A nametag on your breast pocket reads 'Browning', but whatever else used to be pinned there appears to have been ripped off.",
+		 details : "You look down at yourself. What does it even mean to be human? You see a green flight suit on your body, with a large tear in the front. A nametag on your breast pocket reads 'Browning', but whatever else used to be pinned there appears to have been ripped off.",
 		 capacity : 25,
 		),
 		(labels : ["Command Center"],
@@ -13,7 +50,7 @@ World (
 		),
 		(labels : ["Armory"],
 		 description : "the armory",
-		 details : "The weapons room for the mining operation. Now laying empty and barren as if something had taken place to require use of every last weapon ...",
+		 details : "This appears to be the armory. Now laying empty and barren as if something had taken place to require use of every last weapon ... As you scan the room, you notice some loose shells on the ground, two of which appear to have been spent. Meaning someone had fired their weapon here.",
 		 capacity : 9999,
 		),
 		(labels : ["Landing Pad"],
@@ -24,7 +61,7 @@ World (
 		(labels : ["Old Photo","Photo","Picture"],
 		 description : "an old picture of a family. They seem very familiar ...",
 		 location : "Command Center",
-		 details : "This picture appears worn, especially around the edges. There is an older woman, probably in her early fifties, with two younger children. One child looks a extremely recognizable.",
+		 details : "This picture appears worn, especially around the edges. There is an older woman, probably in her early fifties, with two younger children.",
 		 weight : 1,
 		),
 		(lables : ["Some Boxes", "Boxes", "Crates", "Cargo"],
@@ -39,10 +76,16 @@ World (
 		 details : "Upon further inspection the video monitor displays a lock screen that simply reads:\n\n\t\tLV-426\n\t\tATMOS TERRAFORMING COLONY\n\t\t12/05/2219\n\n\t\tPassword:_\n",
 		 weight : 80,
 		),
+		(labels : ["Spent Casing", "Shells", "Casings"],
+		 description : "several spent casings lying under a nearby bench",
+		 location : "Armory",
+		 details : "As you lean down and pick up one of the spent shell casings on the ground, you notice that it's a fired 12 gauge shell. Someone fired a shotgun in here, twice.",
+		 weight: 1,
+		),
 		(labels : ["Wrinkled Photo","Photo","Picture"],
-		 description : "a wrinkled picture of a dog. She is very beautiful",
+		 description : "a wrinkled picture of a dog. The dog is adorable",
 		 location : "Copilot",
-		 details : "This looks to be a picture of your co-pilot's dog. The name 'Willow' is scribbled on the back. The photograph has seen better days.",
+		 details : "This looks to be a picture of your co-pilot's dog. The name 'Willow' is scribbled on the back. The photograph itself has seen better days.",
 		 weight : 1,
 		),
 		(labels : ["the M41A Pulse Rifle","Rifle", "Pulse Rifle", "M41A", "M41"],
@@ -150,16 +193,16 @@ World (
 		 description : "a bulkhead covered in blinking screens, switch-panels, gauges and communications technology",
 		 location : "Command Center",
 		 details : "The walls of the Command Center are covered in all manner of dials, switches, knobs, levers, video screens, gauges, and communications technologies.",
-		 text_go : "The walls stop you from going any further in this direction.",
+		 text_go : "A wall stops you from proceeding any further in this direction.",
 		),
 		(labels : ["East","West", "Wall"],
-		 description : "an empty wall where many rifles were once stored and displayed",
+		 description : "an empty pegboard wall where many rifles were once stored and displayed with empty weapon racks lining the bottom portion of it",
 		 location : "Armory",
 		 details : "It looks as though many types of weapons were once kept here as there are many different sorts of outlines on the walls where weapons obviously once hung.",
 		 text_go : "You cannot walk through these walls, nor is there a passageway behind them that you can see.",
 		),
 		(labels : ["South","East","West", "Pad"],
-		 description : "a large landing pad with a UD-4 'Cheyenne' Dropship nestled in the middle of it. The ramp is extended. Hopefully it flies",
+		 description : "a large landing pad with a UD-4 'Cheyenne' Dropship nestled in the middle of it. The ramp is extended. You're hoping it flies",
 		 location : "Landing Pad",
 		 details : "The UD-4 'Cheyenne' Dropship sits in the center of a large landing pad. Someone in a flight suit, who you believe to be your co-pilot, stands near the ship.", 
 		)

@@ -32,3 +32,10 @@ Ideas I Want To Learn:
 16. Operating System Kernel
 17. Compiler or Interpreter
 18. Driver Code
+
+Dave Land!
+=============
+Run these commands when creating a new dave_land PNG map image after changing locations or creating new ones
+$ cd dave_map
+$ awk -f dave_map.awk ../dave_land_file.ron > map.gv
+$ dot -Tpng -o dave_map.png map.gv

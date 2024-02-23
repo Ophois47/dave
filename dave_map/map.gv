@@ -1,0 +1,6 @@
+digraph map {
+	Command -> Armory
+	Armory -> Command
+	Armory -> Landing
+	Landing -> Armory
+}
