@@ -33,36 +33,36 @@ fn argument_parser() -> ArgMatches {
         .arg(Arg::new("config-path")
             .long("config-path")
             .value_name("path")
-            .action(ArgAction::Set)
+            .num_args(1)
             .help("Point to a new location of the configuration file"))
         .arg(Arg::new("save-config")
             .long("save-config")
             .action(ArgAction::SetTrue)
             .help("Write this configuration to it's default location or the path specified by --config-path"))
-        .arg(Arg::new("export-config")
-            .long("export-config")
-            .action(ArgAction::SetTrue)
-            .help("Export configuration file in the selected output format"))
         .arg(Arg::new("size")
             .long("size")
             .short('s')
             .value_name("path")
+            .num_args(1)
             .help("Check the size of a file or directory"))
-        .arg(Arg::new("hash")
-            .long("hash")
-            .short('h')
-            .value_name("path")
-            .help("Hash a file"))
-        .arg(Arg::new("hash-type")
-            .long("hash-type")
-            .default_value("sha3-256")
-            .value_name("hashing algorithm")
-            .value_parser(["md5", "sha3-256", "sha3-384", "sha3-512"])
-            .help("Chooses which hashing algorithm the program will use"))
+        .subcommand(Command::new("hash")
+            .about("Hash a file")
+            .arg(Arg::new("filename")
+                .value_parser(value_parser!(String))
+                .num_args(1)
+                .required(true))
+            .arg(Arg::new("hash-type")
+                .long("hash-type")
+                .default_value("sha3-256")
+                .value_name("algorithm")
+                .value_parser(["md5", "sha3-256", "sha3-384", "sha3-512"])
+                .num_args(1)
+                .help("Chooses which hashing algorithm the program will use")))
         .arg(Arg::new("guess")
             .long("guess")
             .short('g')
             .value_name("guess")
+            .num_args(1)
             .help("Guess a number from 0 - 10 for funsies"))
         .arg(Arg::new("dgrep")
             .long("dgrep")
@@ -81,8 +81,6 @@ fn argument_parser() -> ArgMatches {
             .long("dave-land")
             .action(ArgAction::SetTrue)
             .help("This is a text based adventure game by Dave"))
-        .arg(Arg::new("")
-            .action(ArgAction::SetTrue))
         .get_matches()
 }
 
@@ -143,9 +141,6 @@ fn main() {
     let matches = argument_parser();
 
     // Handle Options That Only Print Messages and Exit
-    if matches.contains_id("") {
-        println!("##==> Run 'dave --help' for a list of commands to use with this program.");
-    }
 
     // Handle Configuration Updates
     update_config(&matches);
@@ -178,19 +173,26 @@ fn main() {
         }
     }
 
-    if let Some(passed_path) = matches.get_one::<String>("hash") {
-        let path = Path::new(passed_path);
-        if path.exists() {
-            println!("{}", "##==> Path Exists! Continuing ...".green());
-            match hash_file(CONFIG.read().unwrap().hash_type(), passed_path.into()) {
-                Ok(_hash_result) => {
-                    // println!("#==>> Hex Output: {:x?}", hash_result);
-                },
-                Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
-            };
-        } else {
-            eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
-        }
+    match matches.subcommand() {
+        Some(("hash", _m)) => {
+            if let Some(passed_path) = matches.get_one::<String>("path") {
+                let path = Path::new(passed_path);
+                if path.exists() {
+                    println!("{}", "##==> Path Exists! Continuing ...".green());
+                    match hash_file(CONFIG.read().unwrap().hash_type(), passed_path.into()) {
+                    Ok(_hash_result) => {
+                        // println!("#==>> Hex Output: {:x?}", hash_result);
+                    },
+                    Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
+                    };
+                } else {
+                    eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
+                }
+            }
+        },
+        _ => {
+            eprintln!("{}", "##==>> Warning! A valid path must be passed to the program".yellow());
+        },
     }
 
     if let Some(passed_value) = matches.get_one::<String>("guess") {
@@ -212,10 +214,6 @@ fn main() {
         if let Err(error) = dave_game_loop() {
             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
         }
-    }
-
-    if matches.get_flag("") {
-        println!("##==> Run 'dave --help' for commands to use with this program.");
     }
 
     let time = start.elapsed();
