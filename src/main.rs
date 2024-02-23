@@ -81,6 +81,8 @@ fn argument_parser() -> ArgMatches {
             .long("dave-land")
             .action(ArgAction::SetTrue)
             .help("This is a text based adventure game by Dave"))
+        .arg(Arg::new("")
+            .action(ArgAction::SetTrue))
         .get_matches()
 }
 
@@ -141,6 +143,9 @@ fn main() {
     let matches = argument_parser();
 
     // Handle Options That Only Print Messages and Exit
+    if matches.contains_id("") {
+        println!("##==> Run 'dave --help' for a list of commands to use with this program.");
+    }
 
     // Handle Configuration Updates
     update_config(&matches);
@@ -207,6 +212,10 @@ fn main() {
         if let Err(error) = dave_game_loop() {
             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
         }
+    }
+
+    if matches.get_flag("") {
+        println!("##==> Run 'dave --help' for commands to use with this program.");
     }
 
     let time = start.elapsed();
