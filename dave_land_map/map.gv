@@ -6,7 +6,11 @@ digraph map {
 	LandingPad -> LandingPad
 	LandingPad -> SulacoHanger [style=dashed]
 	SulacoHanger -> SulacoHanger
-	SulacoHanger -> Landing [style=dashed]
+	SulacoHanger -> LandingPad [style=dashed]
 	SulacoHanger -> SulacoMessHall
 	SulacoHanger -> SulacoBarracks
+	SulacoHanger -> SulacoMainCorridor
+	SulacoMainCorridor -> SulacoMainCorridor
+	SulacoMainCorridor -> YourRoom [style=dashed]
+	YourRoom -> SulacoMainCorridor
 }

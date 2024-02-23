@@ -1,7 +1,7 @@
 //
 // Dave Land
 //
-// A game by David Petnick
+// A text based adventure game by David Petnick
 //
 // Contains a vector of game objects that describe the game world
 // Objects can have the following fields:
@@ -43,6 +43,11 @@ World (
 		 details : "You look down at yourself. What does it even mean to be human? You see a green flight suit on your body, with a large tear in the front. A nametag on your breast pocket reads 'Browning', but whatever else used to be pinned there appears to have been ripped off.",
 		 capacity : 25,
 		),
+		(labels : ["YourRoom"],
+		 description : "your quarters",
+		 details : "These appear to be your living quarters aboard the USS Sulaco.",
+		 capacity : 9999,
+		),
 		(labels : ["CommandCenter"],
 		 description : "the command center",
 		 details : "The command center makes a gentle humming noise. The only light comes from broken and static and blinking monitors all around you. There appear to be burns or scorch marks of some sort on two of the four walls of the room.",
@@ -71,6 +76,11 @@ World (
 		(labels : ["SulacoBarracks"],
 		 description : "the barracks on the USS Sulaco",
 		 details : "The barracks on the USS Sulaco has 30 beds.",
+		 capacity : 9999,
+		),
+		(labels : ["SulacoMainCorridor"],
+		 description : "the main corridor of the USS Sulaco",
+		 details : "The main corridor of the USS Sulaco is long and sleek.",
 		 capacity : 9999,
 		),
 		(labels : ["Old Photo","Photo","Picture"],
@@ -250,6 +260,28 @@ World (
 		 destination : "SulacoBarracks",
 		 details : "The west wall of the hanger has a passage that leads to the barracks.",
 		 text_go : "You take the door on the western side of the room into the barracks of the USS Sulaco.",
+		),
+		(labels : ["South", "SulacoMainCorridor"],
+		 description : "the central corridor of the USS Sulaco",
+		 location : "SulacoHanger",
+		 destination : "SulacoMainCorridor",
+		 details : "South leads to the central corridor of the USS Sulaco.",
+		 text_go : "You go south into the central corridor of the USS Sulaco.",
+		),
+		(labels : ["East", "YourRoom"],
+		 description : "a slide open door with your name on a placard to the left of it",
+		 location : "SulacoMainCorridor",
+		 destination : "SulacoMainCorridor",
+		 prospect : "YourRoom",
+		 details : "These appear to be your quarters aboard the USS Sulaco.",
+		 text_go : "You go east from the main corridor into your room.",
+		),
+		(labels : ["West", "SulacoMainCorridor"],
+		 description : "the door to your quarters",
+		 location : "YourRoom",
+		 destination : "SulacoMainCorridor",
+		 details : "The only door in your room, leading back into the main corridor of the USS Sulaco.",
+		 text_go : "You go back out into the main corridor.",
 		),
 	]
 )
