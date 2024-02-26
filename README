@@ -5,7 +5,18 @@ dave can hash a file using md5, sha3-256, sha3-384 or sha3-512 with '--hash' or 
 dave can allow you to guess a number using '--guess' or '-g'
 dave has a fully implemented version of GREP using '--dgrep' or '-d'
 dave has a perceptron you can run using '--perceptron' or '-p'
-dave features the greatest text based adventure to have ever been written with '--dave-land'
+dave features the greatest text based adventure game to have ever been written with '--dave-land'
+
+To Install Dave:
+===================
+Make sure your system has 'curl' installed and obtain Rust using your command line or Windows PowerShell.
+$ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+Go into the project directory and build the project from source using cargo after Rust has been installed.
+$ cargo clean && cargo update && cargo build && cargo build --release
+
+A binary executable will now exist for your current system. You can find the release binary at 'target/release/dave'.
+Alternatively, running cargo build && cargo run in the project directory will run the program in debug mode.
 
 To Run Dave:
 ===============
@@ -18,8 +29,9 @@ Ideas I Want To Learn:
 2.  Grep text and pattern matching in files (X)
 	- Bonus: Implement REGEX Matching Capabilities
 3.  Basic Web Scraper
-	 - Build a web scraper that fetches and parses the content of a webpage, extracting specific information like headlines or links. This will involve:
-	 	- HTTP requests using libraries like reqwest
+	- Build a web scraper that fetches and parses the content of a webpage
+		- Extract specific information like headlines or links
+		- HTTP requests using libraries like reqwest
 	 	- HTML parsing using libraries like scraper or select
 	 	- String manipulation and regular expressions
 4.  File Encryption and Decryption
@@ -46,3 +58,4 @@ creating new ones or altering connections for locations or possible pathways bet
 $ cd dave_map
 $ awk -f dave_map.awk ../dave_land_file.ron > map.gv
 $ dot -Tpng -o dave_map.png map.gv
+$ cd ../
