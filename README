@@ -7,6 +7,11 @@ dave has a fully implemented version of GREP using '--dgrep' or '-d'
 dave has a perceptron you can run using '--perceptron' or '-p'
 dave features the greatest text based adventure to have ever been written with '--dave-land'
 
+To Run Dave:
+===============
+For now, use the release binary in '{PROJECT_DIR}/target/release/dave'.
+Run 'dave --help' to get started, or copy the 'dave' binary to '/usr/bin'.
+
 Ideas I Want To Learn:
 ==========================
 1.  Text Based Adventure Game (X)
@@ -35,7 +40,9 @@ Ideas I Want To Learn:
 
 Dave Land!
 =============
-Run these commands when creating a new dave_land PNG map image after changing locations or creating new ones
+Run these commands when creating a new dave_land PNG map image after changing locations or 
+creating new ones or altering connections for locations or possible pathways between locations.
+
 $ cd dave_map
 $ awk -f dave_map.awk ../dave_land_file.ron > map.gv
 $ dot -Tpng -o dave_map.png map.gv
