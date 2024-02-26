@@ -73,10 +73,8 @@ fn argument_parser() -> ArgMatches {
             .help("Behold Dave's glorious implementation of grep in Rust.\nPass this function 'i' or 'insensitive' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search"))
         .subcommand(Command::new("perceptron")
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
-        .arg(Arg::new("dave-land")
-            .long("dave-land")
-            .action(ArgAction::SetTrue)
-            .help("This is a text based adventure game by Dave"))
+        .subcommand(Command::new("dave-land")
+            .about("This is a text based adventure game by Dave"))
         .get_matches()
 }
 
@@ -147,6 +145,11 @@ fn main() {
                 process::exit(1);
             }
         },
+        Some(("dave-land", _matches)) => {
+            if let Err(error) = dave_game_loop() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
         Some(("guess", matches)) => {
             if let Some(passed_value) = matches.get_one::<u16>("number") {
                 if let Err(error) = guess_number(*passed_value) {
@@ -213,12 +216,6 @@ fn main() {
             }
         } else {
             eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
-        }
-    }
-
-    if matches.get_flag("dave-land") {
-        if let Err(error) = dave_game_loop() {
-            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
         }
     }
 
