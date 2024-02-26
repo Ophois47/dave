@@ -27,20 +27,20 @@ fn argument_parser() -> ArgMatches {
         .version(release::VERSION_STR)
         .about(release::DISPLAY_DESCRIPTION)
         .subcommand(Command::new("config")
-            .about("Save or set default settings for config file, along with the path")
+            .about("Save or set default settings for the program's config file, along with the path")
             .arg(Arg::new("defaults")
                 .long("defaults")
                 .action(ArgAction::SetTrue)
                 .help("Applies the default configuration"))
-            .arg(Arg::new("config-path")
-                .long("config-path")
+            .arg(Arg::new("path")
+                .long("path")
                 .value_name("path")
                 .num_args(1)
-                .help("Point to a new location of the configuration file"))
-            .arg(Arg::new("save-config")
-                .long("save-config")
+                .help("Point to a new location for the configuration file"))
+            .arg(Arg::new("save")
+                .long("save")
                 .action(ArgAction::SetTrue)
-                .help("Write this configuration to it's default location or the path specified by --config-path")))
+                .help("Write this configuration to its default location or the path specified by config --path")))
         .subcommand(Command::new("size")
             .about("Check the size of a file or directory")
             .arg(Arg::new("filename")
@@ -63,14 +63,25 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("number")
                 .value_parser(value_parser!(u16))
                 .num_args(1)))
-        .arg(Arg::new("dgrep")
-            .long("dgrep")
-            .short('d')
-            .action(ArgAction::Set)
-            .value_names(["[options]", "[pattern]", "[file]"])
-            .num_args(3)
-            .value_parser(value_parser!(String))
-            .help("Behold Dave's glorious implementation of grep in Rust.\nPass this function 'i' or 'insensitive' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search"))
+        .subcommand(Command::new("dgrep")
+            .about("Behold Dave's glorious implementation of grep in Rust.\nPass this function 'i' or 'insensitive' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search")
+            .arg(Arg::new("option")
+                .long("option")
+                .short('o')
+                .value_name("option")
+                .num_args(1)
+                .value_parser(value_parser!(String))
+                .help("Type 'i' for case insensitivity"))
+            .arg(Arg::new("pattern")
+                .value_parser(value_parser!(String))
+                .value_name("pattern")
+                .num_args(1)
+                .help("The pattern for DGREP to match against"))
+            .arg(Arg::new("filename")
+                .value_parser(value_parser!(String))
+                .value_name("filename")
+                .num_args(1)
+                .help("The file or directory passed to DGREP for it to search through")))
         .subcommand(Command::new("perceptron")
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
@@ -87,7 +98,7 @@ fn update_config<'a>(matches: &ArgMatches) {
     let config: &mut DaveConfig = writer.borrow_mut();
 
     // Deal With Arguments Related to Output Paths
-    if let Some(config_path) = matches.get_one::<String>("config-path") {
+    if let Some(config_path) = matches.get_one::<String>("path") {
         let config_path_buf = PathBuf::from(config_path);
         config.set_config_path(config_path_buf);
     }
@@ -95,7 +106,7 @@ fn update_config<'a>(matches: &ArgMatches) {
     // Deal With Config Arguments That are Flags or Bools
 
     // Deal With Saving Config to Proper File and Location
-    if matches.get_flag("save-config") {
+    if matches.get_flag("save") {
         let config_path = config.config_path();
 
         if let Err(error) = config.save() {
@@ -196,27 +207,36 @@ fn main() {
                 }
             }
         },
-        _ => {},
-    }
+        Some(("dgrep", matches)) => {
+            let mut option = String::new();
 
-    if matches.contains_id("dgrep") {
-        let dgrep_args: Vec<String> = matches.get_many("dgrep")
-            .expect("##==>>>> ERROR: Missing Values")
-            .cloned()
-            .collect();
-        
-        let gotten_filename = &dgrep_args[2];
-        if Path::new(gotten_filename).exists() {
-            let config = Config::new(dgrep_args).unwrap_or_else(|error| {
-                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error.red());
-                process::exit(1);
-            });
-            if let Err(error) = dave_grep::run(config) {
-                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            if let Some(gotten_option) = matches.get_one::<String>("option") {
+                println!("GOTTEN OPTION: {}", gotten_option);
+                option = gotten_option.to_string();
             }
-        } else {
-            eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
-        }
+            if let Some(gotten_pattern) = matches.get_one::<String>("pattern") {
+                let pattern = gotten_pattern.to_string();
+                if let Some(gotten_filename) = matches.get_one::<String>("filename") {
+                    let filename = gotten_filename.to_string();
+                    if Path::new(&filename).exists() {
+                        let config = Config::new(
+                            option.to_string(),
+                            pattern.to_string(),
+                            filename.to_string()
+                        ).unwrap_or_else(|error| {
+                            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error.red());
+                            process::exit(1);
+                        });
+                        if let Err(error) = dave_grep::run(config) {
+                            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                        }
+                    } else {
+                        eprintln!("{}{}", "##==>>>> ERROR: File Not Found: ".red(), filename);
+                    }
+                }
+            }
+        },
+        _ => {},
     }
 
     let time = start.elapsed();

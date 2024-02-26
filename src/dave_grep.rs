@@ -3,35 +3,37 @@ use std::fs;
 use colored::*;
 
 pub struct Config {
+	pub case_sensitive: bool,
 	pub pattern: String,
 	pub filename: String,
-	pub case_sensitive: bool,
 }
 
 impl Config {
-	pub fn new(dargs: Vec<String>) -> Result<Config, &'static str> {
-
+	pub fn new(
+		gotten_option: String,
+		gotten_pattern: String,
+		gotten_filename: String
+	) -> Result<Config, &'static str> {
 		let case_sensitive: bool;
-		let gotten_case_insensitivity = dargs[0].clone();
+		let gotten_case_insensitivity = gotten_option;
 	    if gotten_case_insensitivity == "i" || gotten_case_insensitivity == "insensitive" {
 	        case_sensitive = true;
 	    } else {
 	        case_sensitive = false;
 	    }
-		let pattern = dargs[1].clone();
-		let filename = dargs[2].clone();
+		let pattern = gotten_pattern;
+		let filename = gotten_filename;
 
 		Ok(Config {
+			case_sensitive,
 			pattern,
 			filename,
-			case_sensitive,
 		})
 	}
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 	let contents = fs::read_to_string(config.filename)?;
-
 	let results = if config.case_sensitive {
 		search(&config.pattern, &contents)
 	} else {
