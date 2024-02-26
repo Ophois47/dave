@@ -130,16 +130,12 @@ impl Hasher for Md5Hash {
 
 impl Hasher for Sha3_256Hash {
 	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
+		const ONE_MB: usize = 1048576;
 		let mut hasher = sha3::Sha3_256::new();
 		let mut f = File::open(file)?;
-
-		// Read Entire File
-		// const SIXY_FOUR_KB: usize = 65536;
-		const ONE_MB: usize = 1048576;
 		let mut buffer: [u8; ONE_MB] = [0; ONE_MB];
 
 		loop {
-			println!("Something's wonky about this.");
 			let bytes_read = f.read(&mut buffer)?;
 			if bytes_read == 0 { break; }
 
