@@ -209,11 +209,11 @@ fn main() {
         },
         Some(("dgrep", matches)) => {
             let mut option = String::new();
-
             if let Some(gotten_option) = matches.get_one::<String>("option") {
                 println!("GOTTEN OPTION: {}", gotten_option);
                 option = gotten_option.to_string();
             }
+            
             if let Some(gotten_pattern) = matches.get_one::<String>("pattern") {
                 let pattern = gotten_pattern.to_string();
                 if let Some(gotten_filename) = matches.get_one::<String>("filename") {
