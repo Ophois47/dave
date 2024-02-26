@@ -193,7 +193,7 @@ impl Hasher for Sha3_512Hash {
 		let file_length = f.metadata()?.len();
 
 		// Decide on Reasonable Buffer Size
-		let buf_len = file_length.min(1_000_000) as usize;
+		let buf_len = file_length.min(8_000_000) as usize;
 		let mut buffer = BufReader::with_capacity(buf_len, f);
 
 		loop {
@@ -225,7 +225,7 @@ impl Hasher for Sha3_512Hash {
 // Then Hash the Given File
 pub fn hash_file(hash_type: HashType, path: PathBuf) -> io::Result<Vec<u8>> {
 	let file = PathBuf::from(path.as_path());
-
 	let hasher: Box<dyn Hasher> = hash_type.into();
+	
 	hasher.hash(file)
 }
