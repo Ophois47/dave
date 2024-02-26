@@ -64,7 +64,7 @@ fn argument_parser() -> ArgMatches {
                 .value_parser(value_parser!(u16))
                 .num_args(1)))
         .subcommand(Command::new("dgrep")
-            .about("Behold Dave's glorious implementation of grep in Rust.\nPass this function 'i' or 'insensitive' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search")
+            .about("Behold Dave's glorious implementation of grep in Rust.\nPass this function 'i' or 'I' or 'insensitive' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search")
             .arg(Arg::new("option")
                 .long("option")
                 .short('o')

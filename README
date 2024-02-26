@@ -1,10 +1,10 @@
 dave
 
-dave can check the size of a file or directory with '--size' or '-s'
-dave can hash a file using md5, sha3-256, sha3-384 or sha3-512 with '--hash' or '-h' and '--hash-type'
-dave can allow you to guess a number using '--guess' or '-g'
-dave has a fully implemented version of GREP using '--dgrep' or '-d'
-dave has a perceptron you can run using '--perceptron' or '-p'
+dave can check the size of a file or directory with '--size'
+dave can hash a file using md5, sha3-256, sha3-384 or sha3-512 with 'hash' and '--hash-type'
+dave can allow you to guess a number using '--guess'
+dave has a fully implemented version of GREP using '--dgrep'
+dave has a perceptron you can run using '--perceptron'
 dave features the greatest text based adventure game to have ever been written with '--dave-land'
 
 To Install Dave:
