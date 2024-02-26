@@ -1,4 +1,5 @@
 use sha3::{self, Digest};
+use std::error::Error;
 use std::io;
 use std::io::prelude::*;
 use std::io::BufReader;
@@ -38,9 +39,42 @@ impl fmt::Display for HashType {
 	}
 }
 
+#[derive(Debug)]
+pub struct DaveError {
+	source: DaveErrorPal,
+}
+
+impl fmt::Display for DaveError {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		write!(f, "Dave Error Occurred!")
+	}
+}
+
+impl Error for DaveError {
+	fn source(&self) -> Option<&(dyn Error + 'static)> {
+		Some(&self.source)
+	}
+}
+
+#[derive(Debug)]
+struct DaveErrorPal;
+
+impl fmt::Display for DaveErrorPal {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		write!(f, "Dave Error Pal Occurred!")
+	}
+}
+
+impl Error for DaveErrorPal {}
+
+#[allow(dead_code)]
+fn get_dave_error() -> Result<(), DaveError> {
+	Err(DaveError { source: DaveErrorPal })
+}
+
 impl FromStr for HashType {
-	type Err = ();
-	fn from_str(s: &str) -> Result<HashType, ()> {
+	type Err = DaveError;
+	fn from_str(s: &str) -> Result<HashType, DaveError> {
 		let gotten_hash_type = match s {
 			"md5" 		=> HashType::Md5,
 			"sha3-384" 	=> HashType::Sha3_384,
@@ -97,29 +131,20 @@ impl Hasher for Md5Hash {
 impl Hasher for Sha3_256Hash {
 	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
 		let mut hasher = sha3::Sha3_256::new();
-		let f = File::open(file)?;
-		// Find Length of File
-		let file_length = f.metadata()?.len();
+		let mut f = File::open(file)?;
 
-		// Decide on Reasonable Buffer Size
-		let buf_len = file_length.min(1_000_000) as usize;
-		let mut buffer = BufReader::with_capacity(buf_len, f);
+		// Read Entire File
+		// const SIXY_FOUR_KB: usize = 65536;
+		const ONE_MB: usize = 1048576;
+		let mut buffer: [u8; ONE_MB] = [0; ONE_MB];
 
 		loop {
-			// Get Chunk of File
-			let part = buffer.fill_buf()?;
+			println!("Something's wonky about this.");
+			let bytes_read = f.read(&mut buffer)?;
+			if bytes_read == 0 { break; }
 
-			// If Chunk Empty, EOF Reached
-			if part.is_empty() {
-				break;
-			}
-
-			// Add Chunk to Hasher
-			hasher.update(part);
-
-			// Tell Buffer Chunk Was Consumed
-			let part_len = part.len();
-			buffer.consume(part_len);
+			// Hash File String
+			hasher.update(&buffer[..bytes_read]);
 		}
 
 		// Finalize Hasher Object and Put Into Vec

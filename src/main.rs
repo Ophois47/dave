@@ -41,18 +41,16 @@ fn argument_parser() -> ArgMatches {
                 .long("save-config")
                 .action(ArgAction::SetTrue)
                 .help("Write this configuration to it's default location or the path specified by --config-path")))
-        .arg(Arg::new("size")
-            .long("size")
-            .short('s')
-            .value_name("path")
-            .num_args(1)
-            .help("Check the size of a file or directory"))
-        .subcommand(Command::new("hash")
-            .about("Hash a file")
+        .subcommand(Command::new("size")
+            .about("Check the size of a file or directory")
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
-                .num_args(1)
-                .required(true))
+                .num_args(1)))
+        .subcommand(Command::new("hash")
+            .about("Hash a file using a preferred hashing algorithm")
+            .arg(Arg::new("filename")
+                .value_parser(value_parser!(String))
+                .num_args(1))
             .arg(Arg::new("hash-type")
                 .long("hash-type")
                 .default_value("sha3-256")
@@ -60,12 +58,11 @@ fn argument_parser() -> ArgMatches {
                 .value_parser(["md5", "sha3-256", "sha3-384", "sha3-512"])
                 .num_args(1)
                 .help("Chooses which hashing algorithm the program will use")))
-        .arg(Arg::new("guess")
-            .long("guess")
-            .short('g')
-            .value_name("guess")
-            .num_args(1)
-            .help("Guess a number from 0 - 10 for funsies"))
+        .subcommand(Command::new("guess")
+            .about("Guess a number from 0 - 10 for funsies")
+            .arg(Arg::new("number")
+                .value_parser(value_parser!(u16))
+                .num_args(1)))
         .arg(Arg::new("dgrep")
             .long("dgrep")
             .short('d')
@@ -142,19 +139,48 @@ fn main() {
     // Parse CLI Args
     let matches = argument_parser();
 
-    // Handle Options That Only Print Messages and Exit
-
+    // Deal With Passed Subcommands and Their Arguments
     match matches.subcommand() {
-        Some(("config", _m)) => {
+        Some(("config", matches)) => {
             // Handle Configuration Updates
             update_config(&matches);
         },
-        Some(("hash", _m)) => {
-            if let Some(passed_path) = matches.get_one::<String>("path") {
+        Some(("guess", matches)) => {
+            if let Some(passed_value) = matches.get_one::<u16>("number") {
+                if let Err(error) = guess_number(*passed_value) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    process::exit(1);
+                }
+            }
+        },
+        Some(("size", matches)) => {
+            if let Some(passed_directory) = matches.get_one::<String>("size") {
+                let path = Path::new(passed_directory);
+                if let Err(error) = get_file_size(path) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    process::exit(1);
+                }
+            }
+        },
+        Some(("hash", matches)) => {
+            if let Some(passed_path) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_path);
                 if path.exists() {
                     println!("{}", "##==> Path Exists! Continuing ...".green());
-                    match hash_file(CONFIG.read().unwrap().hash_type(), passed_path.into()) {
+                    // Deal With Determining Hashing Algorithm to Use
+                    let mut hash_type = HashType::Sha3_256;
+                    if let Some(hash_choice) = matches.get_one::<String>("hash-type") {
+                        let hash_choice_parsed: Result<HashType, DaveError> = HashType::from_str(hash_choice);
+                        match hash_choice_parsed {
+                            Ok(ht) => {
+                                hash_type = ht;
+                            },
+                            Err(error) => {
+                                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                            },
+                        }
+                    }
+                    match hash_file(hash_type, passed_path.into()) {
                     Ok(_hash_result) => {
                         // println!("#==>> Hex Output: {:x?}", hash_result);
                     },
@@ -165,9 +191,7 @@ fn main() {
                 }
             }
         },
-        _ => {
-            eprintln!("{}", "##==>> Warning! A valid path must be passed to the program".yellow());
-        },
+        _ => {},
     }
 
     if matches.contains_id("dgrep") {
@@ -187,22 +211,6 @@ fn main() {
             }
         } else {
             eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
-        }
-    }
-
-    if let Some(passed_directory) = matches.get_one::<String>("size") {
-        let path = Path::new(passed_directory);
-        if let Err(error) = get_file_size(path) {
-            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
-            process::exit(1);
-        }
-    }
-
-    if let Some(passed_value) = matches.get_one::<String>("guess") {
-        let guess = passed_value.parse::<u16>().unwrap();
-        if let Err(error) = guess_number(guess) {
-            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
-            process::exit(1);
         }
     }
 
