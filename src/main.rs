@@ -235,7 +235,7 @@ fn main() {
                 }
             }
         },
-        _ => {},
+        _ => { println!("##==> Run the program with --help to see a list of possible commands and options") },
     }
 
     let time = start.elapsed();
