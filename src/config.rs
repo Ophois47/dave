@@ -10,7 +10,7 @@ use std::sync::RwLock;
 pub const CONF_FILE: &str = "dave.conf";
 
 // Default Installation Directory
-pub const ROOT_PATH: &str = "/home/david/opt";
+pub const ROOT_PATH: &str = "./dave_conf";
 
 // Default location of output file
 pub const OUTPUT_FILE: &str = "dave.out";

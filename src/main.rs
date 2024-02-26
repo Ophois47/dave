@@ -71,7 +71,7 @@ fn argument_parser() -> ArgMatches {
                 .value_name("option")
                 .num_args(1)
                 .value_parser(value_parser!(String))
-                .help("Type 'i' for case insensitivity"))
+                .help("Pass '-o i' or '-o I' for case insensitivity"))
             .arg(Arg::new("pattern")
                 .value_parser(value_parser!(String))
                 .value_name("pattern")
@@ -81,7 +81,7 @@ fn argument_parser() -> ArgMatches {
                 .value_parser(value_parser!(String))
                 .value_name("filename")
                 .num_args(1)
-                .help("The file or directory passed to DGREP for it to search through")))
+                .help("The file or directory passed to DGREP for it to search through for the given pattern")))
         .subcommand(Command::new("perceptron")
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
@@ -210,10 +210,9 @@ fn main() {
         Some(("dgrep", matches)) => {
             let mut option = String::new();
             if let Some(gotten_option) = matches.get_one::<String>("option") {
-                println!("GOTTEN OPTION: {}", gotten_option);
                 option = gotten_option.to_string();
             }
-            
+
             if let Some(gotten_pattern) = matches.get_one::<String>("pattern") {
                 let pattern = gotten_pattern.to_string();
                 if let Some(gotten_filename) = matches.get_one::<String>("filename") {

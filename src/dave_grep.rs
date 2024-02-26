@@ -16,7 +16,7 @@ impl Config {
 	) -> Result<Config, &'static str> {
 		let case_sensitive: bool;
 		let gotten_case_insensitivity = gotten_option;
-	    if gotten_case_insensitivity == "i" || gotten_case_insensitivity == "insensitive" {
+	    if gotten_case_insensitivity == "i" || gotten_case_insensitivity == "I" || gotten_case_insensitivity == "insensitive" {
 	        case_sensitive = true;
 	    } else {
 	        case_sensitive = false;
