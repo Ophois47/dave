@@ -1,16 +1,13 @@
 digraph map {
-	CommandCenter -> Armory
-	Armory -> CommandCenter
-	Armory -> LandingPad
-	LandingPad -> Armory
-	LandingPad -> LandingPad
-	LandingPad -> SulacoHanger [style=dashed]
-	SulacoHanger -> SulacoHanger
-	SulacoHanger -> LandingPad [style=dashed]
-	SulacoHanger -> SulacoMessHall
-	SulacoHanger -> SulacoBarracks
-	SulacoHanger -> SulacoMainCorridor
-	SulacoMainCorridor -> SulacoMainCorridor
-	SulacoMainCorridor -> YourRoom [style=dashed]
-	YourRoom -> SulacoMainCorridor
+	Command -> Armory
+	Armory -> Command
+	Armory -> Landing
+	Landing -> Armory
+	Landing -> Sulaco
+	Sulaco -> Landing
+	Sulaco -> Sulaco
+	Sulaco -> Sulaco
+	Sulaco -> Sulaco
+	Sulaco -> Your
+	Your -> Sulaco
 }

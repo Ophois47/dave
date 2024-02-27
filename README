@@ -57,7 +57,7 @@ Dave Land!
 Run these commands when creating a new dave_land PNG map image after changing locations or 
 creating new ones or altering connections for locations or possible pathways between locations.
 
-$ cd dave_map
+$ cd dave_land_map
 $ awk -f dave_map.awk ../dave_land_file.ron > map.gv
 $ dot -Tpng -o dave_map.png map.gv
 $ cd ../
