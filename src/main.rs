@@ -64,14 +64,14 @@ fn argument_parser() -> ArgMatches {
                 .value_parser(value_parser!(u16))
                 .num_args(1)))
         .subcommand(Command::new("dgrep")
-            .about("Behold Dave's glorious implementation of grep in Rust.\nPass this function 'i' or 'I' or for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search. Pass 'r' or 'R' to match using REGEX")
+            .about("Behold Dave's glorious implementation of GREP in Rust.\nPass this function '-o i' or '-o I' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search. Pass '-o r' or '-o R' to instead match using a REGEX pattern")
             .arg(Arg::new("option")
                 .long("option")
                 .short('o')
                 .value_name("option")
                 .num_args(1)
                 .value_parser(value_parser!(String))
-                .help("Pass '-o i' or '-o I' for case insensitivity"))
+                .help("Pass '-o i' or '-o I' for case insensitivity. Pass '-o r' or '-o R' for REGEX pattern matching"))
             .arg(Arg::new("pattern")
                 .value_parser(value_parser!(String))
                 .value_name("pattern")
@@ -170,12 +170,14 @@ fn main() {
             }
         },
         Some(("size", matches)) => {
-            if let Some(passed_directory) = matches.get_one::<String>("size") {
+            if let Some(passed_directory) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_directory);
                 if let Err(error) = get_file_size(path) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                     process::exit(1);
                 }
+            } else {
+                println!("Weener Soup.");
             }
         },
         Some(("hash", matches)) => {
