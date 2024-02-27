@@ -27,7 +27,7 @@ Ideas I Want To Learn:
 ==========================
 1.  Text Based Adventure Game (X)
 2.  Grep text and pattern matching in files (X)
-	- Bonus: Implement REGEX Matching Capabilities
+	- Bonus: Implement REGEX Matching Capabilities (X)
 3.  Basic Web Scraper
 	- Build a web scraper that fetches and parses the content of a webpage
 		- Extract specific information like headlines or links

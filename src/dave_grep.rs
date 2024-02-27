@@ -41,7 +41,6 @@ impl Config {
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-	let filename = config.filename.clone();
 	let contents = fs::read_to_string(config.filename)?;
 
 	if !config.regex {
@@ -60,20 +59,11 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 	} else {
 		let regex = Regex::new(&config.pattern)?;
 		if regex.is_match(&contents) {
-			let matches: Vec<_> = regex.find_iter(&contents).map(|m| m).collect();
-			println!(
-				"##==>> Found REGEX Match For Pattern '{}' in Path '{}'\n",
-				&config.pattern.yellow(),
-				filename.yellow(),
-			);
-			for mat in matches {
-				println!("{}", "MATCH FOUND:".yellow());
-				println!("Match Start: {}", mat.start());
-				println!("Match End: {}", mat.end());
-				println!("Match Length: {}", mat.len());
-				println!("Match Range: {:?}", mat.range());
-				println!("Match Str: {}", mat.as_str());
-				println!();
+			for line in contents.lines() {
+				let matches: Vec<_> = regex.find_iter(line).map(|m| m).collect();
+				for _m in matches {
+					println!("{}", line.yellow());
+				}
 			}
 		} else {
 			println!("{}", "##==> There Were No REGEX Matches For Your Pattern".red());
@@ -91,8 +81,8 @@ pub fn search<'a>(pattern: &str, contents: &'a str) -> Vec<&'a str> {
 }
 
 pub fn search_case_insensitive<'a>(pattern: &str, contents: &'a str) -> Vec<&'a str> {
-	let pattern = pattern.to_lowercase();
 	let mut results = Vec::new();
+	let pattern = pattern.to_lowercase();
 
 	for line in contents.lines() {
 		if line.to_lowercase().contains(&pattern) {
