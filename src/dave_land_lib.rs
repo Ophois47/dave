@@ -549,7 +549,7 @@ impl World {
 					output = output + &format!("{}:\n", self.objects[location].contents);
 				}
 				count += 1;
-				output = output + &format!("{}\n", object.description);
+				output = output + &format!("- {}\n", object.description);
 			}
 		}
 		(output, count)
@@ -564,15 +564,15 @@ impl World {
 			Command::Go(noun) => self.do_go(noun),
 			Command::Inventory => self.do_inventory(),
 			Command::Look(noun) => self.do_look(noun),
-			Command::Quit => format!("Quitting ...\nThank you for playing! - David Petnick"),
+			Command::Quit => format!("Quitting ...\nThank you for playing! I love you personally. - David Petnick"),
 			Command::Help => format!(
 				"You can:\n \
 				Look - see what is around you. Try typing \"look around\"\n \
 				Go - travel to a nearby location. Try typing \"go south\" or \"go north\"\n \
-				Get - pickup an item. Try typing \"get <item name>\"\n \
+				Get - pick up an item. Try typing \"get <item name>\"\n \
 				Give - give an item to someone or something else. Try typing \"give <item name> <location name>\"\n \
 				Drop - drop an item currently in your inventory. Try typing \"drop <item name>\"\n \
-				Inventory - Check your current inventory\n \
+				Inventory - Check your current inventory. Try typing \"inventory\"\n \
 				Ask - speak with someone nearby. Try typing \"ask <entity>\"\n \
 				Help - prints this screen\n \
 				Quit - leave the game"
@@ -648,12 +648,14 @@ impl World {
 	pub fn do_ask(&mut self, noun: &String) -> String {
 		let actor_loc = self.actor_here();
 		let (output, object_idx) = self.get_possession(actor_loc, Command::Ask("ask".to_string()), noun);
+
 		output + self.move_object(object_idx, Some(LOC_PLAYER)).as_str()
 	}
 
 	pub fn do_give(&mut self, noun: &String) -> String {
 		let actor_loc = self.actor_here();
 		let (output, object_idx) = self.get_possession(Some(LOC_PLAYER), Command::Give("give".to_string()), noun);
+
 		output + self.move_object(object_idx, actor_loc).as_str()
 	}
 
