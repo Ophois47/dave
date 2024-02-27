@@ -197,13 +197,13 @@ fn main() {
                         }
                     }
                     match hash_file(hash_type, passed_path.into()) {
-                    Ok(_hash_result) => {
-                        // println!("#==>> Hex Output: {:x?}", hash_result);
-                    },
-                    Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
+                        Ok(_hash_result) => {
+                            // println!("#==>> Hex Output: {:x?}", hash_result);
+                        },
+                        Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
                     };
                 } else {
-                    eprintln!("{}", "##==>>>> ERROR: File Not Found".red());
+                    eprintln!("{}{}", "##==>>>> ERROR: File Not Found: ".red(), passed_path);
                 }
             }
         },

@@ -130,17 +130,30 @@ impl Hasher for Md5Hash {
 
 impl Hasher for Sha3_256Hash {
 	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
-		const ONE_MB: usize = 1048576;
 		let mut hasher = sha3::Sha3_256::new();
-		let mut f = File::open(file)?;
-		let mut buffer: [u8; ONE_MB] = [0; ONE_MB];
+		let f = File::open(file)?;
+		// Find Length of File
+		let file_length = f.metadata()?.len();
+
+		// Decide on Reasonable Buffer Size
+		let buf_len = file_length.min(1_000_000) as usize;
+		let mut buffer = BufReader::with_capacity(buf_len, f);
 
 		loop {
-			let bytes_read = f.read(&mut buffer)?;
-			if bytes_read == 0 { break; }
+			// Get Chunk of File
+			let part = buffer.fill_buf()?;
 
-			// Hash File String
-			hasher.update(&buffer[..bytes_read]);
+			// If Chunk Empty, EOF Reached
+			if part.is_empty() {
+				break;
+			}
+
+			// Add Chunk to Hasher
+			hasher.update(part);
+
+			// Tell Buffer Chunk Was Consumed
+			let part_len = part.len();
+			buffer.consume(part_len);
 		}
 
 		// Finalize Hasher Object and Put Into Vec
