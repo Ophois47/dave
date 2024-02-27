@@ -1,9 +1,11 @@
 use std::error::Error;
 use std::fs;
+use regex::Regex;
 use colored::*;
 
 pub struct Config {
 	pub case_sensitive: bool,
+	pub regex: bool,
 	pub pattern: String,
 	pub filename: String,
 }
@@ -15,17 +17,23 @@ impl Config {
 		gotten_filename: String
 	) -> Result<Config, &'static str> {
 		let case_sensitive: bool;
-		let gotten_case_insensitivity = gotten_option;
-	    if gotten_case_insensitivity == "i" || gotten_case_insensitivity == "I" || gotten_case_insensitivity == "insensitive" {
+	    if gotten_option == "i" || gotten_option == "I" || gotten_option == "insensitive" {
 	        case_sensitive = true;
 	    } else {
 	        case_sensitive = false;
+	    }
+	    let regex: bool;
+	    if gotten_option == "r" || gotten_option == "R" || gotten_option == "regex" {
+	    	regex = true;
+	    } else {
+	    	regex = false;
 	    }
 		let pattern = gotten_pattern;
 		let filename = gotten_filename;
 
 		Ok(Config {
 			case_sensitive,
+			regex,
 			pattern,
 			filename,
 		})
@@ -33,18 +41,42 @@ impl Config {
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+	let filename = config.filename.clone();
 	let contents = fs::read_to_string(config.filename)?;
-	let results = if config.case_sensitive {
-		search(&config.pattern, &contents)
-	} else {
-		search_case_insensitive(&config.pattern, &contents)
-	};
 
-	if results.is_empty() {
-		println!("{}", "##==> There Were No Matches to Your Pattern".red());
+	if !config.regex {
+		let results = if config.case_sensitive {
+			search(&config.pattern, &contents)
+		} else {
+			search_case_insensitive(&config.pattern, &contents)
+		};
+		if results.is_empty() {
+			println!("{}", "##==> There Were No Matches For Your Pattern".red());
+		} else {
+			for line in results {
+				println!("{}", line.yellow());
+			}
+		}
 	} else {
-		for line in results {
-			println!("{}", line.green());
+		let regex = Regex::new(&config.pattern)?;
+		if regex.is_match(&contents) {
+			let matches: Vec<_> = regex.find_iter(&contents).map(|m| m).collect();
+			println!(
+				"##==>> Found REGEX Match For Pattern '{}' in Path '{}'\n",
+				&config.pattern.yellow(),
+				filename.yellow(),
+			);
+			for mat in matches {
+				println!("{}", "MATCH FOUND:".yellow());
+				println!("Match Start: {}", mat.start());
+				println!("Match End: {}", mat.end());
+				println!("Match Length: {}", mat.len());
+				println!("Match Range: {:?}", mat.range());
+				println!("Match Str: {}", mat.as_str());
+				println!();
+			}
+		} else {
+			println!("{}", "##==> There Were No REGEX Matches For Your Pattern".red());
 		}
 	}
 

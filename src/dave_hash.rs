@@ -128,7 +128,7 @@ impl Hasher for Md5Hash {
 	}
 }
 
-impl Hasher for Sha3_256Hash {
+/*impl Hasher for Sha3_256Hash {
 	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
 		let mut hasher = sha3::Sha3_256::new();
 		let f = File::open(file)?;
@@ -154,6 +154,28 @@ impl Hasher for Sha3_256Hash {
 			// Tell Buffer Chunk Was Consumed
 			let part_len = part.len();
 			buffer.consume(part_len);
+		}
+
+		// Finalize Hasher Object and Put Into Vec
+		let hash = hasher.finalize();
+		println!("##==>> Sha3-256 Hash Value: {:x}", hash);
+		Ok(hash.to_vec())
+	}
+}*/
+
+impl Hasher for Sha3_256Hash {
+	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
+		let mut hasher = sha3::Sha3_256::new();
+		match std::fs::read(file) {
+			Ok(bytes) => {
+				hasher.update(bytes);
+			},
+			Err(error) => {
+				if error.kind() == std::io::ErrorKind::PermissionDenied {
+					eprintln!("Please Run Again With Appropriate Permissions");
+				}
+				panic!("{}", error);
+			}
 		}
 
 		// Finalize Hasher Object and Put Into Vec

@@ -1,6 +1,6 @@
 [package]
 name = "dave"
-version = "3.10.0"
+version = "3.15.0"
 edition = "2021"
 
 [lib]
@@ -22,6 +22,7 @@ colored = "2"
 lazy_static = "1"
 md5 = "0.7"
 rand = "0.8"
+regex = "1"
 ron = "0.8"
 serde = { version = "1", features = ["derive"] }
 serde_derive = "1"
