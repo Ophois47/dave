@@ -570,7 +570,7 @@ impl World {
 				Look - see what is around you. Try typing \"look around\"\n \
 				Go - travel to a nearby location. Try typing \"go south\" or \"go north\"\n \
 				Get - pickup an item. Try typing \"get <item name>\"\n \
-				Give - give an item to someone or something else\n \
+				Give - give an item to someone or something else. Try typing \"give <item name> <location name>\"\n \
 				Drop - drop an item currently in your inventory. Try typing \"drop <item name>\"\n \
 				Inventory - Check your current inventory\n \
 				Ask - speak with someone nearby. Try typing \"ask <entity>\"\n \
