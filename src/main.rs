@@ -53,9 +53,9 @@ fn argument_parser() -> ArgMatches {
                 .num_args(1))
             .arg(Arg::new("hash-type")
                 .long("hash-type")
-                .default_value("sha3-256")
+                .default_value("sha-256")
                 .value_name("algorithm")
-                .value_parser(["md5", "sha3-256", "sha3-384", "sha3-512"])
+                .value_parser(["md5", "sha-256", "sha-384", "sha-512"])
                 .num_args(1)
                 .help("Chooses which hashing algorithm the program will use")))
         .subcommand(Command::new("guess")
@@ -184,7 +184,7 @@ fn main() {
                 if path.exists() {
                     println!("{}", "##==> Path Exists! Continuing ...".green());
                     // Deal With Determining Hashing Algorithm to Use
-                    let mut hash_type = HashType::Sha3_256;
+                    let mut hash_type = HashType::Sha256;
                     if let Some(hash_choice) = matches.get_one::<String>("hash-type") {
                         let hash_choice_parsed: Result<HashType, DaveError> = HashType::from_str(hash_choice);
                         match hash_choice_parsed {

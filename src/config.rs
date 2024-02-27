@@ -27,7 +27,7 @@ lazy_static! {
 		"config_path": find_config_path(),
 		"root_path": find_root_path(),
 		"output_file": find_output_file(),
-		"hash_type": HashType::Sha3_256,
+		"hash_type": HashType::Sha256,
 	});
 }
 
