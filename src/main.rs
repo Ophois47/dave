@@ -167,6 +167,8 @@ fn main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                     process::exit(1);
                 }
+            } else {
+                println!("##==> INFO! A guess must be passed to the program. Try running 'dave guess --help' for more information");
             }
         },
         Some(("size", matches)) => {
@@ -177,7 +179,7 @@ fn main() {
                     process::exit(1);
                 }
             } else {
-                println!("Weener Soup.");
+                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave size --help' for more information");
             }
         },
         Some(("hash", matches)) => {
@@ -207,6 +209,8 @@ fn main() {
                 } else {
                     eprintln!("{}{}", "##==>>>> ERROR: File Not Found: ".red(), passed_path);
                 }
+            } else {
+                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave hash --help' for more information");
             }
         },
         Some(("dgrep", matches)) => {
@@ -234,10 +238,14 @@ fn main() {
                     } else {
                         eprintln!("{}{}", "##==>>>> ERROR: File Not Found: ".red(), filename);
                     }
+                } else {
+                    println!("##==> INFO! A file or path must be passed to DGREP. Try running 'dave dgrep --help' for more information");
                 }
+            } else {
+                println!("##==> INFO! A match pattern must be passed to DGREP. Try running 'dave dgrep --help' for more information");
             }
         },
-        _ => { println!("##==> Run the program with --help to see a list of possible commands and options") },
+        _ => { println!("##==> Try running the program with 'dave --help' to see a list of possible commands and options") },
     }
 
     let time = start.elapsed();
