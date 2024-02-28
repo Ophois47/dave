@@ -21,6 +21,7 @@ use davelib::dave_land::dave_game_loop;
 use davelib::dave_perceptron::daves_perceptron;
 use davelib::utils::*;
 use davelib::release;
+use davelib::release::*;
 
 fn argument_parser() -> ArgMatches {
     Command::new(release::DISPLAY_NAME)
@@ -124,8 +125,14 @@ fn update_config<'a>(matches: &ArgMatches) {
     }
 }
 
+fn print_run_message() {
+    println!("##==> Dave Version: {}, Release: {}, Patchlevel: {} ({})", VERSION[0], VERSION[1], VERSION[2], BUILD_DATE);
+    println!();
+}
+
 fn main() {
     let start = Instant::now();
+    print_run_message();
 
     // Setup Files Necessary for Output
     let mut file_options = OpenOptions::new();
@@ -250,7 +257,7 @@ fn main() {
 
     let time = start.elapsed();
     println!(
-        "\n##==> Program Took {}.{}ms to Run",
+        "\n##==> Dave Ran For {}.{}ms",
         time.as_secs(),
         time.subsec_millis(),
     )
