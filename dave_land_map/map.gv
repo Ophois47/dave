@@ -10,4 +10,6 @@ digraph map {
 	Sulaco -> Sulaco
 	Sulaco -> Your
 	Your -> Sulaco
+	Sulaco -> Sulaco
+	Sulaco -> Sulaco
 }
