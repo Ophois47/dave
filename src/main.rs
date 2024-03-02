@@ -7,6 +7,7 @@ use clap::{
 };
 use colored::*;
 use std::borrow::BorrowMut;
+use std::env;
 use std::fs::OpenOptions;
 use std::path::{Path, PathBuf};
 use std::process;
@@ -132,6 +133,13 @@ fn print_run_message() {
 
 fn main() {
     let start = Instant::now();
+
+    // Check Current OS to Determine Colored Terminal Output
+    if env::consts::OS == "windows" {
+        control::set_virtual_terminal(true).unwrap();
+    } else {
+        control::set_virtual_terminal(false).unwrap();
+    }
     print_run_message();
 
     // Setup Files Necessary for Output
