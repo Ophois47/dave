@@ -131,15 +131,27 @@ fn print_run_message() {
     println!();
 }
 
+#[cfg(not(windows))]
+fn setup_terminal() -> std::io::Result<()> {
+    println!("##==> INFO! Found OS: {}", env::consts::OS);
+    Ok(())
+}
+
+#[cfg(windows)]
+fn setup_terminal() -> std::io::Result<()> {
+    println!("##==> INFO! Found OS: {}", env::consts::OS);
+    control::set_virtual_terminal(true)?;
+    Ok(())
+}
+
 fn main() {
     let start = Instant::now();
 
     // Check Current OS to Determine Colored Terminal Output
-    if env::consts::OS == "windows" {
-        control::set_virtual_terminal(true).unwrap();
-    } else {
-        control::set_virtual_terminal(false).unwrap();
+    if let Err(error) = setup_terminal() {
+        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
     }
+
     print_run_message();
 
     // Setup Files Necessary for Output
@@ -168,7 +180,6 @@ fn main() {
         Some(("perceptron", _matches)) => {
             if let Err(error) = daves_perceptron() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
-                process::exit(1);
             }
         },
         Some(("dave-land", _matches)) => {
@@ -180,7 +191,6 @@ fn main() {
             if let Some(passed_value) = matches.get_one::<u16>("number") {
                 if let Err(error) = guess_number(*passed_value) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
-                    process::exit(1);
                 }
             } else {
                 println!("##==> INFO! A guess must be passed to the program. Try running 'dave guess --help' for more information");
@@ -191,7 +201,6 @@ fn main() {
                 let path = Path::new(passed_directory);
                 if let Err(error) = get_file_size(path) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
-                    process::exit(1);
                 }
             } else {
                 println!("##==> INFO! A file or path must be passed to the program. Try running 'dave size --help' for more information");

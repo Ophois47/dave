@@ -8,6 +8,8 @@ digraph map {
 	Sulaco -> Sulaco
 	Sulaco -> Sulaco
 	Sulaco -> Sulaco
+	Sulaco -> Sulaco
+	Sulaco -> Sulaco
 	Sulaco -> Your
 	Your -> Sulaco
 	Sulaco -> Sulaco
