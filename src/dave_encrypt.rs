@@ -2,6 +2,8 @@ use age::secrecy::Secret;
 use std::io::{self, Read, Write};
 
 pub fn dave_encrypt_decrypt(passphrase: String) -> io::Result<()> {
+	// TODO: Read and Encrypt Files
+	// let f = File::open(file.clone())?;
 	let plain_text = b"Hey Dave!";
 
 	// Encrypt the plaintext to a ciphertext using given passphrase
