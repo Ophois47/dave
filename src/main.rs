@@ -86,7 +86,7 @@ fn argument_parser() -> ArgMatches {
                 .value_name("filename")
                 .num_args(1)
                 .help("The file or directory passed to DGREP for it to search through for the given pattern")))
-        .subcommand(Command::new("crypt")
+        .subcommand(Command::new("dcrypt")
             .about("File Encryption and Decryption using a Passphrase")
             .arg(Arg::new("option")
                 .long("option")
@@ -246,7 +246,7 @@ fn main() {
                 println!("##==> INFO! A file or path must be passed to the program. Try running 'dave size --help' for more information");
             }
         },
-        Some(("crypt", matches)) => {
+        Some(("dcrypt", matches)) => {
             if let Some(passed_file) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_file);
                 if path.exists() {
