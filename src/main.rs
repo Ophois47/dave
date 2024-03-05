@@ -7,12 +7,14 @@ use clap::{
 };
 use colored::*;
 use std::borrow::BorrowMut;
+use std::env;
 use std::fs::OpenOptions;
 use std::path::{Path, PathBuf};
 use std::process;
 use std::str::FromStr;
 use std::time::Instant;
 use davelib::config::*;
+use davelib::dave_encrypt::*;
 use davelib::dave_grep;
 use davelib::dave_grep::Config;
 use davelib::dave_guess::guess_number;
@@ -84,6 +86,20 @@ fn argument_parser() -> ArgMatches {
                 .value_name("filename")
                 .num_args(1)
                 .help("The file or directory passed to DGREP for it to search through for the given pattern")))
+        .subcommand(Command::new("crypt")
+            .about("File Encryption and Decryption using a Passphrase")
+            .arg(Arg::new("option")
+                .long("option")
+                .short('o')
+                .value_parser(value_parser!(String))
+                .value_name("option")
+                .num_args(1)
+                .help("Pass '-o e' to encrypt a file or pass '-o d' to decrypt a file"))
+            .arg(Arg::new("filename")
+                .value_parser(value_parser!(String))
+                .value_name("filename")
+                .num_args(1)
+                .help("The file or directory passed to CRYPT for it to do all its crypty business with")))
         .subcommand(Command::new("perceptron")
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
@@ -138,14 +154,32 @@ fn update_config<'a>(matches: &ArgMatches) {
     }
 }
 
-fn print_run_message() {
+fn print_startup_message() {
     println!("##==> Dave Version: {}, Release: {}, Patchlevel: {} ({})", VERSION[0], VERSION[1], VERSION[2], BUILD_DATE);
     println!();
 }
 
+#[cfg(not(windows))]
+fn setup_terminal() -> std::io::Result<()> {
+    Ok(())
+}
+
+#[cfg(windows)]
+fn setup_terminal() -> std::io::Result<()> {
+    control::set_virtual_terminal(true)?;
+    Ok(())
+}
+
 fn main() {
     let start = Instant::now();
-    print_run_message();
+    // Print Program Startup Message
+    print_startup_message();
+
+    // Check Current OS to Determine Colored Terminal Output
+    println!("##==> INFO! Found Operating System '{}'. Configuring Terminal Environment ...", env::consts::OS);
+    if let Err(error) = setup_terminal() {
+        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+    }
 
     // Setup Files Necessary for Output
     let mut file_options = OpenOptions::new();
@@ -173,7 +207,6 @@ fn main() {
         Some(("perceptron", _matches)) => {
             if let Err(error) = daves_perceptron() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
-                process::exit(1);
             }
         },
         Some(("dave-land", _matches)) => {
@@ -198,7 +231,6 @@ fn main() {
             if let Some(passed_value) = matches.get_one::<u16>("number") {
                 if let Err(error) = guess_number(*passed_value) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
-                    process::exit(1);
                 }
             } else {
                 println!("##==> INFO! A guess must be passed to the program. Try running 'dave guess --help' for more information");
@@ -209,10 +241,40 @@ fn main() {
                 let path = Path::new(passed_directory);
                 if let Err(error) = get_file_size(path) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
-                    process::exit(1);
                 }
             } else {
                 println!("##==> INFO! A file or path must be passed to the program. Try running 'dave size --help' for more information");
+            }
+        },
+        Some(("crypt", matches)) => {
+            if let Some(passed_file) = matches.get_one::<String>("filename") {
+                let path = Path::new(passed_file);
+                if path.exists() {
+                    let mut option: String = "".to_string();
+                    if let Some(passed_option) = matches.get_one::<String>("option") {
+                        if passed_option == "e" || passed_option == "encrypt" {
+                            option = "e".to_string();
+                        } else if passed_option == "d" || passed_option == "decrypt" {
+                            option = "d".to_string();
+                        }
+                    }
+                    println!("##==> INFO! Passed Path: '{}'", path.display());
+                    println!("##==> INFO! Passed Option: '{}'", option);
+                    if option == "e" {
+                        println!("##==> INFO! Encryption Selected");
+                    } else if option == "d" {
+                        println!("##==> INFO! Decryption Selected");
+                    }
+
+                    let passphrase: String = "daverules".to_string();
+                    if let Err(error) = dave_encrypt_decrypt(passphrase) {
+                        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    }
+                } else {
+                    eprintln!("{}'{}'", "##==>>>> ERROR: File Not Found: ".red(), path.display());
+                }
+            } else {
+                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave crypt --help' for more information");
             }
         },
         Some(("hash", matches)) => {
@@ -240,7 +302,7 @@ fn main() {
                         Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
                     };
                 } else {
-                    eprintln!("{}{}", "##==>>>> ERROR: File Not Found: ".red(), passed_path);
+                    eprintln!("{}'{}'", "##==>>>> ERROR: File Not Found: ".red(), passed_path);
                 }
             } else {
                 println!("##==> INFO! A file or path must be passed to the program. Try running 'dave hash --help' for more information");
@@ -269,7 +331,7 @@ fn main() {
                             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                         }
                     } else {
-                        eprintln!("{}{}", "##==>>>> ERROR: File Not Found: ".red(), filename);
+                        eprintln!("{}'{}'", "##==>>>> ERROR: File Not Found: ".red(), filename);
                     }
                 } else {
                     println!("##==> INFO! A file or path must be passed to DGREP. Try running 'dave dgrep --help' for more information");

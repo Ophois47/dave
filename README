@@ -1,7 +1,7 @@
 dave
 
 dave can check the size of a file or directory with 'size'
-dave can hash a file using md5, sha3-256, sha3-384 or sha3-512 with 'hash' and '--hash-type'
+dave can hash a file using md5, sha-256, sha-384 or sha-512 with 'hash' and '--hash-type'
 dave can allow you to guess a number using 'guess'
 dave has a fully implemented version of GREP using 'dgrep'
 dave has a perceptron you can run using 'perceptron'
@@ -16,7 +16,8 @@ Go into the project directory and build the project from source using cargo afte
 $ cargo clean && cargo update && cargo build && cargo build --release
 
 A binary executable will now exist for your current system. You can find the release binary at 'target/release/dave'.
-Alternatively, running cargo build && cargo run in the project directory will run the program in debug mode.
+
+Alternatively, running 'cargo run' in the project directory will run the program in debug mode.
 
 To Run Dave:
 ===============
