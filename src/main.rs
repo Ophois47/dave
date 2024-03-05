@@ -72,7 +72,6 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("option")
                 .long("option")
                 .short('o')
-                .value_name("option")
                 .num_args(1)
                 .value_parser(value_parser!(String))
                 .help("Pass '-o i' or '-o I' for case insensitivity. Pass '-o r' or '-o R' for REGEX pattern matching"))
@@ -92,7 +91,6 @@ fn argument_parser() -> ArgMatches {
                 .long("option")
                 .short('o')
                 .value_parser(value_parser!(String))
-                .value_name("option")
                 .num_args(1)
                 .help("Pass '-o e' to encrypt a file or pass '-o d' to decrypt a file"))
             .arg(Arg::new("filename")
@@ -106,15 +104,23 @@ fn argument_parser() -> ArgMatches {
             .about("This is a text based adventure game by Dave"))
         .subcommand(Command::new("drm")
             .about("Calculate your max possible repetitions by giving your weight lifted and for how many reps.")
+            .arg(Arg::new("option")
+                .long("option")
+                .short('o')
+                .default_value("lbs")
+                .num_args(1)
+                .value_parser(["lb", "kg", "lbs", "kgs", "pounds", "kilograms", "kilos"])
+                .value_parser(value_parser!(String))
+                .help("Pass '-o lb' for pounds or '-o kg' for kilograms."))
             .arg(Arg::new("weight")
-                .value_parser(value_parser!(u16))
                 .value_name("weight lifted")
                 .num_args(1)
+                .value_parser(value_parser!(u16))
                 .help("Enter the weight lifted during the movement."))
             .arg(Arg::new("reps")
-                .value_parser(value_parser!(u16))
                 .value_name("repetitions completed")
                 .num_args(1)
+                .value_parser(value_parser!(u16))
                 .help("Enter the amount of reps completed during the movement.")))
         .get_matches()
 }
@@ -180,6 +186,7 @@ fn main() {
     if let Err(error) = setup_terminal() {
         eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
     }
+    println!();
 
     // Setup Files Necessary for Output
     let mut file_options = OpenOptions::new();
@@ -217,14 +224,22 @@ fn main() {
         Some(("drm", matches)) => {
             if let Some(passed_weight) = matches.get_one::<u16>("weight") {
                 if let Some(passed_reps) = matches.get_one::<u16>("reps") {
-                    if let Err(error) = dave_rep_max_calc(*passed_weight, *passed_reps) {
+                    let mut option: String = "".to_string();
+                    if let Some(passed_option) = matches.get_one::<String>("option") {
+                        if passed_option == "lb" || passed_option == "lbs" || passed_option == "pounds" {
+                            option = "lbs".to_string();
+                        } else if passed_option == "kg" || passed_option == "kgs" || passed_option == "kilograms" || passed_option == "kilos" {
+                            option = "kgs".to_string();
+                        }
+                    }
+                    if let Err(error) = dave_rep_max_calc(*passed_weight, *passed_reps, &option) {
                         eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                     }
                 } else {
                     println!("##==> INFO! An amount of reps completed must be passed to the program. Try running 'dave drm --help' for more information");
                 }
             } else {
-                println!("##==> INFO! A weight lifted must be passed to the program. Try running 'dave drm --help' for more information");
+                println!("##==> INFO! A amount of weight lifted must be passed to the program. Try running 'dave drm --help' for more information");
             }
         },
         Some(("guess", matches)) => {
