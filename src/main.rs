@@ -19,6 +19,7 @@ use davelib::dave_guess::guess_number;
 use davelib::dave_hash::*;
 use davelib::dave_land::dave_game_loop;
 use davelib::dave_perceptron::daves_perceptron;
+use davelib::dave_rep_max::dave_rep_max_calc;
 use davelib::utils::*;
 use davelib::release;
 use davelib::release::*;
@@ -87,6 +88,18 @@ fn argument_parser() -> ArgMatches {
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
             .about("This is a text based adventure game by Dave"))
+        .subcommand(Command::new("drm")
+            .about("Calculate your max possible repetitions by giving your weight lifted and for how many reps.")
+            .arg(Arg::new("weight")
+                .value_parser(value_parser!(u16))
+                .value_name("weight lifted")
+                .num_args(1)
+                .help("Enter the weight lifted during the movement."))
+            .arg(Arg::new("reps")
+                .value_parser(value_parser!(u16))
+                .value_name("repetitions completed")
+                .num_args(1)
+                .help("Enter the amount of reps completed during the movement.")))
         .get_matches()
 }
 
@@ -166,6 +179,19 @@ fn main() {
         Some(("dave-land", _matches)) => {
             if let Err(error) = dave_game_loop() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("drm", matches)) => {
+            if let Some(passed_weight) = matches.get_one::<u16>("weight") {
+                if let Some(passed_reps) = matches.get_one::<u16>("reps") {
+                    if let Err(error) = dave_rep_max_calc(*passed_weight, *passed_reps) {
+                        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    }
+                } else {
+                    println!("##==> INFO! An amount of reps completed must be passed to the program. Try running 'dave drm --help' for more information");
+                }
+            } else {
+                println!("##==> INFO! A weight lifted must be passed to the program. Try running 'dave drm --help' for more information");
             }
         },
         Some(("guess", matches)) => {
