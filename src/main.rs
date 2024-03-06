@@ -93,6 +93,12 @@ fn argument_parser() -> ArgMatches {
                 .value_parser(value_parser!(String))
                 .num_args(1)
                 .help("Pass '-o e' to encrypt a file or pass '-o d' to decrypt a file"))
+            .arg(Arg::new("password")
+                .long("password")
+                .short('p')
+                .value_parser(value_parser!(String))
+                .num_args(1)
+                .help("Provide a secure Passphrase for the hashing algoritm to use"))
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
                 .value_name("filename")
@@ -264,7 +270,7 @@ fn main() {
         Some(("crypt", matches)) => {
             if let Some(passed_file) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_file);
-                let passphrase: String = "daverules".to_string();
+                let mut passphrase: String = "default".to_string();
                 if path.exists() {
                     let mut option: String = "".to_string();
                     if let Some(passed_option) = matches.get_one::<String>("option") {
@@ -273,6 +279,10 @@ fn main() {
                         } else if passed_option == "d" || passed_option == "decrypt" {
                             option = "d".to_string();
                         }
+                    }
+                    if let Some(passed_phrase) = matches.get_one::<String>("password") {
+                        println!("PASSED PHRASE: {}", passed_phrase);
+                        passphrase = passed_phrase.to_string();
                     }
                     println!("##==> INFO! Passed Path: '{}'", path.display());
                     if option == "e" {
