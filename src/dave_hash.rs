@@ -1,10 +1,7 @@
 use sha2::Digest;
 use std::error::Error;
 use std::io;
-use std::io::prelude::*;
-use std::io::BufReader;
 use std::fmt;
-use std::fs::File;
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -97,33 +94,19 @@ pub struct Sha512Hash;
 impl Hasher for Md5Hash {
 	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
 		let mut md5_context = md5::Context::new();
-		let f = File::open(file.clone())?;
-		// Find Length of File
-		let file_length = f.metadata()?.len();
-
-		// Decide on Reasonable Buffer Size
-		let buf_len = file_length.min(1_000_000) as usize;
-		let mut buffer = BufReader::with_capacity(buf_len, f);
-
-		loop {
-			// Get Chunk of File
-			let part = buffer.fill_buf()?;
-
-			// If Chunk Empty, EOF Reached
-			if part.is_empty() {
-				break;
+		match std::fs::read(file) {
+			Ok(bytes) => {
+				md5_context.consume(&bytes);
+			},
+			Err(error) => {
+				if error.kind() == std::io::ErrorKind::PermissionDenied {
+					eprintln!("Please Run Again With Appropriate Permissions");
+				}
+				panic!("{}", error);
 			}
-			// Add Chunk to Hasher
-			md5_context.consume(part);
-
-			// Tell Buffer Chunk Was Consumed
-			let part_len = part.len();
-			buffer.consume(part_len);
 		}
 
-		// Finalize md5.context + Put Into Digest
 		let md5_digest = md5_context.compute();
-		println!("##==>> MD5 Checksum: {:x}", md5_digest);
 		Ok(md5_digest.to_vec())
 	}
 }
@@ -143,9 +126,7 @@ impl Hasher for Sha256Hash {
 			}
 		}
 
-		// Finalize Hasher Object and Put Into Vec
 		let hash = hasher.finalize();
-		println!("##==>> Sha-256 Checksum: {:x}", hash);
 		Ok(hash.to_vec())
 	}
 }
@@ -153,34 +134,19 @@ impl Hasher for Sha256Hash {
 impl Hasher for Sha384Hash {
 	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
 		let mut hasher = sha2::Sha384::new();
-		let f = File::open(file)?;
-		// Find Length of File
-		let file_length = f.metadata()?.len();
-
-		// Decide on Reasonable Buffer Size
-		let buf_len = file_length.min(1_000_000) as usize;
-		let mut buffer = BufReader::with_capacity(buf_len, f);
-
-		loop {
-			// Get Chunk of File
-			let part = buffer.fill_buf()?;
-
-			// If Chunk Empty, EOF Reached
-			if part.is_empty() {
-				break;
+		match std::fs::read(file) {
+			Ok(bytes) => {
+				hasher.update(&bytes);
+			},
+			Err(error) => {
+				if error.kind() == std::io::ErrorKind::PermissionDenied {
+					eprintln!("Please Run Again With Appropriate Permissions");
+				}
+				panic!("{}", error);
 			}
-
-			// Add Chunk to Hasher
-			hasher.update(part);
-
-			// Tell Buffer Chunk Was Consumed
-			let part_len = part.len();
-			buffer.consume(part_len);
 		}
 
-		// Finalize Hasher Object and Put Into Vec
 		let hash = hasher.finalize();
-		println!("##==>> Sha-384 Checksum: {:x}", hash);
 		Ok(hash.to_vec())
 	}
 }
@@ -188,34 +154,19 @@ impl Hasher for Sha384Hash {
 impl Hasher for Sha512Hash {
 	fn hash(&self, file: PathBuf) -> io::Result<Vec<u8>> {
 		let mut hasher = sha2::Sha512::new();
-		let f = File::open(file)?;
-		// Find Length of File
-		let file_length = f.metadata()?.len();
-
-		// Decide on Reasonable Buffer Size
-		let buf_len = file_length.min(8_000_000) as usize;
-		let mut buffer = BufReader::with_capacity(buf_len, f);
-
-		loop {
-			// Get Chunk of File
-			let part = buffer.fill_buf()?;
-
-			// If Chunk Empty, EOF Reached
-			if part.is_empty() {
-				break;
+		match std::fs::read(file) {
+			Ok(bytes) => {
+				hasher.update(&bytes);
+			},
+			Err(error) => {
+				if error.kind() == std::io::ErrorKind::PermissionDenied {
+					eprintln!("Please Run Again With Appropriate Permissions");
+				}
+				panic!("{}", error);
 			}
-
-			// Add Chunk to Hasher
-			hasher.update(part);
-
-			// Tell Buffer Chunk Was Consumed
-			let part_len = part.len();
-			buffer.consume(part_len);
 		}
 
-		// Finalize Hasher Object and Put Into Vec
 		let hash = hasher.finalize();
-		println!("##==>> Sha-512 Checksum: {:x}", hash);
 		Ok(hash.to_vec())
 	}
 }

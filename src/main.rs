@@ -50,7 +50,7 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
                 .num_args(1)))
-        .subcommand(Command::new("dhash")
+        .subcommand(Command::new("hash")
             .about("Hash a file using a preferred hashing algorithm")
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
@@ -68,7 +68,7 @@ fn argument_parser() -> ArgMatches {
                 .value_parser(value_parser!(u16))
                 .num_args(1)))
         .subcommand(Command::new("dgrep")
-            .about("Behold Dave's glorious implementation of GREP in Rust.\nPass this function '-o i' or '-o I' for case insensitive\nsearches, then pass a pattern to query and a\nfilename to search. Pass '-o r' or '-o R' to instead match using a REGEX pattern")
+            .about("Behold Dave's glorious implementation of GREP in Rust.")
             .arg(Arg::new("option")
                 .long("option")
                 .short('o')
@@ -85,7 +85,7 @@ fn argument_parser() -> ArgMatches {
                 .value_name("filename")
                 .num_args(1)
                 .help("The file or directory passed to DGREP for it to search through for the given pattern")))
-        .subcommand(Command::new("dcrypt")
+        .subcommand(Command::new("crypt")
             .about("File Encryption and Decryption using a Passphrase")
             .arg(Arg::new("option")
                 .long("option")
@@ -261,7 +261,7 @@ fn main() {
                 println!("##==> INFO! A file or path must be passed to the program. Try running 'dave size --help' for more information");
             }
         },
-        Some(("dcrypt", matches)) => {
+        Some(("crypt", matches)) => {
             if let Some(passed_file) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_file);
                 let passphrase: String = "daverules".to_string();
@@ -296,10 +296,10 @@ fn main() {
                     eprintln!("{}'{}'", "##==>>>> ERROR: File Not Found: ".red(), path.display());
                 }
             } else {
-                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave dcrypt --help' for more information");
+                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave crypt --help' for more information");
             }
         },
-        Some(("dhash", matches)) => {
+        Some(("hash", matches)) => {
             if let Some(passed_path) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_path);
                 if path.exists() {
@@ -318,8 +318,9 @@ fn main() {
                         }
                     }
                     match hash_file(hash_type, passed_path.into()) {
-                        Ok(_hash_result) => {
-                            // println!("#==>> Hex Output: {:x?}", hash_result);
+                        Ok(hash_result) => {
+                            let encoded_string = hex::encode(hash_result);
+                            println!("#==>> {} Checksum: {:x?}", hash_type, encoded_string);
                         },
                         Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
                     };
@@ -327,7 +328,7 @@ fn main() {
                     eprintln!("{}'{}'", "##==>>>> ERROR: File Not Found: ".red(), passed_path);
                 }
             } else {
-                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave dhash --help' for more information");
+                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave hash --help' for more information");
             }
         },
         Some(("dgrep", matches)) => {

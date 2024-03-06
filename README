@@ -21,6 +21,9 @@ A binary executable will now exist for your current system. You can find the rel
 
 Alternatively, running 'cargo run' in the project directory will run the program in debug mode.
 
+To build on an executable for Windows when building on Linux run the following commands.
+$ cargo build --target x86_64-pc-windows-gnu && cargo build --release --target x86_64-pc-windows-gnu
+
 To Run Dave:
 ===============
 For now, use the release binary in '{PROJECT_DIR}/target/release/dave'.
