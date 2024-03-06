@@ -50,21 +50,21 @@ pub fn dave_rep_max_calc(mut weight: u16, reps: u16, uom: &str) -> io::Result<()
 
 	let average_max = (bform + eform + laform + loform)/4;
 	println!("##==>> Your 1RM: {} {}", average_max, unit_of_measurement);
-	let ninetyfive_percent = 0.95 * weight as f32;
+	let ninetyfive_percent = 0.95 * average_max as f32;
 	println!("##==>> Your 95% Max: {} {}", ninetyfive_percent as u16, unit_of_measurement);
-	let ninety_percent = 0.90 * weight as f32;
+	let ninety_percent = 0.90 * average_max as f32;
 	println!("##==>> Your 90% Max: {} {}", ninety_percent as u16, unit_of_measurement);
-	let eightyfive_percent = 0.85 * weight as f32;
+	let eightyfive_percent = 0.85 * average_max as f32;
 	println!("##==>> Your 85% Max: {} {}", eightyfive_percent as u16, unit_of_measurement);
-	let eighty_percent = 0.80 * weight as f32;
+	let eighty_percent = 0.80 * average_max as f32;
 	println!("##==>> Your 80% Max: {} {}", eighty_percent as u16, unit_of_measurement);
-	let seventyfive_percent = 0.75 * weight as f32;
+	let seventyfive_percent = 0.75 * average_max as f32;
 	println!("##==>> Your 75% Max: {} {}", seventyfive_percent as u16, unit_of_measurement);
-	let seventy_percent = 0.70 * weight as f32;
+	let seventy_percent = 0.70 * average_max as f32;
 	println!("##==>> Your 70% Max: {} {}", seventy_percent as u16, unit_of_measurement);
-	let sixty_percent = 0.60 * weight as f32;
+	let sixty_percent = 0.60 * average_max as f32;
 	println!("##==>> Your 60% Max: {} {}", sixty_percent as u16, unit_of_measurement);
-	let fifty_percent = 0.50 * weight as f32;
+	let fifty_percent = 0.50 * average_max as f32;
 	println!("##==>> Your 50% Max: {} {}", fifty_percent as u16, unit_of_measurement);
 
 	Ok(())
