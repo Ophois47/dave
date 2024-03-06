@@ -264,6 +264,7 @@ fn main() {
         Some(("dcrypt", matches)) => {
             if let Some(passed_file) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_file);
+                let passphrase: String = "daverules".to_string();
                 if path.exists() {
                     let mut option: String = "".to_string();
                     if let Some(passed_option) = matches.get_one::<String>("option") {
@@ -274,10 +275,9 @@ fn main() {
                         }
                     }
                     println!("##==> INFO! Passed Path: '{}'", path.display());
-                    let passphrase: String = "daverules".to_string();
                     if option == "e" {
                         println!("##==> INFO! Encryption Selected");
-                        match dave_encrypt(passphrase, path) {
+                        match dave_encrypt(&passphrase, path) {
                             Ok(encrypted_result) => {
                                 println!("##==>> Encrypted Result: {:?}", encrypted_result);
                             },
@@ -285,9 +285,12 @@ fn main() {
                         }
                     } else if option == "d" {
                         println!("##==> INFO! Decryption Selected");
-                        /*if let Err(error) = dave_decrypt(&passphrase, &encrypted_result) {
-                            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
-                        }*/
+                        match dave_decrypt(&passphrase, path) {
+                            Ok(decrypted_result) => {
+                                println!("##==>> Decrypted Result: {}", String::from_utf8_lossy(&decrypted_result));
+                            },
+                            Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
+                        }
                     }
                 } else {
                     eprintln!("{}'{}'", "##==>>>> ERROR: File Not Found: ".red(), path.display());

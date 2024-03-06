@@ -1,10 +1,17 @@
+use age::DecryptError;
 use age::secrecy::Secret;
 use std::fs::File;
-use std::io::{self, Read, Write};
+use std::io::{
+	self,
+	Error,
+	ErrorKind,
+	Read,
+	Write,
+};
 use std::path::Path;
 
-pub fn dave_encrypt(passphrase: String, file: &Path) -> io::Result<Vec<u8>> {
-	let mut file = File::open(file)?;
+pub fn dave_encrypt(passphrase: &str, path: &Path) -> io::Result<Vec<u8>> {
+	let mut file = File::open(path)?;
 	let mut buffer = vec![];
 	file.read_to_end(&mut buffer)?;
 	let plain_text = String::from_utf8_lossy(&buffer);
@@ -20,15 +27,26 @@ pub fn dave_encrypt(passphrase: String, file: &Path) -> io::Result<Vec<u8>> {
 		encrypted
 	};
 
+	let encrypted_file_name = format!("{}_encrypted", path.display());
+	let mut encrypted_file = File::create(encrypted_file_name)?;
+	encrypted_file.write_all(&encrypted)?;
+
 	Ok(encrypted)
 }
 
-pub fn dave_decrypt(passphrase: &str, encrypted: &[u8]) -> io::Result<Vec<u8>> {
+pub fn dave_decrypt(passphrase: &str, path: &Path) -> io::Result<Vec<u8>> {
+	let mut file = File::open(path)?;
+	let mut buffer = vec![];
+	file.read_to_end(&mut buffer)?;
+
 	// Decrypt ciphertext to plaintext again using same passphrase
 	let decrypted = {
 		println!("##==> INFO! Now Decrypting ...");
-		let decryptor = match age::Decryptor::new(&encrypted[..]).unwrap() {
-			age::Decryptor::Passphrase(d) => d,
+		let decryptor = match age::Decryptor::new(&buffer[..]) {
+			Ok(age::Decryptor::Passphrase(d)) => d,
+			Err(DecryptError::InvalidHeader) => {
+				return Err(Error::new(ErrorKind::Other, "This file is not encrypted"))
+			},
 			_ => unreachable!(),
 		};
 
