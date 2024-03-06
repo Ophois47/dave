@@ -50,7 +50,7 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
                 .num_args(1)))
-        .subcommand(Command::new("hash")
+        .subcommand(Command::new("dhash")
             .about("Hash a file using a preferred hashing algorithm")
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
@@ -97,7 +97,7 @@ fn argument_parser() -> ArgMatches {
                 .value_parser(value_parser!(String))
                 .value_name("filename")
                 .num_args(1)
-                .help("The file or directory passed to CRYPT for it to do all its crypty business with")))
+                .help("The file or directory passed to DCRYPT for it to do all its crypty business with")))
         .subcommand(Command::new("perceptron")
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
@@ -274,25 +274,29 @@ fn main() {
                         }
                     }
                     println!("##==> INFO! Passed Path: '{}'", path.display());
-                    println!("##==> INFO! Passed Option: '{}'", option);
+                    let passphrase: String = "daverules".to_string();
                     if option == "e" {
                         println!("##==> INFO! Encryption Selected");
+                        match dave_encrypt(passphrase, path) {
+                            Ok(encrypted_result) => {
+                                println!("##==>> Encrypted Result: {:?}", encrypted_result);
+                            },
+                            Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
+                        }
                     } else if option == "d" {
                         println!("##==> INFO! Decryption Selected");
-                    }
-
-                    let passphrase: String = "daverules".to_string();
-                    if let Err(error) = dave_encrypt_decrypt(passphrase) {
-                        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                        /*if let Err(error) = dave_decrypt(&passphrase, &encrypted_result) {
+                            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                        }*/
                     }
                 } else {
                     eprintln!("{}'{}'", "##==>>>> ERROR: File Not Found: ".red(), path.display());
                 }
             } else {
-                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave crypt --help' for more information");
+                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave dcrypt --help' for more information");
             }
         },
-        Some(("hash", matches)) => {
+        Some(("dhash", matches)) => {
             if let Some(passed_path) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_path);
                 if path.exists() {
@@ -320,7 +324,7 @@ fn main() {
                     eprintln!("{}'{}'", "##==>>>> ERROR: File Not Found: ".red(), passed_path);
                 }
             } else {
-                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave hash --help' for more information");
+                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave dhash --help' for more information");
             }
         },
         Some(("dgrep", matches)) => {
