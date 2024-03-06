@@ -172,7 +172,7 @@ fn setup_terminal() -> std::io::Result<()> {
 
 #[cfg(windows)]
 fn setup_terminal() -> std::io::Result<()> {
-    control::set_virtual_terminal(true)?;
+    control::set_virtual_terminal(true).unwrap();
     Ok(())
 }
 

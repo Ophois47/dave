@@ -19,7 +19,7 @@ fn lander_formula(weight: u16, reps: u16) -> u16 {
 }
 
 fn lombardi_formula(weight: u16, reps: u16) -> u16 {
-	// weight * reps ^ 0.1
+	// weight * (reps ^ 0.1)
 	let rep_max = weight as f64 * (reps as f64).powf(0.1);
 	rep_max as u16
 }
