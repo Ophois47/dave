@@ -364,7 +364,7 @@ dependencies = [
 
 [[package]]
 name = "dave"
-version = "6.5.1"
+version = "6.5.2"
 dependencies = [
  "age",
  "bytesize",
