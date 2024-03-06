@@ -320,7 +320,7 @@ fn main() {
                     match hash_file(hash_type, passed_path.into()) {
                         Ok(hash_result) => {
                             let encoded_string = hex::encode(hash_result);
-                            println!("#==>> {} Checksum: {:x?}", hash_type, encoded_string);
+                            println!("#==>> {} Checksum: {}", hash_type, encoded_string);
                         },
                         Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
                     };
@@ -345,7 +345,7 @@ fn main() {
                         let config = Config::new(
                             option.to_string(),
                             pattern.to_string(),
-                            filename.to_string()
+                            filename.to_string(),
                         ).unwrap_or_else(|error| {
                             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error.red());
                             process::exit(1);
