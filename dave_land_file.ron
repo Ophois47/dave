@@ -130,7 +130,7 @@ World (
 		 details : "The Ithaca Model 37 is an American-made pump-action shotgun chambered for 12 gauge cartridges. Designed in 1933 and first manufactured in 1937, the Model 37 utilizes a novel combination ejection/loading port on the bottom of the gun that leaves the sides of the weapon closed to the elements.",
 		 weight : 7,
 		),
-		(labels : ["M56 Smart Gun", "Smart Gun", "M56"],
+		(labels : ["M56 Smart Gun", "Smart Gun", "M56", "Smartgun"],
 		 description : "a single M56 Smart Gun, with reticulating combat harness and arm still attached",
 		 location : "Armory",
 		 details : "The M56 Smartgun is chambered in 10x28mm Caseless. A Rotating breech, electronic pulse action heavy machine gun that holds 500 rounds in a detachable drum magazine. It has a rate of fire of 1,200 rounds/min and a range of up to 1,500 meteres.",
