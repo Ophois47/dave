@@ -6,6 +6,8 @@ use clap::{
     value_parser,
 };
 use colored::*;
+use rand::{thread_rng, Rng};
+use rand::distributions::Alphanumeric;
 use std::borrow::BorrowMut;
 use std::env;
 use std::fs::OpenOptions;
@@ -270,7 +272,12 @@ fn main() {
         Some(("crypt", matches)) => {
             if let Some(passed_file) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_file);
-                let mut passphrase: String = "default".to_string();
+                let mut passphrase: String = thread_rng()
+                    .sample_iter(&Alphanumeric)
+                    .take(30)
+                    .map(char::from)
+                    .collect();
+
                 if path.exists() {
                     let mut option: String = "".to_string();
                     if let Some(passed_option) = matches.get_one::<String>("option") {
@@ -281,12 +288,10 @@ fn main() {
                         }
                     }
                     if let Some(passed_phrase) = matches.get_one::<String>("password") {
-                        println!("PASSED PHRASE: {}", passed_phrase);
                         passphrase = passed_phrase.to_string();
                     }
-                    println!("##==> INFO! Passed Path: '{}'", path.display());
                     if option == "e" {
-                        println!("##==> INFO! Encryption Selected");
+                        println!("##==> Encrypting {} ...", path.display());
                         match dave_encrypt(&passphrase, path) {
                             Ok(encrypted_result) => {
                                 println!("##==>> Encrypted Result: {:?}", encrypted_result);
@@ -294,7 +299,7 @@ fn main() {
                             Err(error) => eprintln!("{}{}", "##==>>>> ERROR: ".red(), error),
                         }
                     } else if option == "d" {
-                        println!("##==> INFO! Decryption Selected");
+                        println!("##==> Decrypting {} ...", path.display());
                         match dave_decrypt(&passphrase, path) {
                             Ok(decrypted_result) => {
                                 println!("##==>> Decrypted Result: {}", String::from_utf8_lossy(&decrypted_result));

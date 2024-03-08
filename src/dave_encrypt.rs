@@ -18,7 +18,6 @@ pub fn dave_encrypt(passphrase: &str, path: &Path) -> io::Result<Vec<u8>> {
 
 	// Encrypt the plaintext to a ciphertext using given passphrase
 	let encrypted = {
-		println!("##==> INFO! Now Encrypting ...");
 		let encryptor = age::Encryptor::with_user_passphrase(Secret::new(passphrase.to_owned()));
 		let mut encrypted = vec![];
 		let mut writer = encryptor.wrap_output(&mut encrypted).unwrap();
@@ -41,17 +40,22 @@ pub fn dave_decrypt(passphrase: &str, path: &Path) -> io::Result<Vec<u8>> {
 
 	// Decrypt ciphertext to plaintext again using same passphrase
 	let decrypted = {
-		println!("##==> INFO! Now Decrypting ...");
 		let decryptor = match age::Decryptor::new(&buffer[..]) {
 			Ok(age::Decryptor::Passphrase(d)) => d,
 			Err(DecryptError::InvalidHeader) => {
-				return Err(Error::new(ErrorKind::Other, "This file is not encrypted"))
+				return Err(Error::new(ErrorKind::Other, "File Not Encrypted"))
 			},
 			_ => unreachable!(),
 		};
 
 		let mut decrypted = vec![];
-		let mut reader = decryptor.decrypt(&Secret::new(passphrase.to_owned()), None).unwrap();
+		let mut reader = match decryptor.decrypt(&Secret::new(passphrase.to_owned()), None) {
+			Ok(reader) => reader,
+			Err(DecryptError::DecryptionFailed) => {
+				return Err(Error::new(ErrorKind::Other, "Incorrect Passphrase"))
+			},
+			_ => unreachable!(),
+		};
 		if let Err(error) = reader.read_to_end(&mut decrypted) {
 			eprintln!("##==>>>> ERROR: {}", error);
 		}
