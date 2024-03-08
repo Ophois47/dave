@@ -6,7 +6,7 @@ use crate::dave_land_lib;
 const GAME_FILE_LOC: &str = "./dave_land_file.ron";
 
 fn init_game(file_loc: &str) -> Result<dave_land_lib::World, std::io::Error> {
-	// Read game file, return world
+	// Read Game File, Return World
 	dave_land_lib::World::read_from_file(file_loc)
 }
 
@@ -19,7 +19,7 @@ fn dave_do_game(mut world: dave_land_lib::World) -> io::Result<()> {
 	println!("{}", "* Welcome to LV-426, the Second Moon of Zeta 2 Reticuli IV *".blue());
 	println!("{}", "************************************************************".blue());
 	println!();
-	println!("You awaken in what seems to be absolute darkness, suddenly\npunctuated by the occasional blast of light that appears to be\ncoming from a currently malfunctioning video screen on a nearby\nwall. Your mouth feels dry, and you have an intense headache.");
+	println!("You awaken in what begins as absolute darkness, suddenly\npunctuated by the occasional blast of light that appears to be\ncoming from a currently malfunctioning video screen on a nearby\nwall. Your mouth feels dry, and you have an intense headache.");
 	println!();
 	println!("Feeling a sudden surge of adrenaline, questions about the nature of\nyour recent consciousness and current location swirl around violently\nin your mind. It's time to have a look around ...");
 	println!();
@@ -37,7 +37,6 @@ fn dave_do_game(mut world: dave_land_lib::World) -> io::Result<()> {
 
 	// Shutdown, Cleanup and Exit
 	println!("{}", "... In Space, No One Can Hear You Scream ...".bright_green());
-
 	Ok(())
 }
 
@@ -56,6 +55,6 @@ pub fn dave_game_loop() -> io::Result<()> {
 			eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
 		}
 	}
-
+	
 	Ok(())
 }

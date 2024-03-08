@@ -89,7 +89,7 @@ impl DaveConfig {
 		let file = match File::open(&config_path) {
 			Ok(file) => file,
 			Err(error) => {
-				println!("##==>> Warning! Configuration File Not Found, Using Defaults");
+				println!("##==>> Warning! Config File Not Found, Using Defaults");
 				println!("##==>> Warning! {}: {}\n", config_path.display(), error);
 				return Self::default()
 			}

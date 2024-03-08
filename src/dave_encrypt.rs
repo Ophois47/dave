@@ -1,4 +1,4 @@
-use age::DecryptError;
+use age::{DecryptError, EncryptError};
 use age::secrecy::Secret;
 use std::fs::File;
 use std::io::{
@@ -20,7 +20,13 @@ pub fn dave_encrypt(passphrase: &str, path: &Path) -> io::Result<Vec<u8>> {
 	let encrypted = {
 		let encryptor = age::Encryptor::with_user_passphrase(Secret::new(passphrase.to_owned()));
 		let mut encrypted = vec![];
-		let mut writer = encryptor.wrap_output(&mut encrypted).unwrap();
+		let mut writer = match encryptor.wrap_output(&mut encrypted) {
+			Ok(writer) => writer,
+			Err(EncryptError::Io(_)) => {
+				return Err(Error::new(ErrorKind::Other, "IO Error"))
+			},
+			_ => unreachable!(),
+		};
 		writer.write_all(plain_text.as_bytes()).unwrap();
 		writer.finish()?;
 		encrypted

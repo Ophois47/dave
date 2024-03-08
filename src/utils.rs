@@ -42,10 +42,11 @@ pub fn get_file_size(path: &Path) -> io::Result<()> {
             println!("##==>> File '{}' is {}", path.display(), ByteSize::b(file_metadata.len()));
             spinner.stop_with_symbol(&stop_symbol);
         } else {
-            println!("{}", "##==>>> Warning! Idk WTF that is ... Where did you even find it? Spit it out".red());
+            println!("{}", "##==>>> Warning! Where did you even find this? Spit it out".red());
         }
     } else {
         eprintln!("{}{}", "##==>>>> ERROR: File Not Found: ".red(), path.display());
     }
+    
     Ok(())
 }

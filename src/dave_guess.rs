@@ -12,13 +12,13 @@ pub fn guess_number(guess: u16) -> io::Result<()> {
     if random_value == guess {
         println!("{}", "#=> CORRECT! You got it right.".green());
     } else if random_value < guess {
-        println!("{}", "#=> WRONG! Too High!".red());
+        println!("{}", "#=> INCORRECT! Too High!".red());
     } else if random_value > guess {
-        println!("{}", "#=> WRONG! Too Low!".red());
+        println!("{}", "#=> INCORRECT! Too Low!".red());
     }
 
     println!("#=> Your Guess: {}", guess);
-    println!("#=> Correct Value: {}", random_value);
+    println!("#=> Correct Guess: {}", random_value);
     Ok(())
 }
 

@@ -78,6 +78,7 @@ impl FromStr for HashType {
 			"sha-512" 	=> HashType::Sha512,
 			_ 			=> HashType::Sha256,
 		};
+		
 		Ok(gotten_hash_type)
 	}
 }
@@ -177,6 +178,5 @@ impl Hasher for Sha512Hash {
 pub fn hash_file(hash_type: HashType, path: PathBuf) -> io::Result<Vec<u8>> {
 	let file = PathBuf::from(path.as_path());
 	let hasher: Box<dyn Hasher> = hash_type.into();
-	
 	hasher.hash(file)
 }

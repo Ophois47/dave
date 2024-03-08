@@ -66,7 +66,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 				}
 			}
 		} else {
-			println!("{}", "##==> There Were No REGEX Matches For Your Pattern".red());
+			println!("{}", "##==> There Were No Matches For Your REGEX Pattern".red());
 		}
 	}
 

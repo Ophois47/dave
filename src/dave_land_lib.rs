@@ -577,7 +577,7 @@ impl World {
 				Help - prints this screen\n \
 				Quit - leave the game"
 			),
-			Command::Unknown(input_str) => format!("What do you mean by '{}'?", input_str),
+			Command::Unknown(input_str) => format!("What do you mean by {}?", input_str),
 		}
 	}
 
@@ -599,9 +599,9 @@ impl World {
             		(Distance::HereContained, _) => {
             			output_vis + "Hard to see, you should try to get closer first.\n"
             		}
-            		(Distance::OverThere, _) => output_vis + "Too far away, move closer.\n",
+            		(Distance::OverThere, _) => output_vis + "You are too far away, move closer.\n",
             		(Distance::NotHere, _) => {
-            			output_vis + &format!("You don't see any '{}' here.\n", noun)
+            			output_vis + &format!("You don't see any {} here.\n", noun)
             		}
             		(Distance::UnknownObject, _) => output_vis,
             		(Distance::Location, Some(obj_idx)) => {
@@ -864,7 +864,6 @@ impl World {
 pub fn parse(input_str: String) -> Command {
     let lc_input_str = input_str.to_lowercase();
     let mut split_input_iter = lc_input_str.split_whitespace();
- 
     let verb = split_input_iter.next().unwrap_or_default().to_string();
     let noun = split_input_iter.fold("".to_string(), |accum, item| {
         if accum.is_empty() {

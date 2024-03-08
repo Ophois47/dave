@@ -2,7 +2,6 @@ use std::io;
 
 fn activate_sigmoid(slope: f64, x: f64) -> f64 {
 	let e: f64 = std::f64::consts::E;
-
 	return 1.0/(1.0 + e.powf(-0.5 * slope * x));
 }
 

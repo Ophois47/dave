@@ -29,9 +29,17 @@ fn convert_lb_to_kg(weight: u16) -> u16 {
 	kg_weight as u16
 }
 
-pub fn dave_rep_max_calc(mut weight: u16, reps: u16, uom: &str) -> io::Result<()> {
-	let unit_of_measurement: &str = uom;
-	println!("##==> If you are able to lift {} {} for {} reps ...", weight, unit_of_measurement, reps);
+pub fn dave_rep_max_calc(
+	mut weight: u16,
+	reps: u16,
+	unit_of_measurement: &str,
+) -> io::Result<()> {
+	println!(
+		"##==> If you are able to lift {} {} for {} reps ...",
+		weight,
+		unit_of_measurement,
+		reps,
+	);
 	println!();
 
 	if unit_of_measurement == "kgs" {
