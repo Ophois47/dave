@@ -16,6 +16,7 @@ use std::process;
 use std::str::FromStr;
 use std::time::Instant;
 use davelib::config::*;
+use davelib::dave_currency::dave_currency_conv;
 use davelib::dave_encrypt::*;
 use davelib::dave_grep;
 use davelib::dave_grep::Config;
@@ -110,15 +111,37 @@ fn argument_parser() -> ArgMatches {
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
             .about("This is a text based adventure game by Dave"))
+        .subcommand(Command::new("dcurrency")
+            .about("Dave's implementation of a currency converter")
+            .arg(Arg::new("option")
+                .long("option")
+                .short('o')
+                .value_parser(value_parser!(String))
+                .num_args(1)
+                .help("Pass '-o a' or '-o all' to see each nation that uses the currency specified"))
+            .arg(Arg::new("amount")
+                .num_args(1)
+                .value_parser(value_parser!(u16))
+                .help("Pass an amount to convert into another world currency"))
+            .arg(Arg::new("currency")
+                .num_args(1)
+                .value_parser(value_parser!(String))
+                .value_parser(["USD", "EUR", "GBP"])
+                .help("Pass the three letter ISO 4217 currency code"))
+            .arg(Arg::new("convert")
+                .num_args(1)
+                .value_parser(value_parser!(String))
+                .value_parser(["USD", "EUR", "GBP"])
+                .help("Enter the three letter ISO 4217 currency code you wish to convert your amount to")))
         .subcommand(Command::new("drm")
-            .about("Calculate your max possible repetitions by giving your weight lifted and for how many reps.")
+            .about("Calculate your max possible repetitions by giving your weight lifted and for how many reps")
             .arg(Arg::new("option")
                 .long("option")
                 .short('o')
                 .default_value("lbs")
                 .num_args(1)
-                .value_parser(["lb", "kg", "lbs", "kgs", "pounds", "kilograms", "kilos"])
                 .value_parser(value_parser!(String))
+                .value_parser(["lb", "kg", "lbs", "kgs", "pounds", "kilograms", "kilos"])
                 .help("Pass '-o lb' for pounds or '-o kg' for kilograms."))
             .arg(Arg::new("weight")
                 .value_name("weight lifted")
@@ -227,6 +250,27 @@ fn main() {
         Some(("dave-land", _matches)) => {
             if let Err(error) = dave_game_loop() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("dcurrency", matches)) => {
+            if let Some(passed_amount) = matches.get_one::<u16>("amount") {
+                if let Some(passed_currency) = matches.get_one::<String>("currency") {
+                    if let Some(passed_conversion) = matches.get_one::<String>("convert") {
+                        if let Err(error) = dave_currency_conv(
+                            *passed_amount,
+                            passed_currency,
+                            passed_conversion,
+                        ) {
+                            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                        }
+                    } else {
+                        println!("##==> INFO! A currency to convert your amount to must be passed to the program. Try running 'dave dcurrency --help' for more information");
+                    }
+                } else {
+                    println!("##==> INFO! A type of currency for your amount must be passed to the program. Try running 'dave dcurrency --help' for more information");
+                }
+            } else {
+                println!("##==> INFO! An amount must be passed to the program. Try running 'dave dcurrency --help' for more information");
             }
         },
         Some(("drm", matches)) => {

@@ -2,6 +2,7 @@
 extern crate serde_derive;
 
 pub mod config;
+pub mod dave_currency;
 pub mod dave_encrypt;
 pub mod dave_grep;
 pub mod dave_guess;

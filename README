@@ -8,6 +8,7 @@ dave has a perceptron you can run using 'perceptron'
 dave features the greatest text based adventure game to have ever been written with 'dave-land'
 dave allows you to encrypt and decrypt files with a passcode using 'crypt'
 dave lets you calculate your one-rep max at the gym with 'drm'
+dave allows you to calculate the difference in world currencies with 'dconv'
 
 To Install Dave:
 ===================
@@ -41,7 +42,7 @@ Ideas I Want To Learn:
 	 	- HTML parsing using libraries like scraper or select
 	 	- String manipulation and regular expressions
 4.  File Encryption and Decryption (X)
-5.  Currency Converter
+5.  Currency Converter (X)
 6.  Real-Time Object Detection System
 7.  Too Many Linked Lists Article
 8.  Budget Manager
