@@ -121,18 +121,18 @@ fn argument_parser() -> ArgMatches {
                 .help("Pass '-o a' or '-o all' to see each nation that uses the currency specified"))
             .arg(Arg::new("amount")
                 .num_args(1)
-                .value_parser(value_parser!(u16))
+                .value_parser(value_parser!(f32))
                 .help("Pass an amount to convert into another world currency"))
             .arg(Arg::new("currency")
                 .num_args(1)
                 .value_parser(value_parser!(String))
-                .value_parser(["USD", "EUR", "GBP"])
-                .help("Pass the three letter ISO 4217 currency code"))
+                .value_parser(["USD", "EUR", "GBP", "JPY", "CAD"])
+                .help("Pass a three letter ISO 4217 currency code to indicate the starting currency"))
             .arg(Arg::new("convert")
                 .num_args(1)
                 .value_parser(value_parser!(String))
-                .value_parser(["USD", "EUR", "GBP"])
-                .help("Enter the three letter ISO 4217 currency code you wish to convert your amount to")))
+                .value_parser(["USD", "EUR", "GBP", "JPY", "CAD"])
+                .help("Enter the three letter ISO 4217 currency code you wish to convert your intial amount to")))
         .subcommand(Command::new("drm")
             .about("Calculate your max possible repetitions by giving your weight lifted and for how many reps")
             .arg(Arg::new("option")
@@ -253,7 +253,7 @@ fn main() {
             }
         },
         Some(("dcurrency", matches)) => {
-            if let Some(passed_amount) = matches.get_one::<u16>("amount") {
+            if let Some(passed_amount) = matches.get_one::<f32>("amount") {
                 if let Some(passed_currency) = matches.get_one::<String>("currency") {
                     if let Some(passed_conversion) = matches.get_one::<String>("convert") {
                         if let Err(error) = dave_currency_conv(
