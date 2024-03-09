@@ -18,6 +18,8 @@ fn match_from_currency(from_currency: &str, to_currency: &str, num: &f32) -> f32
 		"CNY" => convert_from_cny(&to_currency, &num),
 		"AUD" => convert_from_aud(&to_currency, &num),
 		"CHF" => convert_from_chf(&to_currency, &num),
+		"SEK" => convert_from_sek(&to_currency, &num),
+		"INR" => convert_from_inr(&to_currency, &num),
 		_ => 0.0,
 	}
 }
@@ -30,6 +32,8 @@ fn convert_from_usd(to_currency: &str, num: &f32) -> f32 {
 	let cny_to_usd_rate = 7.19503;
 	let aud_to_usd_rate = 1.5151;
 	let chf_to_usd_rate = 0.87983;
+	let sek_to_usd_rate = 10.2616;
+	let inr_to_usd_rate = 82.7497;
 
 	let amount: f32 = match to_currency {
 		"EUR" => *num * eur_to_usd_rate,
@@ -39,6 +43,8 @@ fn convert_from_usd(to_currency: &str, num: &f32) -> f32 {
 		"CNY" => *num * cny_to_usd_rate,
 		"AUD" => *num * aud_to_usd_rate,
 		"CHF" => *num * chf_to_usd_rate,
+		"SEK" => *num * sek_to_usd_rate,
+		"INR" => *num * inr_to_usd_rate,
 		"USD" => *num,
 		_ => 0.0,
 	};
@@ -54,6 +60,8 @@ fn convert_from_jpy(to_currency: &str, num: &f32) -> f32 {
 	let cny_to_jpy_rate = 0.04855;
 	let aud_to_jpy_rate = 0.01022;
 	let chf_to_jpy_rate = 0.00594;
+	let sek_to_jpy_rate = 0.06924;
+	let inr_to_jpy_rate = 0.55836;
 
 	let amount: f32 = match to_currency {
 		"USD" => *num * usd_to_jpy_rate,
@@ -63,6 +71,8 @@ fn convert_from_jpy(to_currency: &str, num: &f32) -> f32 {
 		"CNY" => *num * cny_to_jpy_rate,
 		"AUD" => *num * aud_to_jpy_rate,
 		"CHF" => *num * chf_to_jpy_rate,
+		"SEK" => *num * sek_to_jpy_rate,
+		"INR" => *num * inr_to_jpy_rate,
 		"JPY" => *num,
 		_ => 0.0,
 	};
@@ -78,6 +88,8 @@ fn convert_from_eur(to_currency: &str, num: &f32) -> f32 {
     let cny_to_eur_rate = 7.85179;
     let aud_to_eur_rate = 1.65355;
     let chf_to_eur_rate = 0.9602;
+    let sek_to_eur_rate = 11.1986;
+	let inr_to_eur_rate = 90.3031;
 
     let amount: f32 = match to_currency {
         "USD" => *num * usd_to_eur_rate,
@@ -87,6 +99,8 @@ fn convert_from_eur(to_currency: &str, num: &f32) -> f32 {
         "CNY" => *num * cny_to_eur_rate,
         "AUD" => *num * aud_to_eur_rate,
         "CHF" => *num * chf_to_eur_rate,
+        "SEK" => *num * sek_to_eur_rate,
+		"INR" => *num * inr_to_eur_rate,
         "EUR" => *num,
         _ => 0.0,
     };
@@ -102,6 +116,8 @@ fn convert_from_gbp(to_currency: &str, num: &f32) -> f32 {
     let cny_to_gdp_rate = 9.18275;
     let aud_to_gbp_rate = 1.93367;
     let chf_to_gbp_rate = 1.12298;
+    let sek_to_gbp_rate = 13.0965;
+	let inr_to_gbp_rate = 105.61;
 
     let amount: f32 = match to_currency {
         "USD" => *num * usd_to_gbp_rate,
@@ -111,6 +127,8 @@ fn convert_from_gbp(to_currency: &str, num: &f32) -> f32 {
         "CNY" => *num * cny_to_gdp_rate,
         "AUD" => *num * aud_to_gbp_rate,
         "CHF" => *num * chf_to_gbp_rate,
+        "SEK" => *num * sek_to_gbp_rate,
+		"INR" => *num * inr_to_gbp_rate,
         "GBP" => *num,
         _ => 0.0,
     };
@@ -126,6 +144,8 @@ fn convert_from_cad(to_currency: &str, num: &f32) -> f32 {
     let cny_to_cad_rate = 5.33268;
     let aud_to_cad_rate = 1.12293;
     let chf_to_cad_rate = 0.6521;
+    let sek_to_cad_rate = 7.60548;
+	let inr_to_cad_rate = 61.3309;
 
     let amount: f32 = match to_currency {
         "USD" => *num * usd_to_cad_rate,
@@ -135,6 +155,8 @@ fn convert_from_cad(to_currency: &str, num: &f32) -> f32 {
         "CNY" => *num * cny_to_cad_rate,
         "AUD" => *num * aud_to_cad_rate,
         "CHF" => *num * chf_to_cad_rate,
+        "SEK" => *num * sek_to_cad_rate,
+		"INR" => *num * inr_to_cad_rate,
         "CAD" => *num,
         _ => 0.0,
     };
@@ -150,6 +172,8 @@ fn convert_from_cny(to_currency: &str, num: &f32) -> f32 {
     let cad_to_cny_rate = 0.18745;
     let aud_to_cny_rate = 0.21052;
     let chf_to_cny_rate = 0.12225;
+    let sek_to_cny_rate = 1.42581;
+	let inr_to_cny_rate = 11.4978;
 
     let amount: f32 = match to_currency {
         "USD" => *num * usd_to_cny_rate,
@@ -159,6 +183,8 @@ fn convert_from_cny(to_currency: &str, num: &f32) -> f32 {
         "CAD" => *num * cad_to_cny_rate,
         "AUD" => *num * aud_to_cny_rate,
         "CHF" => *num * chf_to_cny_rate,
+        "SEK" => *num * sek_to_cny_rate,
+		"INR" => *num * inr_to_cny_rate,
         "CNY" => *num,
         _ => 0.0,
     };
@@ -174,6 +200,8 @@ fn convert_from_aud(to_currency: &str, num: &f32) -> f32 {
     let cad_to_aud_rate = 0.89023;
     let cny_to_aud_rate = 4.74799;
     let chf_to_aud_rate = 0.5806;
+    let sek_to_aud_rate = 6.7716;
+	let inr_to_aud_rate = 54.6065;
 
     let amount: f32 = match to_currency {
         "USD" => *num * usd_to_aud_rate,
@@ -183,6 +211,8 @@ fn convert_from_aud(to_currency: &str, num: &f32) -> f32 {
         "CAD" => *num * cad_to_aud_rate,
         "CNY" => *num * cny_to_aud_rate,
         "CHF" => *num * chf_to_aud_rate,
+        "SEK" => *num * sek_to_aud_rate,
+		"INR" => *num * inr_to_aud_rate,
         "AUD" => *num,
         _ => 0.0,
     };
@@ -198,6 +228,8 @@ fn convert_from_chf(to_currency: &str, num: &f32) -> f32 {
 	let cad_to_chf_rate = 1.53302;
 	let aud_to_chf_rate = 1.72172;
 	let cny_to_chf_rate = 8.17625;
+	let sek_to_chf_rate = 11.661;
+	let inr_to_chf_rate = 94.0347;
 
 	let amount: f32 = match to_currency {
         "USD" => *num * usd_to_chf_rate,
@@ -207,7 +239,65 @@ fn convert_from_chf(to_currency: &str, num: &f32) -> f32 {
         "CAD" => *num * cad_to_chf_rate,
         "CNY" => *num * cny_to_chf_rate,
         "AUD" => *num * aud_to_chf_rate,
+        "SEK" => *num * sek_to_chf_rate,
+		"INR" => *num * inr_to_chf_rate,
         "CHF" => *num,
+        _ => 0.0,
+    };
+
+    amount
+}
+
+fn convert_from_sek(to_currency: &str, num: &f32) -> f32 {
+	let gbp_to_sek_rate = 0.07631;
+	let eur_to_sek_rate = 0.08925;
+	let jpy_to_sek_rate = 14.4338;
+	let usd_to_sek_rate = 0.0974;
+	let cad_to_sek_rate = 0.1314;
+	let aud_to_sek_rate = 0.14758;
+	let cny_to_sek_rate = 0.70083;
+	let chf_to_sek_rate = 0.0857;
+	let inr_to_sek_rate = 8.06022;
+
+	let amount: f32 = match to_currency {
+        "USD" => *num * usd_to_sek_rate,
+        "EUR" => *num * eur_to_sek_rate,
+        "GBP" => *num * gbp_to_sek_rate,
+        "JPY" => *num * jpy_to_sek_rate,
+        "CAD" => *num * cad_to_sek_rate,
+        "CNY" => *num * cny_to_sek_rate,
+        "AUD" => *num * aud_to_sek_rate,
+        "CHF" => *num * chf_to_sek_rate,
+        "INR" => *num * inr_to_sek_rate,
+        "SEK" => *num,
+        _ => 0.0,
+    };
+
+    amount
+}
+
+fn convert_from_inr(to_currency: &str, num: &f32) -> f32 {
+	let gbp_to_inr_rate = 0.00947;
+	let eur_to_inr_rate = 0.01107;
+	let jpy_to_inr_rate = 1.79059;
+	let usd_to_inr_rate = 0.01208;
+	let cad_to_inr_rate = 0.0163;
+	let aud_to_inr_rate = 0.01831;
+	let cny_to_inr_rate = 0.08694;
+	let chf_to_inr_rate = 0.01063;
+	let sek_to_inr_rate = 0.124;
+
+	let amount: f32 = match to_currency {
+        "USD" => *num * usd_to_inr_rate,
+        "EUR" => *num * eur_to_inr_rate,
+        "GBP" => *num * gbp_to_inr_rate,
+        "JPY" => *num * jpy_to_inr_rate,
+        "CAD" => *num * cad_to_inr_rate,
+        "CNY" => *num * cny_to_inr_rate,
+        "AUD" => *num * aud_to_inr_rate,
+        "CHF" => *num * chf_to_inr_rate,
+        "SEK" => *num * sek_to_inr_rate,
+        "INR" => *num,
         _ => 0.0,
     };
 
@@ -334,6 +424,38 @@ pub fn dave_currency_conv(
 		},
 		"CHF" => {
 			match Currency::from_code("CHF") {
+				Some(currency_code) => {
+					println!("##==> {} {}", amount, currency_code.name());
+					println!("##==> {}{}", currency_code.symbol(), amount);
+					println!("##==> The {} is in use by:", currency_code.name());
+					currency_code.used_by().iter().fold(true, |first, nation| {
+						if !first { print!(", "); }
+						print!("{}", nation.name());
+						false
+					});
+					println!("\n##==> Converting to {} ...", to_currency);
+				},
+				_ => {},
+			}
+		},
+		"SEK" => {
+			match Currency::from_code("SEK") {
+				Some(currency_code) => {
+					println!("##==> {} {}", amount, currency_code.name());
+					println!("##==> {}{}", currency_code.symbol(), amount);
+					println!("##==> The {} is in use by:", currency_code.name());
+					currency_code.used_by().iter().fold(true, |first, nation| {
+						if !first { print!(", "); }
+						print!("{}", nation.name());
+						false
+					});
+					println!("\n##==> Converting to {} ...", to_currency);
+				},
+				_ => {},
+			}
+		},
+		"INR" => {
+			match Currency::from_code("INR") {
 				Some(currency_code) => {
 					println!("##==> {} {}", amount, currency_code.name());
 					println!("##==> {}{}", currency_code.symbol(), amount);
