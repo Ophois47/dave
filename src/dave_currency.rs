@@ -23,6 +23,8 @@ fn match_from_currency(from_currency: &str, to_currency: &str, num: &f32) -> f32
 		"KRW" => convert_from_krw(&to_currency, &num),
 		"NOK" => convert_from_nok(&to_currency, &num),
 		"NZD" => convert_from_nzd(&to_currency, &num),
+		"RUB" => convert_from_rub(&to_currency, &num),
+		"BRL" => convert_from_brl(&to_currency, &num),
 		_ => 0.0,
 	}
 }
@@ -40,6 +42,8 @@ fn convert_from_usd(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_usd_rate = 1326.82;
 	let nok_to_usd_rate = 10.4495;
 	let nzd_to_usd_rate = 1.62381;
+	let rub_to_usd_rate = 90.7754;
+	let brl_to_usd_rate = 4.9548;
 
 	let amount: f32 = match to_currency {
 		"EUR" => *num * eur_to_usd_rate,
@@ -54,6 +58,8 @@ fn convert_from_usd(to_currency: &str, num: &f32) -> f32 {
 		"KRW" => *num * krw_to_usd_rate,
 		"NOK" => *num * nok_to_usd_rate,
 		"NZD" => *num * nzd_to_usd_rate,
+		"RUB" => *num * rub_to_usd_rate,
+		"BRL" => *num * brl_to_usd_rate,
 		"USD" => *num,
 		_ => 0.0,
 	};
@@ -74,6 +80,8 @@ fn convert_from_jpy(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_jpy_rate = 8.95286;
 	let nok_to_jpy_rate = 0.07051;
 	let nzd_to_jpy_rate = 0.01096;
+	let rub_to_jpy_rate = 0.61585;
+	let brl_to_jpy_rate = 0.03361;
 
 	let amount: f32 = match to_currency {
 		"USD" => *num * usd_to_jpy_rate,
@@ -88,6 +96,8 @@ fn convert_from_jpy(to_currency: &str, num: &f32) -> f32 {
 		"KRW" => *num * krw_to_jpy_rate,
 		"NOK" => *num * nok_to_jpy_rate,
 		"NZD" => *num * nzd_to_jpy_rate,
+		"RUB" => *num * rub_to_jpy_rate,
+		"BRL" => *num * brl_to_jpy_rate,
 		"JPY" => *num,
 		_ => 0.0,
 	};
@@ -108,6 +118,8 @@ fn convert_from_eur(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_eur_rate = 1447.93;
 	let nok_to_eur_rate = 11.4038;
 	let nzd_to_eur_rate = 1.77203;
+	let rub_to_eur_rate = 99.3225;
+	let brl_to_eur_rate = 5.42133;
 
     let amount: f32 = match to_currency {
         "USD" => *num * usd_to_eur_rate,
@@ -122,6 +134,8 @@ fn convert_from_eur(to_currency: &str, num: &f32) -> f32 {
 		"KRW" => *num * krw_to_eur_rate,
 		"NOK" => *num * nok_to_eur_rate,
 		"NZD" => *num * nzd_to_eur_rate,
+		"RUB" => *num * rub_to_eur_rate,
+		"BRL" => *num * brl_to_eur_rate,
         "EUR" => *num,
         _ => 0.0,
     };
@@ -142,6 +156,8 @@ fn convert_from_gbp(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_gbp_rate = 1693.37;
 	let nok_to_gbp_rate = 13.3363;
 	let nzd_to_gbp_rate = 2.07241;
+	let rub_to_gbp_rate = 116.499;
+	let brl_to_gbp_rate = 6.35887;
 
     let amount: f32 = match to_currency {
         "USD" => *num * usd_to_gbp_rate,
@@ -156,6 +172,8 @@ fn convert_from_gbp(to_currency: &str, num: &f32) -> f32 {
 		"KRW" => *num * krw_to_gbp_rate,
 		"NOK" => *num * nok_to_gbp_rate,
 		"NZD" => *num * nzd_to_gbp_rate,
+		"RUB" => *num * rub_to_gbp_rate,
+		"BRL" => *num * brl_to_gbp_rate,
         "GBP" => *num,
         _ => 0.0,
     };
@@ -176,6 +194,8 @@ fn convert_from_cad(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_cad_rate = 983.387;
 	let nok_to_cad_rate = 7.74479;
 	let nzd_to_cad_rate = 1.2035;
+	let rub_to_cad_rate = 67.4361;
+	let brl_to_cad_rate = 3.68087;
 
     let amount: f32 = match to_currency {
         "USD" => *num * usd_to_cad_rate,
@@ -190,6 +210,8 @@ fn convert_from_cad(to_currency: &str, num: &f32) -> f32 {
 		"KRW" => *num * krw_to_cad_rate,
 		"NOK" => *num * nok_to_cad_rate,
 		"NZD" => *num * nzd_to_cad_rate,
+		"RUB" => *num * rub_to_cad_rate,
+		"BRL" => *num * brl_to_cad_rate,
         "CAD" => *num,
         _ => 0.0,
     };
@@ -210,6 +232,8 @@ fn convert_from_cny(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_cny_rate = 184.357;
 	let nok_to_cny_rate = 1.45192;
 	let nzd_to_cny_rate = 0.22562;
+	let rub_to_cny_rate = 12.6249;
+	let brl_to_cny_rate = 0.6891;
 
     let amount: f32 = match to_currency {
         "USD" => *num * usd_to_cny_rate,
@@ -224,6 +248,8 @@ fn convert_from_cny(to_currency: &str, num: &f32) -> f32 {
 		"KRW" => *num * krw_to_cny_rate,
 		"NOK" => *num * nok_to_cny_rate,
 		"NZD" => *num * nzd_to_cny_rate,
+		"RUB" => *num * rub_to_cny_rate,
+		"BRL" => *num * brl_to_cny_rate,
         "CNY" => *num,
         _ => 0.0,
     };
@@ -244,6 +270,8 @@ fn convert_from_aud(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_aud_rate = 875.567;
 	let nok_to_aud_rate = 6.89564;
 	let nzd_to_aud_rate = 1.07165;
+	let rub_to_aud_rate = 60.1816;
+	let brl_to_aud_rate = 3.2849;
 
     let amount: f32 = match to_currency {
         "USD" => *num * usd_to_aud_rate,
@@ -258,6 +286,8 @@ fn convert_from_aud(to_currency: &str, num: &f32) -> f32 {
 		"KRW" => *num * krw_to_aud_rate,
 		"NOK" => *num * nok_to_aud_rate,
 		"NZD" => *num * nzd_to_aud_rate,
+		"RUB" => *num * rub_to_aud_rate,
+		"BRL" => *num * brl_to_aud_rate,
         "AUD" => *num,
         _ => 0.0,
     };
@@ -278,6 +308,8 @@ fn convert_from_chf(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_chf_rate = 1507.76;
 	let nok_to_chf_rate = 11.8746;
 	let nzd_to_chf_rate = 1.84526;
+	let rub_to_chf_rate = 103.507;
+	let brl_to_chf_rate = 5.64971;
 
 	let amount: f32 = match to_currency {
         "USD" => *num * usd_to_chf_rate,
@@ -292,6 +324,8 @@ fn convert_from_chf(to_currency: &str, num: &f32) -> f32 {
 		"KRW" => *num * krw_to_chf_rate,
 		"NOK" => *num * nok_to_chf_rate,
 		"NZD" => *num * nzd_to_chf_rate,
+		"RUB" => *num * rub_to_chf_rate,
+		"BRL" => *num * brl_to_chf_rate,
         "CHF" => *num,
         _ => 0.0,
     };
@@ -312,6 +346,8 @@ fn convert_from_sek(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_sek_rate = 129.239;
 	let nok_to_sek_rate = 1.01783;
 	let nzd_to_sek_rate = 0.15817;
+	let rub_to_sek_rate = 8.88339;
+	let brl_to_sek_rate = 0.48488;
 
 	let amount: f32 = match to_currency {
         "USD" => *num * usd_to_sek_rate,
@@ -326,6 +362,8 @@ fn convert_from_sek(to_currency: &str, num: &f32) -> f32 {
         "KRW" => *num * krw_to_sek_rate,
 		"NOK" => *num * nok_to_sek_rate,
 		"NZD" => *num * nzd_to_sek_rate,
+		"RUB" => *num * rub_to_sek_rate,
+		"BRL" => *num * brl_to_sek_rate,
         "SEK" => *num,
         _ => 0.0,
     };
@@ -346,6 +384,8 @@ fn convert_from_inr(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_inr_rate = 16.0327;
 	let nok_to_inr_rate = 0.12627;
 	let nzd_to_inr_rate = 0.01962;
+	let rub_to_inr_rate = 1.09715;
+	let brl_to_inr_rate = 0.05989;
 
 	let amount: f32 = match to_currency {
         "USD" => *num * usd_to_inr_rate,
@@ -360,6 +400,8 @@ fn convert_from_inr(to_currency: &str, num: &f32) -> f32 {
         "KRW" => *num * krw_to_inr_rate,
 		"NOK" => *num * nok_to_inr_rate,
 		"NZD" => *num * nzd_to_inr_rate,
+		"RUB" => *num * rub_to_inr_rate,
+		"BRL" => *num * brl_to_inr_rate,
         "INR" => *num,
         _ => 0.0,
     };
@@ -380,6 +422,8 @@ fn convert_from_krw(to_currency: &str, num: &f32) -> f32 {
 	let inr_to_krw_rate = 0.0623;
 	let nok_to_krw_rate = 0.00787;
 	let nzd_to_krw_rate = 0.00122;
+	let rub_to_krw_rate = 0.06878;
+	let brl_to_krw_rate = 0.00375;
 
 	let amount: f32 = match to_currency {
         "USD" => *num * usd_to_krw_rate,
@@ -394,6 +438,8 @@ fn convert_from_krw(to_currency: &str, num: &f32) -> f32 {
         "INR" => *num * inr_to_krw_rate,
 		"NOK" => *num * nok_to_krw_rate,
 		"NZD" => *num * nzd_to_krw_rate,
+		"RUB" => *num * rub_to_krw_rate,
+		"BRL" => *num * brl_to_krw_rate,
         "KRW" => *num,
         _ => 0.0,
     };
@@ -414,6 +460,8 @@ fn convert_from_nok(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_nok_rate = 126.923;
 	let inr_to_nok_rate = 7.91578;
 	let nzd_to_nok_rate = 0.15533;
+	let rub_to_nok_rate = 8.72469;
+	let brl_to_nok_rate = 0.47622;
 
 	let amount: f32 = match to_currency {
         "USD" => *num * usd_to_nok_rate,
@@ -428,6 +476,8 @@ fn convert_from_nok(to_currency: &str, num: &f32) -> f32 {
         "KRW" => *num * krw_to_nok_rate,
 		"INR" => *num * inr_to_nok_rate,
 		"NZD" => *num * nzd_to_nok_rate,
+		"RUB" => *num * rub_to_nok_rate,
+		"BRL" => *num * brl_to_nok_rate,
         "NOK" => *num,
         _ => 0.0,
     };
@@ -448,6 +498,8 @@ fn convert_from_nzd(to_currency: &str, num: &f32) -> f32 {
 	let krw_to_nzd_rate = 816.913;
 	let nok_to_nzd_rate = 6.4337;
 	let inr_to_nzd_rate = 50.9484;
+	let rub_to_nzd_rate = 56.0867;
+	let brl_to_nzd_rate = 3.06139;
 
 	let amount: f32 = match to_currency {
         "USD" => *num * usd_to_nzd_rate,
@@ -462,7 +514,85 @@ fn convert_from_nzd(to_currency: &str, num: &f32) -> f32 {
         "INR" => *num * inr_to_nzd_rate,
         "KRW" => *num * krw_to_nzd_rate,
         "NOK" => *num * nok_to_nzd_rate,
+        "RUB" => *num * rub_to_nzd_rate,
+        "BRL" => *num * brl_to_nzd_rate,
         "NZD" => *num,
+        _ => 0.0,
+    };
+
+    amount
+}
+
+fn convert_from_rub(to_currency: &str, num: &f32) -> f32 {
+	let gbp_to_rub_rate = 0.00858;
+	let eur_to_rub_rate = 0.01006;
+	let jpy_to_rub_rate = 1.62277;
+	let usd_to_rub_rate = 0.01101;
+	let cad_to_rub_rate = 0.01482;
+	let aud_to_rub_rate = 0.0166;
+	let cny_to_rub_rate = 0.07915;
+	let chf_to_rub_rate = 0.00965;
+	let sek_to_rub_rate = 0.11246;
+	let krw_to_rub_rate = 14.5132;
+	let nok_to_rub_rate = 0.11451;
+	let inr_to_rub_rate = 0.91091;
+	let nzd_to_rub_rate = 0.01782;
+	let brl_to_rub_rate = 0.05456;
+
+	let amount: f32 = match to_currency {
+        "USD" => *num * usd_to_rub_rate,
+        "EUR" => *num * eur_to_rub_rate,
+        "GBP" => *num * gbp_to_rub_rate,
+        "JPY" => *num * jpy_to_rub_rate,
+        "CAD" => *num * cad_to_rub_rate,
+        "CNY" => *num * cny_to_rub_rate,
+        "AUD" => *num * aud_to_rub_rate,
+        "CHF" => *num * chf_to_rub_rate,
+        "SEK" => *num * sek_to_rub_rate,
+        "INR" => *num * inr_to_rub_rate,
+        "KRW" => *num * krw_to_rub_rate,
+        "NOK" => *num * nok_to_rub_rate,
+        "NZD" => *num * nzd_to_rub_rate,
+        "BRL" => *num * brl_to_rub_rate,
+        "RUB" => *num,
+        _ => 0.0,
+    };
+
+    amount
+}
+
+fn convert_from_brl(to_currency: &str, num: &f32) -> f32 {
+	let gbp_to_brl_rate = 0.15712;
+	let eur_to_brl_rate = 0.1843;
+	let jpy_to_brl_rate = 29.7238;
+	let usd_to_brl_rate = 0.20168;
+	let cad_to_brl_rate = 0.27143;
+	let aud_to_brl_rate = 0.30412;
+	let cny_to_brl_rate = 1.44972;
+	let chf_to_brl_rate = 0.17684;
+	let sek_to_brl_rate = 2.05999;
+	let krw_to_brl_rate = 265.833;
+	let nok_to_brl_rate = 2.09746;
+	let inr_to_brl_rate = 16.6849;
+	let nzd_to_brl_rate = 0.32634;
+	let rub_to_brl_rate = 18.3077;
+
+	let amount: f32 = match to_currency {
+        "USD" => *num * usd_to_brl_rate,
+        "EUR" => *num * eur_to_brl_rate,
+        "GBP" => *num * gbp_to_brl_rate,
+        "JPY" => *num * jpy_to_brl_rate,
+        "CAD" => *num * cad_to_brl_rate,
+        "CNY" => *num * cny_to_brl_rate,
+        "AUD" => *num * aud_to_brl_rate,
+        "CHF" => *num * chf_to_brl_rate,
+        "SEK" => *num * sek_to_brl_rate,
+        "INR" => *num * inr_to_brl_rate,
+        "KRW" => *num * krw_to_brl_rate,
+        "NOK" => *num * nok_to_brl_rate,
+        "NZD" => *num * nzd_to_brl_rate,
+        "RUB" => *num * rub_to_brl_rate,
+        "BRL" => *num,
         _ => 0.0,
     };
 
@@ -669,6 +799,38 @@ pub fn dave_currency_conv(
 		},
 		"NZD" => {
 			match Currency::from_code("NZD") {
+				Some(currency_code) => {
+					println!("##==> {} {}", amount, currency_code.name());
+					println!("##==> {}{}", currency_code.symbol(), amount);
+					println!("##==> The {} is in use by:", currency_code.name());
+					currency_code.used_by().iter().fold(true, |first, nation| {
+						if !first { print!(", "); }
+						print!("{}", nation.name());
+						false
+					});
+					println!("\n##==> Converting to {} ...", to_currency);
+				},
+				_ => {},
+			}
+		},
+		"RUB" => {
+			match Currency::from_code("RUB") {
+				Some(currency_code) => {
+					println!("##==> {} {}", amount, currency_code.name());
+					println!("##==> {}{}", currency_code.symbol(), amount);
+					println!("##==> The {} is in use by:", currency_code.name());
+					currency_code.used_by().iter().fold(true, |first, nation| {
+						if !first { print!(", "); }
+						print!("{}", nation.name());
+						false
+					});
+					println!("\n##==> Converting to {} ...", to_currency);
+				},
+				_ => {},
+			}
+		},
+		"BRL" => {
+			match Currency::from_code("BRL") {
 				Some(currency_code) => {
 					println!("##==> {} {}", amount, currency_code.name());
 					println!("##==> {}{}", currency_code.symbol(), amount);
