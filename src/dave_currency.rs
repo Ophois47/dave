@@ -1325,6 +1325,20 @@ pub fn dave_currency_conv(
 		},
 	}
 
+	let from_currency_symbol = match Currency::from_code(from_currency) {
+		Some(currency_code) => {
+			Some(currency_code.symbol())
+		},
+		_ => None,
+	};
+
+	let to_currency_symbol = match Currency::from_code(to_currency) {
+		Some(currency_code) => {
+			Some(currency_code.symbol())
+		},
+		_ => None,
+	};
+
 	let result = match_from_currency(from_currency, to_currency, &amount);
 	let exchange_result = ExchangeResult {
         original_currency: String::from(&from_currency.trim().to_uppercase()),
@@ -1334,9 +1348,11 @@ pub fn dave_currency_conv(
     };
 
 	println!(
-		"##==>> {} {} was converted to {} {}",
+		"##==>> {}{} {} was converted to {}{} {}",
+		from_currency_symbol.unwrap(),
 		exchange_result.original_amount,
 		exchange_result.original_currency,
+		to_currency_symbol.unwrap(),
 		exchange_result.final_amount,
 		exchange_result.final_currency,
 	);
