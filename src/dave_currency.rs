@@ -35,7 +35,7 @@ fn match_from_currency(from_currency: &str, to_currency: &str, num: &f32) -> f32
 }
 
 fn convert_from_usd(to_currency: &str, num: &f32) -> f32 {
-	let gbp_to_usd_rate = 0.78343;
+	let gbp_to_usd_rate = 0.77764;
 	let eur_to_usd_rate = 0.91623;
 	let jpy_to_usd_rate = 148.184;
 	let cad_to_usd_rate = 1.34905;
@@ -131,7 +131,7 @@ fn convert_from_jpy(to_currency: &str, num: &f32) -> f32 {
 }
 
 fn convert_from_eur(to_currency: &str, num: &f32) -> f32 {
-    let gbp_to_eur_rate = 0.85499;
+    let gbp_to_eur_rate = 0.85061;
     let usd_to_eur_rate = 1.09128;
     let jpy_to_eur_rate = 161.719;
     let cad_to_eur_rate = 1.47219;
@@ -227,7 +227,7 @@ fn convert_from_gbp(to_currency: &str, num: &f32) -> f32 {
 }
 
 fn convert_from_cad(to_currency: &str, num: &f32) -> f32 {
-    let gbp_to_cad_rate = 0.58065;
+    let gbp_to_cad_rate = 0.5764;
     let eur_to_cad_rate = 0.67907;
     let jpy_to_cad_rate = 109.828;
     let usd_to_cad_rate = 0.74116;
@@ -611,25 +611,25 @@ fn convert_from_nok(to_currency: &str, num: &f32) -> f32 {
 }
 
 fn convert_from_nzd(to_currency: &str, num: &f32) -> f32 {
-	let gbp_to_nzd_rate = 0.00947;
-	let eur_to_nzd_rate = 0.01107;
-	let jpy_to_nzd_rate = 1.79059;
-	let usd_to_nzd_rate = 0.01208;
-	let cad_to_nzd_rate = 0.0163;
-	let aud_to_nzd_rate = 0.01831;
-	let cny_to_nzd_rate = 0.08694;
-	let chf_to_nzd_rate = 0.01063;
-	let sek_to_nzd_rate = 0.124;
-	let krw_to_nzd_rate = 816.913;
-	let nok_to_nzd_rate = 6.4337;
-	let inr_to_nzd_rate = 50.9484;
-	let rub_to_nzd_rate = 56.0867;
+	let gbp_to_nzd_rate = 0.48015;
+	let eur_to_nzd_rate = 0.56441;
+	let jpy_to_nzd_rate = 90.7933;
+	let usd_to_nzd_rate = 0.61745;
+	let cad_to_nzd_rate = 0.83245;
+	let aud_to_nzd_rate = 0.93195;
+	let cny_to_nzd_rate = 4.43649;
+	let chf_to_nzd_rate = 0.54182;
+	let sek_to_nzd_rate = 6.30444;
+	let krw_to_nzd_rate = 811.957;
+	let nok_to_nzd_rate = 6.43554;
+	let inr_to_nzd_rate = 51.0931;
+	let rub_to_nzd_rate = 56.0454;
 	let brl_to_nzd_rate = 3.06139;
 	let sar_to_nzd_rate = 2.31566;
 	let ils_to_nzd_rate = 2.20578;
 	let dkk_to_nzd_rate = 4.20873;
 	let pln_to_nzd_rate = 2.42876;
-	let mxn_to_nzd_rate = 10.406;
+	let mxn_to_nzd_rate = 10.3772;
 
 	let amount: f32 = match to_currency {
         "USD" => *num * usd_to_nzd_rate,
@@ -1334,11 +1334,11 @@ pub fn dave_currency_conv(
     };
 
 	println!(
-		"{} {} was converted to {} {}",
-		exchange_result.original_currency,
+		"##==>> {} {} was converted to {} {}",
 		exchange_result.original_amount,
-		exchange_result.final_currency,
+		exchange_result.original_currency,
 		exchange_result.final_amount,
+		exchange_result.final_currency,
 	);
 	
 	Ok(())
