@@ -9,6 +9,7 @@ dave features the greatest text based adventure game to have ever been written w
 dave allows you to encrypt and decrypt files with a passcode using 'crypt'
 dave lets you calculate your one-rep max at the gym with 'drm'
 dave allows you to calculate the difference in world currencies with 'dcurrency'
+dave allows you to budget your income with 'budget'
 
 To Install Dave:
 ===================

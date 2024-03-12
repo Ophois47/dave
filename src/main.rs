@@ -16,6 +16,7 @@ use std::process;
 use std::str::FromStr;
 use std::time::Instant;
 use davelib::config::*;
+use davelib::dave_budget::*;
 use davelib::dave_currency::dave_currency_conv;
 use davelib::dave_encrypt::*;
 use davelib::dave_grep;
@@ -111,6 +112,8 @@ fn argument_parser() -> ArgMatches {
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
             .about("This is a text based adventure game by Dave"))
+        .subcommand(Command::new("budget")
+            .about("Budget your income and become WEALTHY. Thanks to Dave"))
         .subcommand(Command::new("dcurrency")
             .about("Dave's implementation of a currency converter. Current as of 3-9-2024")
             .arg(Arg::new("option")
@@ -246,6 +249,9 @@ fn main() {
             if let Err(error) = daves_perceptron() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
+        },
+        Some(("budget", _matches)) => {
+            budget_main();
         },
         Some(("dave-land", _matches)) => {
             if let Err(error) = dave_game_loop() {
