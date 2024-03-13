@@ -131,6 +131,13 @@ fn argument_parser() -> ArgMatches {
                 .num_args(1)
                 .value_parser(value_parser!(f64))
                 .help("Add an amount of income to your budget"))
+            .arg(Arg::new("expense")
+                .long("expense")
+                .short('e')
+                .num_args(2)
+                .value_names(["tag", "amount"])
+                .value_parser(value_parser!(String))
+                .help("Subtract an expense from your budget. Pass a tag and amount"))
             .arg(Arg::new("summary")
                 .long("summary")
                 .short('s')
@@ -334,6 +341,18 @@ fn main() {
                 }
                 println!("##==>> Budget Updated!");
             }
+
+            let mut values = matches.get_many::<String>("expense").unwrap().map(|s| s.as_str());
+            let tag = match values.next() {
+                Some(tag) => tag,
+                None => { std::process::exit(1) },
+            };
+            let amount = match values.next() {
+                Some(amount) => amount,
+                None => { std::process::exit(1) },
+            };
+            println!("Expense: {}, Amount: {}", tag, amount);
+            
             if matches.get_flag("summary") {
                 // Get JSON String From Budget File
                 let budget_file_string: String = fs::read_to_string(budget_path).unwrap().parse().unwrap();
