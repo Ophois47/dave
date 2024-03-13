@@ -15,6 +15,9 @@ pub const ROOT_PATH: &str = "./dave_conf";
 // Default location of output file
 pub const OUTPUT_FILE: &str = "dave.out";
 
+// Default location of budget file
+pub const BUDGET_FILE: &str = "dave.budget";
+
 lazy_static! {
 	pub static ref CONFIG: RwLock<DaveConfig> = {
 		RwLock::new(DaveConfig::load())
@@ -27,6 +30,7 @@ lazy_static! {
 		"config_path": find_config_path(),
 		"root_path": find_root_path(),
 		"output_file": find_output_file(),
+		"budget_file": find_budget_file(),
 		"hash_type": HashType::Sha256,
 	});
 }
@@ -42,6 +46,15 @@ pub fn find_config_path() -> PathBuf {
 	config_path
 }
 
+// Determines Root Path
+pub fn find_root_path() -> PathBuf {
+	let mut root_path = PathBuf::new();
+	let dave_home = ROOT_PATH.to_string();
+
+	root_path.push(dave_home);
+	root_path
+}
+
 // Determines Appropriate Path to Output File
 pub fn find_output_file() -> PathBuf {
 	let mut output_file_path = PathBuf::new();
@@ -53,13 +66,15 @@ pub fn find_output_file() -> PathBuf {
 	output_file_path
 }
 
-// Determines Root Path
-pub fn find_root_path() -> PathBuf {
-	let mut root_path = PathBuf::new();
+// Determines Appropriate Path to Budget File
+pub fn find_budget_file() -> PathBuf {
+	let mut output_file_path = PathBuf::new();
 	let dave_home = ROOT_PATH.to_string();
 
-	root_path.push(dave_home);
-	root_path
+	output_file_path.push(dave_home);
+	output_file_path.push("var/");
+	output_file_path.push(BUDGET_FILE);
+	output_file_path
 }
 
 // Runtime Configuration for Dave
@@ -71,6 +86,8 @@ pub struct DaveConfig {
 	root_path: PathBuf,
 	// Output File Path
 	output_file: PathBuf,
+	// Budget File Path
+	budget_file: PathBuf,
 	// What Hashing Algorithm Dave Will Use
 	pub hash_type: HashType,
 }
@@ -138,6 +155,14 @@ impl DaveConfig {
 
 	pub fn output_file(&self) -> PathBuf {
 		self.output_file.clone()
+	}
+
+	pub fn set_budget_path(&mut self, path: PathBuf) {
+		self.budget_file = path;
+	}
+
+	pub fn budget_path(&self) -> PathBuf {
+		self.budget_file.clone()
 	}
 
 	pub fn set_hash_type(&mut self, hash_type: HashType) {

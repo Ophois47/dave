@@ -10,13 +10,14 @@ use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use std::borrow::BorrowMut;
 use std::env;
-use std::fs::OpenOptions;
+use std::fs::{self, OpenOptions};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process;
 use std::str::FromStr;
 use std::time::Instant;
 use davelib::config::*;
-use davelib::dave_budget::*;
+use davelib::dave_budget::DaveBudget;
 use davelib::dave_currency::dave_currency_conv;
 use davelib::dave_encrypt::*;
 use davelib::dave_grep;
@@ -45,6 +46,11 @@ fn argument_parser() -> ArgMatches {
                 .value_name("path")
                 .num_args(1)
                 .help("Point to a new location for the configuration file"))
+            .arg(Arg::new("bpath")
+                .long("bpath")
+                .value_name("budget path")
+                .num_args(1)
+                .help("Point to a new location for the budget file"))
             .arg(Arg::new("save")
                 .long("save")
                 .action(ArgAction::SetTrue)
@@ -113,7 +119,23 @@ fn argument_parser() -> ArgMatches {
         .subcommand(Command::new("dave-land")
             .about("This is a text based adventure game by Dave"))
         .subcommand(Command::new("budget")
-            .about("Budget your income and become WEALTHY. Thanks to Dave"))
+            .about("Budget your income and become WEALTHY. Thanks to Dave")
+            .arg(Arg::new("new")
+                .long("new")
+                .short('n')
+                .action(ArgAction::SetTrue)
+                .help("Budget new will create a new budget. Wiping the old one"))
+            .arg(Arg::new("income")
+                .long("income")
+                .short('i')
+                .num_args(1)
+                .value_parser(value_parser!(f64))
+                .help("Add an amount of income to your budget"))
+            .arg(Arg::new("summary")
+                .long("summary")
+                .short('s')
+                .action(ArgAction::SetTrue)
+                .help("Budget summary will print a summary of the current budget to the screen")))
         .subcommand(Command::new("dcurrency")
             .about("Dave's implementation of a currency converter. Current as of 3-9-2024")
             .arg(Arg::new("option")
@@ -172,6 +194,10 @@ fn update_config<'a>(matches: &ArgMatches) {
         let config_path_buf = PathBuf::from(config_path);
         config.set_config_path(config_path_buf);
     }
+    if let Some(budget_path) = matches.get_one::<String>("bpath") {
+        let budget_path_buf = PathBuf::from(budget_path);
+        config.set_budget_path(budget_path_buf);
+    }
 
     // Deal With Config Arguments That are Flags or Bools
 
@@ -225,11 +251,10 @@ fn main() {
     // Setup Files Necessary for Output
     let mut file_options = OpenOptions::new();
     file_options.write(true);
-    file_options.append(true);
     file_options.create(true);
 
     // Create Files That Will Have Important Data Written to Them
-    let _output_file = match file_options.open(find_output_file()) {
+    let _output_file = match file_options.append(true).open(find_output_file()) {
         Ok(output_file) => output_file,
         Err(error) => {
             eprintln!("##==>>>> ERROR: {}: {}", find_output_file().display(), error);
@@ -239,6 +264,9 @@ fn main() {
 
     // Parse CLI Args
     let matches = argument_parser();
+
+    // Get Important Data From Config
+    let reader = CONFIG.read().unwrap();
 
     // Deal With Passed Subcommands and Their Arguments
     match matches.subcommand() {
@@ -250,8 +278,84 @@ fn main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
-        Some(("budget", _matches)) => {
-            budget_main();
+        Some(("budget", matches)) => {
+            let mut budget_file = match file_options.append(false).open(find_budget_file()) {
+                Ok(budget_file) => budget_file,
+                Err(error) => {
+                    eprintln!(
+                        "##==>>>> ERROR: {}: {}",
+                        find_budget_file().display(),
+                        error
+                    );
+                    return
+                }
+            };
+            let budget_path = reader.budget_path();
+
+            if matches.get_flag("new") {
+                // Remove Budget File and Create New One
+                // Until I Can Figure Out Extra Chars Problem
+                fs::remove_file(budget_path.clone()).unwrap();
+                let mut budget_file = match file_options.append(false).open(find_budget_file()) {
+                    Ok(budget_file) => budget_file,
+                    Err(error) => {
+                        eprintln!(
+                            "##==>>>> ERROR: {}: {}",
+                            find_budget_file().display(),
+                            error
+                        );
+                        return
+                    }
+                };
+                // Create New Budget Object and Write to Budget File
+                let budget = DaveBudget::new();
+                if let Err(error) = write!(budget_file, "{}", serde_json::to_string(&budget).unwrap()) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    std::process::exit(1)
+                }
+                println!("##==>> New Budget Created!");
+            }
+            if let Some(income_amount) = matches.get_one::<f64>("income") {
+                // Get JSON String From Budget File
+                let budget_file_string: String = fs::read_to_string(budget_path.clone()).unwrap().parse().unwrap();
+                // Have Serde Deserialize It Into Budget Object
+                let mut budget:DaveBudget = match serde_json::from_str(&budget_file_string) {
+                    Ok(budget) => budget,
+                    Err(error) => {
+                        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                        std::process::exit(1)
+                    },
+                };
+                // Add Income and Update by Writing to Budget File
+                budget.add_income(*income_amount);
+                if let Err(error) = write!(budget_file, "{}", serde_json::to_string(&budget).unwrap()) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    std::process::exit(1)
+                }
+                println!("##==>> Budget Updated!");
+            }
+            if matches.get_flag("summary") {
+                // Get JSON String From Budget File
+                let budget_file_string: String = fs::read_to_string(budget_path).unwrap().parse().unwrap();
+                // Have Serde Deserialize It Into Budget Object
+                let budget:DaveBudget = match serde_json::from_str(&budget_file_string) {
+                    Ok(budget) => budget,
+                    Err(error) => {
+                        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                        std::process::exit(1)
+                    },
+                };
+                println!("##==>> BUDGET: {:?}", budget);
+                // Print Budget Information to Screen From Gotten
+                // Budget Object
+                println!("##==>> Budget Income: ${}", budget.income);
+                if budget.expenses.len() > 0 {
+                    for (expense, amount) in budget.expenses {
+                        println!("##==>> Expense: {} - ${}", expense, amount);
+
+                    }
+                }
+            }
         },
         Some(("dave-land", _matches)) => {
             if let Err(error) = dave_game_loop() {

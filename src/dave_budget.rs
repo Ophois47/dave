@@ -1,19 +1,21 @@
+use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 
-struct DaveBudget {
-	income: f64,
-	expenses: HashMap<String, f64>,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DaveBudget {
+	pub income: f64,
+	pub expenses: HashMap<String, f64>,
 }
 
 impl DaveBudget {
-	fn new() -> DaveBudget {
+	pub fn new() -> DaveBudget {
 		DaveBudget {
 			income: 0.0,
 			expenses: HashMap::new(),
 		}
 	}
 
-	fn add_income(&mut self, amount: f64) {
+	pub fn add_income(&mut self, amount: f64) {
 		self.income += amount;
 	}
 
@@ -21,7 +23,7 @@ impl DaveBudget {
 		self.expenses.insert(expense_name, amount);
 	}
 
-	fn get_balance(&self) -> f64 {
+	pub fn get_balance(&self) -> f64 {
 		self.income - self.expenses.values().sum::<f64>()
 	}
 }
