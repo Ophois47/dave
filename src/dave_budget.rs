@@ -23,6 +23,10 @@ impl DaveBudget {
 		self.expenses.insert(expense_name, amount);
 	}
 
+	/*fn remove_expense(&mut self, expense_name: String, amount: f64) {
+		self.expenses.remove(&expense_name, amount);
+	}*/
+
 	pub fn get_balance(&self) -> f64 {
 		self.income - self.expenses.values().sum::<f64>()
 	}
