@@ -135,6 +135,7 @@ fn argument_parser() -> ArgMatches {
                 .long("expense")
                 .short('e')
                 .num_args(2)
+                .value_delimiter(' ')
                 .value_names(["tag", "amount"])
                 .value_parser(value_parser!(String))
                 .help("Subtract an expense from your budget. Pass a tag and amount"))
@@ -341,18 +342,33 @@ fn main() {
                 }
                 println!("##==>> Budget Updated!");
             }
-
-            let mut values = matches.get_many::<String>("expense").unwrap().map(|s| s.as_str());
-            let tag = match values.next() {
-                Some(tag) => tag,
-                None => { std::process::exit(1) },
-            };
-            let amount = match values.next() {
-                Some(amount) => amount,
-                None => { std::process::exit(1) },
-            };
-            println!("Expense: {}, Amount: {}", tag, amount);
-            
+            if let Some(mut values) = matches.get_many::<String>("expense") {
+                // Get JSON String From Budget File
+                let budget_file_string: String = fs::read_to_string(budget_path.clone()).unwrap().parse().unwrap();
+                // Have Serde Deserialize It Into Budget Object
+                let mut budget:DaveBudget = match serde_json::from_str(&budget_file_string) {
+                    Ok(budget) => budget,
+                    Err(error) => {
+                        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                        std::process::exit(1)
+                    },
+                };
+                let tag = match values.next() {
+                    Some(tag) => tag,
+                    None => { std::process::exit(1) },
+                };
+                let amount = match values.next() {
+                    Some(amount) => amount,
+                    None => { std::process::exit(1) },
+                };
+                println!("Expense: {}, Amount: {}", tag, amount);
+                budget.add_expense(String::from(tag), amount.parse::<f64>().unwrap());
+                if let Err(error) = write!(budget_file, "{}", serde_json::to_string(&budget).unwrap()) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    std::process::exit(1)
+                }
+                println!("##==>> Budget Updated!");
+            }
             if matches.get_flag("summary") {
                 // Get JSON String From Budget File
                 let budget_file_string: String = fs::read_to_string(budget_path).unwrap().parse().unwrap();
@@ -364,10 +380,10 @@ fn main() {
                         std::process::exit(1)
                     },
                 };
-                println!("##==>> BUDGET: {:?}", budget);
                 // Print Budget Information to Screen From Gotten
                 // Budget Object
-                println!("##==>> Budget Income: ${}", budget.income);
+                println!("##==>> Amount of Income: ${}", budget.income);
+                println!("##==>> Current Budget: ${}", budget.get_balance());
                 if budget.expenses.len() > 0 {
                     for (expense, amount) in budget.expenses {
                         println!("##==>> Expense: {} - ${}", expense, amount);
