@@ -25,6 +25,7 @@ use davelib::dave_grep::Config;
 use davelib::dave_guess::guess_number;
 use davelib::dave_hash::*;
 use davelib::dave_land::dave_game_loop;
+use davelib::dave_notes::*;
 use davelib::dave_perceptron::daves_perceptron;
 use davelib::dave_rep_max::dave_rep_max_calc;
 use davelib::utils::*;
@@ -118,6 +119,29 @@ fn argument_parser() -> ArgMatches {
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
             .about("This is a text based adventure game by Dave"))
+        .subcommand(Command::new("dnote")
+            .about("This is a notes keeping program")
+            .arg(Arg::new("loop")
+                .long("loop")
+                .action(ArgAction::SetTrue)
+                .help("Temporary loop until serialization or sled logic can be worked out for persistent notes database"))
+            .arg(Arg::new("add")
+                .long("add")
+                .short('a')
+                .value_parser(value_parser!(String))
+                .num_args(1)
+                .help("Add a new note"))
+            .arg(Arg::new("list")
+                .long("list")
+                .short('l')
+                .action(ArgAction::SetTrue)
+                .help("List existing notes"))
+            .arg(Arg::new("complete")
+                .long("complete")
+                .short('c')
+                .value_parser(value_parser!(String))
+                .num_args(1)
+                .help("Complete an existing note")))
         .subcommand(Command::new("budget")
             .about("Budget your income and become WEALTHY. Thanks to Dave")
             .arg(Arg::new("new")
@@ -501,6 +525,22 @@ fn main() {
                 }
             } else {
                 println!("##==> INFO! A file or path must be passed to the program. Try running 'dave crypt --help' for more information");
+            }
+        },
+        Some(("dnote", matches)) => {
+            if matches.get_flag("loop") {
+                if let Err(error) = dave_notes() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("list") {
+                println!("##==> Passed List Option");
+            }
+            if let Some(note_label) = matches.get_one::<String>("add") {
+                println!("##==> Passed Note Label: {}", note_label);
+            }
+            if let Some(note_id) = matches.get_one::<String>("complete") {
+                println!("##==> Passed Note ID: {}", note_id);
             }
         },
         Some(("hash", matches)) => {

@@ -10,6 +10,7 @@ pub mod dave_guess;
 pub mod dave_hash;
 pub mod dave_land;
 pub mod dave_land_lib;
+pub mod dave_notes;
 pub mod dave_perceptron;
 pub mod dave_rep_max;
 pub mod release;
