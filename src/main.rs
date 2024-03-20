@@ -143,7 +143,7 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("complete")
                 .long("complete")
                 .short('c')
-                .value_parser(value_parser!(String))
+                .value_parser(value_parser!(u64))
                 .num_args(1)
                 .help("Complete an existing note")))
         .subcommand(Command::new("budget")
@@ -543,7 +543,7 @@ fn main() {
             if matches.get_flag("overwrite") {
                 match db.clear() {
                     Ok(_) => {
-                        println!("##==> Database Overwritten");
+                        println!("##==> Database Overwritten Successfully");
                         return
                     },
                     Err(error) => {
@@ -553,11 +553,12 @@ fn main() {
                 }
             }
             if matches.get_flag("list") {
-                println!("##==> Listing Notes in Database ...");
-
-                let iter_db = db.iter().rev();
+                println!("##==> Current Notes:");
+                // Iterate Over Database 
+                // FIXME: so ID #'s are in Order
+                let iter_db = db.iter().values().rev();
                 for member in iter_db {
-                    if let Ok((_, ref value)) = member {
+                    if let Ok(ref value) = member {
                         let dave_note: DaveNote = bincode::deserialize(&value).unwrap();
                         let status = if dave_note.completed { "[X]" } else { "[ ]" };
                         println!("{} {} - {}", status, dave_note.id, dave_note.title);
@@ -565,12 +566,13 @@ fn main() {
                 }
             }
             if let Some(note_label) = matches.get_one::<String>("add") {
-                println!("##==> Adding Note to Database ...");
+                println!("##==> Adding Note ...");
                 let mut dave_note = DaveNote::new();
                 dave_note.title = note_label.to_string();
                 dave_note.completed = false;
 
                 // Determine ID number by counting members of database
+                // and adding 1
                 let iter_db = db.iter();
                 let mut count = 0;
                 for _ in iter_db {
@@ -586,10 +588,30 @@ fn main() {
                 if let Err(error) = DaveDatabase::update(&mut db, dave_note, &hash_value) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
-                println!("##==> Note Added to Database");
+                println!("##==> Note Added Successfully");
             }
-            if let Some(note_id) = matches.get_one::<String>("complete") {
+            if let Some(note_id) = matches.get_one::<u64>("complete") {
                 println!("##==> Passed Note ID: {}", note_id);
+                let iter_db = db.iter().values().rev();
+                for member in iter_db {
+                    if let Ok(ref value) = member {
+                        let mut dave_note: DaveNote = bincode::deserialize(&value).unwrap();
+                        if dave_note.id == *note_id {
+                            println!("##==> Found Note with ID #{} - {}!", note_id, dave_note.title);
+                            dave_note.completed = true;
+
+                            // Create New Key Value for Updated Note by Hashing Label String
+                            let mut hasher = sha2::Sha256::new();
+                            hasher.update(&dave_note.title);
+                            let hash_value = hasher.finalize().to_vec();
+
+                            if let Err(error) = DaveDatabase::update(&mut db, dave_note, &hash_value) {
+                                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                            }
+                            println!("##==> Note Updated Successfully");
+                        }
+                    }
+                }
             }
         },
         Some(("hash", matches)) => {
