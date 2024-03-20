@@ -76,13 +76,13 @@ pub fn dave_rep_max_calc(
 	println!("##==>> Your 50% Max: {} {}", fifty_percent as u16, unit_of_measurement);
 	println!();
 
-	println!("##=> 95% for 1-3 reps");
-	println!("##=> 90% for 4 reps");
-	println!("##=> 85% for 5 reps");
-	println!("##=> 80% for 6-8 reps");
-	println!("##=> 75% for 10 reps");
+	println!("##=> 95% for  1-3  reps");
+	println!("##=> 90% for   4   reps");
+	println!("##=> 85% for   5   reps");
+	println!("##=> 80% for  6-8  reps");
+	println!("##=> 75% for  10   reps");
 	println!("##=> 70% for 12-20 reps");
-	println!("##=> 50% for 20+ reps");
+	println!("##=> 50% for  20+  reps");
 
 	Ok(())
 }
