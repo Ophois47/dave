@@ -541,6 +541,7 @@ fn main() {
                 },
             };
 
+            // Clear Database and Return
             if matches.get_flag("overwrite") {
                 match db.clear() {
                     Ok(_) => {
@@ -569,7 +570,9 @@ fn main() {
             }
             if let Some(note_label) = matches.get_one::<String>("add") {
                 println!("##==> Adding Note ...");
+                // Create New Note
                 let mut dave_note = DaveNote::new();
+                // Set Known Values for New Note
                 dave_note.title = note_label.to_string();
                 dave_note.completed = false;
 
@@ -583,22 +586,27 @@ fn main() {
                 hasher.update(&note_label);
                 let hash_value = hasher.finalize().to_vec();
 
+                // Update the Database
                 if let Err(error) = DaveDatabase::update(&mut db, dave_note, &hash_value) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
                 println!("##==> Note Added Successfully");
             }
             if let Some(note_id) = matches.get_one::<u64>("complete") {
+                // Iterate Over Members of Database and Find Matching ID Number
                 let iter_db = db.iter().values();
                 for member in iter_db {
                     if let Ok(ref value) = member {
+                        // Deserialize Member Into DaveNote and Check ID #
                         let mut dave_note: DaveNote = bincode::deserialize(&value).unwrap();
+                        // If ID #'s Equal, Correct Note Found
                         if dave_note.id == *note_id {
                             println!("##==> Found Note with ID #{} - {}!", note_id, dave_note.title);
                             if dave_note.completed {
                                 println!("##==> Warning! You already did that. You're senile");
                                 std::process::exit(0)
                             }
+                            // Set Note Completion to True
                             dave_note.completed = true;
 
                             // Create New Key for Updated Note by Hashing Label String
@@ -606,6 +614,7 @@ fn main() {
                             hasher.update(&dave_note.title);
                             let hash_value = hasher.finalize().to_vec();
 
+                            // Update Database with Modified Entry
                             if let Err(error) = DaveDatabase::update(&mut db, dave_note, &hash_value) {
                                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                             }
