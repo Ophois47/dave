@@ -8,8 +8,9 @@ dave has a perceptron you can run using 'perceptron'
 dave features the greatest text based adventure game to have ever been written with 'dave-land'
 dave allows you to encrypt and decrypt files with a passcode using 'crypt'
 dave lets you calculate your one-rep max at the gym with 'drm'
-dave allows you to calculate the difference in world currencies with 'dcurrency'
+dave allows you to calculate the difference in world currencies with 'currency'
 dave allows you to budget your income with 'budget'
+dave allows you to ponder and record your own thoughts using 'note'
 
 To Install Dave:
 ===================
