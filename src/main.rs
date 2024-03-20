@@ -8,6 +8,7 @@ use clap::{
 use colored::*;
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
+use sha2::Digest;
 use std::borrow::BorrowMut;
 use std::env;
 use std::fs::{self, OpenOptions};
@@ -19,6 +20,7 @@ use std::time::Instant;
 use davelib::config::*;
 use davelib::dave_budget::DaveBudget;
 use davelib::dave_currency::dave_currency_conv;
+use davelib::dave_db::DaveDatabase;
 use davelib::dave_encrypt::*;
 use davelib::dave_grep;
 use davelib::dave_grep::Config;
@@ -119,21 +121,23 @@ fn argument_parser() -> ArgMatches {
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
             .about("This is a text based adventure game by Dave"))
-        .subcommand(Command::new("dnote")
+        .subcommand(Command::new("note")
             .about("This is a notes keeping program")
-            .arg(Arg::new("loop")
-                .long("loop")
-                .action(ArgAction::SetTrue)
-                .help("Temporary loop until serialization or sled logic can be worked out for persistent notes database"))
             .arg(Arg::new("add")
                 .long("add")
                 .short('a')
                 .value_parser(value_parser!(String))
+                .value_name("note")
                 .num_args(1)
                 .help("Add a new note"))
             .arg(Arg::new("list")
                 .long("list")
                 .short('l')
+                .action(ArgAction::SetTrue)
+                .help("List existing notes"))
+            .arg(Arg::new("overwrite")
+                .long("overwrite")
+                .short('o')
                 .action(ArgAction::SetTrue)
                 .help("List existing notes"))
             .arg(Arg::new("complete")
@@ -168,7 +172,7 @@ fn argument_parser() -> ArgMatches {
                 .short('s')
                 .action(ArgAction::SetTrue)
                 .help("Budget summary will print a summary of the current budget to the screen")))
-        .subcommand(Command::new("dcurrency")
+        .subcommand(Command::new("currency")
             .about("Dave's implementation of a currency converter. Current as of 3-9-2024")
             .arg(Arg::new("option")
                 .long("option")
@@ -411,7 +415,6 @@ fn main() {
                 if budget.expenses.len() > 0 {
                     for (expense, amount) in budget.expenses {
                         println!("##==>> Expense: {} - ${}", expense, amount);
-
                     }
                 }
             }
@@ -421,7 +424,7 @@ fn main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
-        Some(("dcurrency", matches)) => {
+        Some(("currency", matches)) => {
             if let Some(passed_amount) = matches.get_one::<f32>("amount") {
                 if let Some(passed_currency) = matches.get_one::<String>("currency") {
                     if let Some(passed_conversion) = matches.get_one::<String>("convert") {
@@ -527,17 +530,63 @@ fn main() {
                 println!("##==> INFO! A file or path must be passed to the program. Try running 'dave crypt --help' for more information");
             }
         },
-        Some(("dnote", matches)) => {
-            if matches.get_flag("loop") {
-                if let Err(error) = dave_notes() {
+        Some(("note", matches)) => {
+            // Create or Get Database
+            let mut db: sled::Db = match sled::open("./dave_conf/var/daves_notes") {
+                Ok(db) => db,
+                Err(error) => {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    std::process::exit(1)
+                },
+            };
+
+            if matches.get_flag("overwrite") {
+                match db.clear() {
+                    Ok(_) => {
+                        println!("##==> Database Overwritten");
+                        return
+                    },
+                    Err(error) => {
+                        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                        std::process::exit(1)
+                    },
                 }
             }
             if matches.get_flag("list") {
-                println!("##==> Passed List Option");
+                println!("##==> Listing Notes in Database ...");
+
+                let iter_db = db.iter().rev();
+                for member in iter_db {
+                    if let Ok((_, ref value)) = member {
+                        let dave_note: DaveNote = bincode::deserialize(&value).unwrap();
+                        let status = if dave_note.completed { "[X]" } else { "[ ]" };
+                        println!("{} {} - {}", status, dave_note.id, dave_note.title);
+                    }
+                }
             }
             if let Some(note_label) = matches.get_one::<String>("add") {
-                println!("##==> Passed Note Label: {}", note_label);
+                println!("##==> Adding Note to Database ...");
+                let mut dave_note = DaveNote::new();
+                dave_note.title = note_label.to_string();
+                dave_note.completed = false;
+
+                // Determine ID number by counting members of database
+                let iter_db = db.iter();
+                let mut count = 0;
+                for _ in iter_db {
+                    count += 1;
+                }
+                dave_note.id = count + 1;
+
+                // Create Key Value by Hashing Label String
+                let mut hasher = sha2::Sha256::new();
+                hasher.update(&note_label);
+                let hash_value = hasher.finalize().to_vec();
+
+                if let Err(error) = DaveDatabase::update(&mut db, dave_note, &hash_value) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+                println!("##==> Note Added to Database");
             }
             if let Some(note_id) = matches.get_one::<String>("complete") {
                 println!("##==> Passed Note ID: {}", note_id);

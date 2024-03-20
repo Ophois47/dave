@@ -6,16 +6,19 @@ use std::fs::{File, OpenOptions};
 use std::path::PathBuf;
 use std::sync::RwLock;
 
-// Default filename for configuration file
+// Default Filename for Configuration File
 pub const CONF_FILE: &str = "dave.conf";
 
 // Default Installation Directory
 pub const ROOT_PATH: &str = "./dave_conf";
 
-// Default location of output file
+// Default Database Name
+pub const DB_NAME: &str = "dave_db";
+
+// Default Location of Output File
 pub const OUTPUT_FILE: &str = "dave.out";
 
-// Default location of budget file
+// Default Location of Budget File
 pub const BUDGET_FILE: &str = "dave.budget";
 
 lazy_static! {
@@ -29,6 +32,7 @@ lazy_static! {
 	static ref DEFAULT_CONFIG: serde_json::Value = json!({
 		"config_path": find_config_path(),
 		"root_path": find_root_path(),
+		"database_path": find_database_path(),
 		"output_file": find_output_file(),
 		"budget_file": find_budget_file(),
 		"hash_type": HashType::Sha256,
@@ -53,6 +57,17 @@ pub fn find_root_path() -> PathBuf {
 
 	root_path.push(dave_home);
 	root_path
+}
+
+// Determines Path to Database
+pub fn find_database_path() -> PathBuf {
+	let mut db_path = PathBuf::new();
+	let dave_home = ROOT_PATH.to_string();
+
+	db_path.push(dave_home);
+	db_path.push("var/");
+	db_path.push(DB_NAME);
+	db_path
 }
 
 // Determines Appropriate Path to Output File
@@ -84,6 +99,8 @@ pub struct DaveConfig {
 	config_path: PathBuf,
 	// Root Path
 	root_path: PathBuf,
+	// Database Path
+	database_path: PathBuf,
 	// Output File Path
 	output_file: PathBuf,
 	// Budget File Path
@@ -147,6 +164,14 @@ impl DaveConfig {
 
 	pub fn root_path(&self) -> PathBuf {
 		self.root_path.clone()
+	}
+
+	pub fn set_database_path(&mut self, path: PathBuf) {
+		self.database_path = path;
+	}
+
+	pub fn database_path(&self) -> PathBuf {
+		self.database_path.clone()
 	}
 
 	pub fn set_output_file(&mut self, path: PathBuf) {
