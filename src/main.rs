@@ -139,13 +139,14 @@ fn argument_parser() -> ArgMatches {
                 .long("overwrite")
                 .short('o')
                 .action(ArgAction::SetTrue)
-                .help("List existing notes"))
+                .help("Overwrite and wipe the existing Notes database"))
             .arg(Arg::new("complete")
                 .long("complete")
                 .short('c')
                 .value_parser(value_parser!(u64))
+                .value_name("id #")
                 .num_args(1)
-                .help("Complete an existing note")))
+                .help("Complete an existing note by passing the Note ID#, found when running note with '--list'")))
         .subcommand(Command::new("budget")
             .about("Budget your income and become WEALTHY. Thanks to Dave")
             .arg(Arg::new("new")
@@ -556,6 +557,7 @@ fn main() {
                 println!("##==> Current Notes:");
                 // Iterate Over Database 
                 // FIXME: so ID #'s are in Order
+                // Use sort with predicate
                 let iter_db = db.iter().values().rev();
                 for member in iter_db {
                     if let Ok(ref value) = member {
@@ -573,12 +575,8 @@ fn main() {
 
                 // Determine ID number by counting members of database
                 // and adding 1
-                let iter_db = db.iter();
-                let mut count = 0;
-                for _ in iter_db {
-                    count += 1;
-                }
-                dave_note.id = count + 1;
+                let count = db.len();
+                dave_note.id = count as u64 + 1;
 
                 // Create Key Value by Hashing Label String
                 let mut hasher = sha2::Sha256::new();
@@ -591,16 +589,19 @@ fn main() {
                 println!("##==> Note Added Successfully");
             }
             if let Some(note_id) = matches.get_one::<u64>("complete") {
-                println!("##==> Passed Note ID: {}", note_id);
-                let iter_db = db.iter().values().rev();
+                let iter_db = db.iter().values();
                 for member in iter_db {
                     if let Ok(ref value) = member {
                         let mut dave_note: DaveNote = bincode::deserialize(&value).unwrap();
                         if dave_note.id == *note_id {
                             println!("##==> Found Note with ID #{} - {}!", note_id, dave_note.title);
+                            if dave_note.completed {
+                                println!("##==> Warning! You already did that. You're senile");
+                                std::process::exit(0)
+                            }
                             dave_note.completed = true;
 
-                            // Create New Key Value for Updated Note by Hashing Label String
+                            // Create New Key for Updated Note by Hashing Label String
                             let mut hasher = sha2::Sha256::new();
                             hasher.update(&dave_note.title);
                             let hash_value = hasher.finalize().to_vec();
