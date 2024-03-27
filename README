@@ -11,6 +11,7 @@ dave lets you calculate your one-rep max at the gym with 'drm'
 dave allows you to calculate the difference in world currencies with 'currency'
 dave allows you to budget your income with 'budget'
 dave allows you to ponder and record your own thoughts using 'note'
+dave makes it possible to do complicated calculations with 'calc'
 
 To Install Dave:
 ===================
@@ -51,7 +52,7 @@ Ideas I Want To Learn:
 9.  File Format Parsers
 10. Guess A Number (X)
 11. Weather App
-12. Calculator
+12. Calculator (X)
 13. Blog Posts
 14. Quiz Game
 15. Recipe Book

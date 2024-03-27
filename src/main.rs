@@ -19,6 +19,7 @@ use std::str::FromStr;
 use std::time::Instant;
 use davelib::config::*;
 use davelib::dave_budget::DaveBudget;
+use davelib::dave_calc::dave_calc_loop;
 use davelib::dave_currency::dave_currency_conv;
 use davelib::dave_db::DaveDatabase;
 use davelib::dave_encrypt::*;
@@ -63,6 +64,8 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
                 .num_args(1)))
+        .subcommand(Command::new("calc")
+            .about("Use the program's calculator"))
         .subcommand(Command::new("hash")
             .about("Hash a file using a preferred hashing algorithm")
             .arg(Arg::new("filename")
@@ -312,6 +315,11 @@ fn main() {
         },
         Some(("perceptron", _matches)) => {
             if let Err(error) = daves_perceptron() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("calc", _matches)) => {
+            if let Err(error) = dave_calc_loop() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
@@ -693,7 +701,7 @@ fn main() {
 
     let time = start.elapsed();
     println!(
-        "\n##==> Dave Ran For {}.{}ms",
+        "\n##==> Dave Ran For {}.{}s",
         time.as_secs(),
         time.subsec_millis(),
     )
