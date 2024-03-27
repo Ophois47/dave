@@ -12,6 +12,7 @@ dave allows you to calculate the difference in world currencies with 'currency'
 dave allows you to budget your income with 'budget'
 dave allows you to ponder and record your own thoughts using 'note'
 dave makes it possible to do complicated calculations with 'calc'
+dave lets you learn about the world around you with 'quiz'
 
 To Install Dave:
 ===================
@@ -48,7 +49,7 @@ Ideas I Want To Learn:
 5.  Currency Converter (X)
 6.  Real-Time Object Detection System
 7.  Too Many Linked Lists Article
-8.  Budget Manager
+8.  Budget Manager (X)
 9.  File Format Parsers
 10. Guess A Number (X)
 11. Weather App

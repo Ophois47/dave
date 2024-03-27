@@ -30,6 +30,7 @@ use davelib::dave_hash::*;
 use davelib::dave_land::dave_game_loop;
 use davelib::dave_notes::*;
 use davelib::dave_perceptron::daves_perceptron;
+use davelib::dave_quiz::*;
 use davelib::dave_rep_max::dave_rep_max_calc;
 use davelib::utils::*;
 use davelib::release;
@@ -66,6 +67,20 @@ fn argument_parser() -> ArgMatches {
                 .num_args(1)))
         .subcommand(Command::new("calc")
             .about("Use the program's calculator"))
+        .subcommand(Command::new("quiz")
+            .about("Take David's quiz")
+            .arg(Arg::new("animals")
+                .long("animals")
+                .action(ArgAction::SetTrue)
+                .help("Take the Quiz about Animals"))
+            .arg(Arg::new("strek")
+                .long("strek")
+                .action(ArgAction::SetTrue)
+                .help("Take the Star Trek Quiz"))
+            .arg(Arg::new("swars")
+                .long("swars")
+                .action(ArgAction::SetTrue)
+                .help("Take the Star Wars Quiz")))
         .subcommand(Command::new("hash")
             .about("Hash a file using a preferred hashing algorithm")
             .arg(Arg::new("filename")
@@ -323,6 +338,26 @@ fn main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
+        Some(("quiz", matches)) => {
+            if matches.get_flag("animals") {
+                let quiz_choice = "animals".to_string();
+                if let Err(error) = dave_quiz(quiz_choice) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            } else if matches.get_flag("strek") {
+                let quiz_choice = "strek".to_string();
+                if let Err(error) = dave_quiz(quiz_choice) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            } else if matches.get_flag("swars") {
+                let quiz_choice = "swars".to_string();
+                if let Err(error) = dave_quiz(quiz_choice) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            } else {
+                println!("##==> A valid quiz must be chosen. Try running 'dave quiz --help' for more information");
+            }
+        },
         Some(("budget", matches)) => {
             let mut budget_file = match file_options.append(false).open(find_budget_file()) {
                 Ok(budget_file) => budget_file,
@@ -445,13 +480,13 @@ fn main() {
                             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                         }
                     } else {
-                        println!("##==> INFO! A currency to convert your amount to must be passed to the program. Try running 'dave dcurrency --help' for more information");
+                        println!("##==> A currency to convert your amount to must be passed to the program. Try running 'dave currency --help' for more information");
                     }
                 } else {
-                    println!("##==> INFO! A type of currency for your amount must be passed to the program. Try running 'dave dcurrency --help' for more information");
+                    println!("##==> A type of currency for your amount must be passed to the program. Try running 'dave currency --help' for more information");
                 }
             } else {
-                println!("##==> INFO! An amount must be passed to the program. Try running 'dave dcurrency --help' for more information");
+                println!("##==> An amount must be passed to the program. Try running 'dave currency --help' for more information");
             }
         },
         Some(("drm", matches)) => {
@@ -469,10 +504,10 @@ fn main() {
                         eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                     }
                 } else {
-                    println!("##==> INFO! An amount of reps completed must be passed to the program. Try running 'dave drm --help' for more information");
+                    println!("##==> An amount of reps completed must be passed to the program. Try running 'dave drm --help' for more information");
                 }
             } else {
-                println!("##==> INFO! A amount of weight lifted must be passed to the program. Try running 'dave drm --help' for more information");
+                println!("##==> A amount of weight lifted must be passed to the program. Try running 'dave drm --help' for more information");
             }
         },
         Some(("guess", matches)) => {
@@ -481,7 +516,7 @@ fn main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else {
-                println!("##==> INFO! A guess must be passed to the program. Try running 'dave guess --help' for more information");
+                println!("##==> A guess must be passed to the program. Try running 'dave guess --help' for more information");
             }
         },
         Some(("size", matches)) => {
@@ -491,7 +526,7 @@ fn main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else {
-                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave size --help' for more information");
+                println!("##==> A file or path must be passed to the program. Try running 'dave size --help' for more information");
             }
         },
         Some(("crypt", matches)) => {
@@ -536,7 +571,7 @@ fn main() {
                     eprintln!("{}'{}'", "##==>>>> ERROR: File Not Found: ".red(), path.display());
                 }
             } else {
-                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave crypt --help' for more information");
+                println!("##==> A file or path must be passed to the program. Try running 'dave crypt --help' for more information");
             }
         },
         Some(("note", matches)) => {
@@ -661,7 +696,7 @@ fn main() {
                     eprintln!("{}'{}'", "##==>>>> ERROR: File Not Found: ".red(), passed_path);
                 }
             } else {
-                println!("##==> INFO! A file or path must be passed to the program. Try running 'dave hash --help' for more information");
+                println!("##==> A file or path must be passed to the program. Try running 'dave hash --help' for more information");
             }
         },
         Some(("dgrep", matches)) => {
@@ -690,10 +725,10 @@ fn main() {
                         eprintln!("{}'{}'", "##==>>>> ERROR: File Not Found: ".red(), filename);
                     }
                 } else {
-                    println!("##==> INFO! A file or path must be passed to DGREP. Try running 'dave dgrep --help' for more information");
+                    println!("##==> A file or path must be passed to DGREP. Try running 'dave dgrep --help' for more information");
                 }
             } else {
-                println!("##==> INFO! A match pattern must be passed to DGREP. Try running 'dave dgrep --help' for more information");
+                println!("##==> A match pattern must be passed to DGREP. Try running 'dave dgrep --help' for more information");
             }
         },
         _ => { println!("##==> Try running the program with 'dave --help' to see a list of possible commands and options") },

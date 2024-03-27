@@ -18,13 +18,13 @@ pub fn dave_calc_loop() -> io::Result<()> {
 		let choice: u32 = match choice.trim().parse() {
 			Ok(num) => num,
 			Err(_) => {
-				eprintln!("{}", "##==>>> ERROR: Invalid Input. Please Enter a Valid Choice\n".red());
+				eprintln!("{}", "##==>>>> ERROR: Invalid Input. Please Enter a Valid Choice\n".red());
 				continue
 			},
 		};
 
 		if choice > 5 || choice < 1 {
-			eprintln!("{}", "##==>>> ERROR: Invalid Choice. Please Enter a Value Between 1 and 5\n".red());
+			eprintln!("{}", "##==>>>> ERROR: Invalid Choice. Please Enter a Value Between 1 and 5\n".red());
 			continue
 		} else if choice == 5 {
 			println!("##==> Exiting ...");
@@ -37,7 +37,7 @@ pub fn dave_calc_loop() -> io::Result<()> {
 		let value1: f64 = match value1.trim().parse() {
 			Ok(num) => num,
 			Err(_) => {
-				eprintln!("{}", "##==>>> ERROR: Invalid Input. Please Enter a Valid Number\n".red());
+				eprintln!("{}", "##==>>>> ERROR: Invalid Input. Please Enter a Valid Number\n".red());
 				continue
 			}
 		};
@@ -48,7 +48,7 @@ pub fn dave_calc_loop() -> io::Result<()> {
 		let value2: f64 = match value2.trim().parse() {
 			Ok(num) => num,
 			Err(_) => {
-				eprintln!("{}", "##==>>> ERROR: Invalid Input. Please Enter a Valid Number\n".red());
+				eprintln!("{}", "##==>>>> ERROR: Invalid Input. Please Enter a Valid Number\n".red());
 				continue
 			}
 		};
@@ -79,7 +79,7 @@ pub fn dave_calc_loop() -> io::Result<()> {
 					continue
 				}
 			},
-			_ => eprintln!("{}", "##==>>> ERROR: Invalid Choice. Please Enter a Value Between 1 and 5\n".red()),
+			_ => eprintln!("{}", "##==>>>> ERROR: Invalid Choice. Please Enter a Value Between 1 and 5\n".red()),
 		}
 	}
 	Ok(())
