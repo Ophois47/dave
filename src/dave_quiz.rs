@@ -55,7 +55,7 @@ pub fn dave_quiz(quiz_choice: String) -> io::Result<()> {
 	}
 
 	// Time Given For Each Question
-	let timeout = 40;
+	let timeout = 60;
 
 	// Open and Read Contents From Quiz File
 	let mut quiz_file = fs::File::open(quiz_tsv_filename).unwrap();
