@@ -6,7 +6,7 @@ use std::thread;
 use std::time::Duration;
 
 fn test_question(question: &str, answer: &str, timeout: u32) -> Option<bool> {
-	print!("{} ", question);
+	print!("Q: {}\nA: ", question);
 	// Flush Question to Display
 	io::stdout().flush().expect("Failed to flush buffer");
 
@@ -58,9 +58,9 @@ pub fn dave_quiz(quiz_choice: String) -> io::Result<()> {
 	let timeout = 60;
 
 	// Open and Read Contents From Quiz File
-	let mut quiz_file = fs::File::open(quiz_tsv_filename).unwrap();
+	let mut quiz_file = fs::File::open(quiz_tsv_filename)?;
 	let mut buffer = String::new();
-	quiz_file.read_to_string(&mut buffer).unwrap();
+	quiz_file.read_to_string(&mut buffer)?;
 
 	// Count Number of Questions
 	let total_questions = buffer.lines().count();
@@ -78,7 +78,7 @@ pub fn dave_quiz(quiz_choice: String) -> io::Result<()> {
 		.filter(|p| *p)
 		.count();
 
-	println!("Score: {} / {}", score, total_questions);
+	println!("\n##==>> Score: {} / {}", score, total_questions);
 	if score == total_questions {
 		println!("{}", "!!! You Are Master Champion !!!".yellow());
 	}

@@ -340,16 +340,19 @@ fn main() {
         },
         Some(("quiz", matches)) => {
             if matches.get_flag("animals") {
+                println!("{}", "^^^ David's Animal Quiz ^^^\n".green());
                 let quiz_choice = "animals".to_string();
                 if let Err(error) = dave_quiz(quiz_choice) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else if matches.get_flag("strek") {
+                println!("{}", "*** David's Star Trek Quiz ***\n".yellow());
                 let quiz_choice = "strek".to_string();
                 if let Err(error) = dave_quiz(quiz_choice) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else if matches.get_flag("swars") {
+                println!("{}", "### David's Star Wars Quiz ###\n".yellow());
                 let quiz_choice = "swars".to_string();
                 if let Err(error) = dave_quiz(quiz_choice) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
