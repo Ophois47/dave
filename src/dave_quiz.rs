@@ -31,26 +31,20 @@ fn test_question(question: &str, answer: &str, timeout: u32) -> Option<bool> {
 		.recv_timeout(Duration::new(timeout as u64, 0))
 			.or_else(|o| {
 				// If Error, Print This and Re-Wrap Error
-				println!("{}", "\nYou ran out of time!".red());
 				Err(o)
 			})
 		.ok() // 'ok' Changes 'Result<A,B>' into 'Option<A>'
 		.map(|buffer| buffer == answer); // Use Mapping Function to Transform Option<String> to Option<bool>
 
-	if result == Some(false) {
-		println!("{}", "##==>>> Incorrect!".red());
-		let answer_string = format!("##==>> Correct Answer: {}\n", answer);
-		println!("{}", answer_string.green());
-	}
-	result
-
 	// Function Will Return 1 of 3 Things
 	// Some(true) if Answer Correct
 	// Some(false) if Answer Wrong
 	// None if Timeout Triggered
+	result
 }
 
 pub fn dave_quiz(quiz_choice: String, total_questions: usize) -> io::Result<()> {
+	// Determine Which Quiz Was Chosen by User
 	let quiz_tsv_filename: &str;
 	if quiz_choice == "animals" {
 		quiz_tsv_filename = "./dave_conf/var/daves_quiz/animal_quiz.tsv";
@@ -63,47 +57,48 @@ pub fn dave_quiz(quiz_choice: String, total_questions: usize) -> io::Result<()> 
 	}
 
 	// Time Given For Each Question
-	let timeout = 60;
+	let timeout = 15;
 
 	// Open and Read Contents From Quiz File
 	let mut quiz_file = fs::File::open(quiz_tsv_filename)?;
 	let mut buffer = String::new();
 	quiz_file.read_to_string(&mut buffer)?;
 
-	// Get Random Sample of Questions Based on Difficulty
+	// Get Random Sample of Questions Based on
+	// User Input
 	let mut random_questions = vec![];
 	let _ = buffer.lines()
 		.map(|line| {
 			random_questions.push(line);
 		})
 		.count();
-
 	let sample_questions: Vec<_> = random_questions
         .choose_multiple(&mut rand::thread_rng(), total_questions)
         .collect();
 
-    // TODO: Use sample_questions as questions list instead of buffer
-    // so random sample of questions is used
+    // Use sample_questions as Questions List
+    let mut score = 0;
     for question in sample_questions {
+    	// Seperate Question and Answer from Each Sample Question String
     	let mut q_a = question.split('\t').map(|s| s.to_string());
-    	let question = q_a.next().expect("No Question Found");
-    	let answer = q_a.next().expect("No Answer Found");
-    	println!("\nDEBUG OUTPUT\n- QUESTION: {}\n- ANSWER: {}\n", question, answer);
+    	let question = q_a.next().expect("##==> INFO! No Question Found");
+    	let answer = q_a.next().expect("##==> INFO! No Answer Found");
+    	// Test_Question Takes User Input to Check for Match with Actual Answer
+    	match test_question(&question, &answer, timeout) {
+    		Some(true) => score += 1,
+    		Some(false) => {
+				println!("{}", "##==> Incorrect!".red());
+				let answer_string = format!("##==>> Correct Answer: {}\n", answer);
+				println!("{}", answer_string.green());
+    		},
+    		None => {
+    			println!("{}", "\n##==>>>> You ran out of time!".red());
+    			return Ok(());
+    		},
+    	}
     }
 
-	let score = buffer.lines()
-		.map(|line| {
-			let mut q_a = line.split('\t').map(|s| s.to_string());
-			let question = q_a.next().expect("No Question Found");
-			let answer = q_a.next().expect("No Answer Found");
-			(question, answer)
-		})
-		.map(|(question, answer)| test_question(&question, &answer, timeout))
-		.take_while(|o| o.is_some())
-		.map(|o| o.unwrap())
-		.filter(|p| *p)
-		.count();
-
+    // Determine Score by Comparing it to Total Questions
 	println!("\n##==>> Score: {} / {}", score, total_questions);
 	if score == total_questions {
 		println!("{}", "!!! You Are Master Champion !!!".yellow());
