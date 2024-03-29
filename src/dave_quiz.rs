@@ -43,7 +43,7 @@ fn test_question(question: &str, answer: &str, timeout: u32) -> Option<bool> {
 	result
 }
 
-pub fn dave_quiz(quiz_choice: String, total_questions: usize) -> io::Result<()> {
+pub fn dave_quiz(quiz_choice: String, total_questions: usize, user_difficulty: &str) -> io::Result<()> {
 	// Determine Which Quiz Was Chosen by User
 	let quiz_tsv_filename: &str;
 	if quiz_choice == "animals" {
@@ -56,8 +56,16 @@ pub fn dave_quiz(quiz_choice: String, total_questions: usize) -> io::Result<()> 
 		std::process::exit(1);
 	}
 
-	// Time Given For Each Question
-	let timeout = 45;
+	// Time Given For Each Question Based
+	// on Chosen User Difficulty
+	let mut timeout = 60;
+	match user_difficulty {
+		"easy" => { timeout = 60 },
+		"medium" => { timeout = 30 },
+		"hard" => { timeout = 10 },
+		"god" => { timeout = 5 },
+		_ => {},
+	};
 
 	// Open and Read Contents From Quiz File
 	let mut quiz_file = fs::File::open(quiz_tsv_filename)?;
