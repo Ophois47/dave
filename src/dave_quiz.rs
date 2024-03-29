@@ -57,7 +57,7 @@ pub fn dave_quiz(quiz_choice: String, total_questions: usize) -> io::Result<()> 
 	}
 
 	// Time Given For Each Question
-	let timeout = 15;
+	let timeout = 45;
 
 	// Open and Read Contents From Quiz File
 	let mut quiz_file = fs::File::open(quiz_tsv_filename)?;
@@ -85,15 +85,18 @@ pub fn dave_quiz(quiz_choice: String, total_questions: usize) -> io::Result<()> 
     	let answer = q_a.next().expect("##==> INFO! No Answer Found");
     	// Test_Question Takes User Input to Check for Match with Actual Answer
     	match test_question(&question, &answer, timeout) {
+    		// User Answer == Question Answer, Increment Score
     		Some(true) => score += 1,
+    		// User Answer != Question Answer, Inform User and Show Correct Answer
     		Some(false) => {
 				println!("{}", "##==> Incorrect!".red());
 				let answer_string = format!("##==>> Correct Answer: {}\n", answer);
 				println!("{}", answer_string.green());
     		},
+    		// User Ran Out of Time, Inform User and Return
     		None => {
     			println!("{}", "\n##==>>>> You ran out of time!".red());
-    			return Ok(());
+    			break;
     		},
     	}
     }
