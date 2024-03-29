@@ -1,4 +1,5 @@
 use colored::*;
+use rand::seq::SliceRandom;
 use std::fs;
 use std::io::{self, Read, Write};
 use std::sync::mpsc;
@@ -26,7 +27,7 @@ fn test_question(question: &str, answer: &str, timeout: u32) -> Option<bool> {
 		transmitter.send(buffer).expect("Failed to send user input");
 	});
 
-	receiver
+	let result = receiver
 		.recv_timeout(Duration::new(timeout as u64, 0))
 			.or_else(|o| {
 				// If Error, Print This and Re-Wrap Error
@@ -34,7 +35,14 @@ fn test_question(question: &str, answer: &str, timeout: u32) -> Option<bool> {
 				Err(o)
 			})
 		.ok() // 'ok' Changes 'Result<A,B>' into 'Option<A>'
-		.map(|buffer| buffer == answer) // Use Mapping Function to Transform Option<String> to Option<bool>
+		.map(|buffer| buffer == answer); // Use Mapping Function to Transform Option<String> to Option<bool>
+
+	if result == Some(false) {
+		println!("{}", "##==>>> Incorrect!".red());
+		let answer_string = format!("##==>> Correct Answer: {}\n", answer);
+		println!("{}", answer_string.green());
+	}
+	result
 
 	// Function Will Return 1 of 3 Things
 	// Some(true) if Answer Correct
@@ -42,7 +50,7 @@ fn test_question(question: &str, answer: &str, timeout: u32) -> Option<bool> {
 	// None if Timeout Triggered
 }
 
-pub fn dave_quiz(quiz_choice: String) -> io::Result<()> {
+pub fn dave_quiz(quiz_choice: String, total_questions: usize) -> io::Result<()> {
 	let quiz_tsv_filename: &str;
 	if quiz_choice == "animals" {
 		quiz_tsv_filename = "./dave_conf/var/daves_quiz/animal_quiz.tsv";
@@ -62,8 +70,26 @@ pub fn dave_quiz(quiz_choice: String) -> io::Result<()> {
 	let mut buffer = String::new();
 	quiz_file.read_to_string(&mut buffer)?;
 
-	// Count Number of Questions
-	let total_questions = buffer.lines().count();
+	// Get Random Sample of Questions Based on Difficulty
+	let mut random_questions = vec![];
+	let _ = buffer.lines()
+		.map(|line| {
+			random_questions.push(line);
+		})
+		.count();
+
+	let sample_questions: Vec<_> = random_questions
+        .choose_multiple(&mut rand::thread_rng(), total_questions)
+        .collect();
+
+    // TODO: Use sample_questions as questions list instead of buffer
+    // so random sample of questions is used
+    for question in sample_questions {
+    	let mut q_a = question.split('\t').map(|s| s.to_string());
+    	let question = q_a.next().expect("No Question Found");
+    	let answer = q_a.next().expect("No Answer Found");
+    	println!("\nDEBUG OUTPUT\n- QUESTION: {}\n- ANSWER: {}\n", question, answer);
+    }
 
 	let score = buffer.lines()
 		.map(|line| {

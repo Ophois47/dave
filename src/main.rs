@@ -80,7 +80,15 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("swars")
                 .long("swars")
                 .action(ArgAction::SetTrue)
-                .help("Take the Star Wars Quiz")))
+                .help("Take the Star Wars Quiz"))
+            .arg(Arg::new("#")
+                .long("#")
+                .short('#')
+                .num_args(1)
+                .value_parser(value_parser!(usize))
+                .default_value("5")
+                .value_name("questions")
+                .help("Set the number of questions to answer. Maximum 15")))
         .subcommand(Command::new("hash")
             .about("Hash a file using a preferred hashing algorithm")
             .arg(Arg::new("filename")
@@ -339,22 +347,33 @@ fn main() {
             }
         },
         Some(("quiz", matches)) => {
+            let mut total_questions = 5;
+            if let Some(gotten_question_amount) = matches.get_one::<usize>("#") {
+                if *gotten_question_amount > 0 && *gotten_question_amount < 16 {
+                    total_questions = *gotten_question_amount;
+                } else {
+                    println!(
+                        "##==> {} is not a valid number of questions. Defaulting to 5\n",
+                        gotten_question_amount,
+                    );
+                }
+            }
             if matches.get_flag("animals") {
                 println!("{}", "^^^ David's Animal Quiz ^^^\n".green());
                 let quiz_choice = "animals".to_string();
-                if let Err(error) = dave_quiz(quiz_choice) {
+                if let Err(error) = dave_quiz(quiz_choice, total_questions) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else if matches.get_flag("strek") {
                 println!("{}", "*** David's Star Trek Quiz ***\n".yellow());
                 let quiz_choice = "strek".to_string();
-                if let Err(error) = dave_quiz(quiz_choice) {
+                if let Err(error) = dave_quiz(quiz_choice, total_questions) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else if matches.get_flag("swars") {
                 println!("{}", "### David's Star Wars Quiz ###\n".yellow());
                 let quiz_choice = "swars".to_string();
-                if let Err(error) = dave_quiz(quiz_choice) {
+                if let Err(error) = dave_quiz(quiz_choice, total_questions) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else {
@@ -370,7 +389,7 @@ fn main() {
                         find_budget_file().display(),
                         error
                     );
-                    return
+                    std::process::exit(1)
                 }
             };
             let budget_path = reader.budget_path();
@@ -387,7 +406,7 @@ fn main() {
                             find_budget_file().display(),
                             error
                         );
-                        return
+                        std::process::exit(1)
                     }
                 };
                 // Create New Budget Object and Write to Budget File
