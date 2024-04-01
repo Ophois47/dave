@@ -82,6 +82,14 @@ fn argument_parser() -> ArgMatches {
                 .long("swars")
                 .action(ArgAction::SetTrue)
                 .help("Take the Star Wars Quiz"))
+            .arg(Arg::new("difficulty")
+                .long("difficulty")
+                .short('d')
+                .num_args(1)
+                .value_parser(value_parser!(String))
+                .default_value("easy")
+                .value_name("difficulty level")
+                .help("Set the difficulty which affects the timer length for each question"))
             .arg(Arg::new("#")
                 .long("#")
                 .short('#')
@@ -98,8 +106,8 @@ fn argument_parser() -> ArgMatches {
                 .num_args(1))
             .arg(Arg::new("hash-type")
                 .long("hash-type")
-                .default_value("sha-256")
                 .value_name("algorithm")
+                .default_value("sha-256")
                 .value_parser(["md5", "sha-256", "sha-384", "sha-512"])
                 .num_args(1)
                 .help("Chooses which hashing algorithm the program will use")))
@@ -367,22 +375,37 @@ fn main() {
                     );
                 }
             }
+            let mut chosen_difficulty = "easy";
+            if let Some(gotten_difficulty) = matches.get_one::<String>("difficulty") {
+                match gotten_difficulty.as_str() {
+                    "easy" => { chosen_difficulty = "easy" },
+                    "medium" => { chosen_difficulty = "medium" },
+                    "hard" => { chosen_difficulty = "hard" },
+                    "god" => { chosen_difficulty = "god" },
+                    _ => {
+                        println!(
+                        "##==> {} is not a valid difficulty. Defaulting to 'Easy'\n",
+                            gotten_difficulty,
+                        );
+                    },
+                };
+            }
             if matches.get_flag("animals") {
                 println!("{}", "^^^ David's Animal Quiz ^^^\n".green());
                 let quiz_choice = "animals".to_string();
-                if let Err(error) = dave_quiz(quiz_choice, total_questions) {
+                if let Err(error) = dave_quiz(quiz_choice, total_questions, chosen_difficulty) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else if matches.get_flag("strek") {
                 println!("{}", "*** David's Star Trek Quiz ***\n".yellow());
                 let quiz_choice = "strek".to_string();
-                if let Err(error) = dave_quiz(quiz_choice, total_questions) {
+                if let Err(error) = dave_quiz(quiz_choice, total_questions, chosen_difficulty) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else if matches.get_flag("swars") {
                 println!("{}", "### David's Star Wars Quiz ###\n".yellow());
                 let quiz_choice = "swars".to_string();
-                if let Err(error) = dave_quiz(quiz_choice, total_questions) {
+                if let Err(error) = dave_quiz(quiz_choice, total_questions, chosen_difficulty) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else {
