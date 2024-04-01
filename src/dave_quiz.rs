@@ -82,7 +82,7 @@ pub fn dave_quiz(quiz_choice: String, total_questions: usize) -> io::Result<()> 
         .choose_multiple(&mut rand::thread_rng(), total_questions)
         .collect();
 
-    // TODO: Use sample_questions as questions list instead of buffer
+    // Use sample_questions as questions list instead of buffer
     // so random sample of questions is used
     for question in sample_questions {
     	let mut q_a = question.split('\t').map(|s| s.to_string());

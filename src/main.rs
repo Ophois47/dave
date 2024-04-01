@@ -53,7 +53,7 @@ fn argument_parser() -> ArgMatches {
                 .help("Point to a new location for the configuration file"))
             .arg(Arg::new("bpath")
                 .long("bpath")
-                .value_name("budget path")
+                .value_name("path")
                 .num_args(1)
                 .help("Point to a new location for the budget file"))
             .arg(Arg::new("save")
@@ -64,6 +64,7 @@ fn argument_parser() -> ArgMatches {
             .about("Check the size of a file or directory")
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
+                .value_name("path")
                 .num_args(1)))
         .subcommand(Command::new("calc")
             .about("Use the program's calculator"))
@@ -93,6 +94,7 @@ fn argument_parser() -> ArgMatches {
             .about("Hash a file using a preferred hashing algorithm")
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
+                .value_name("path")
                 .num_args(1))
             .arg(Arg::new("hash-type")
                 .long("hash-type")
@@ -105,6 +107,7 @@ fn argument_parser() -> ArgMatches {
             .about("Guess a number from 0 - 10 for funsies")
             .arg(Arg::new("number")
                 .value_parser(value_parser!(u16))
+                .value_name("value")
                 .num_args(1)))
         .subcommand(Command::new("dgrep")
             .about("Behold Dave's glorious implementation of GREP in Rust.")
@@ -137,6 +140,7 @@ fn argument_parser() -> ArgMatches {
                 .short('p')
                 .value_parser(value_parser!(String))
                 .num_args(1)
+                .value_name("passphrase")
                 .help("Provide a secure Passphrase for the hashing algoritm to use"))
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
@@ -184,12 +188,14 @@ fn argument_parser() -> ArgMatches {
                 .long("income")
                 .short('i')
                 .num_args(1)
+                .value_name("amount")
                 .value_parser(value_parser!(f64))
                 .help("Add an amount of income to your budget"))
             .arg(Arg::new("expense")
                 .long("expense")
                 .short('e')
                 .num_args(2)
+                .value_name("amount")
                 .value_delimiter(' ')
                 .value_names(["expense", "amount"])
                 .value_parser(value_parser!(String))
@@ -210,14 +216,17 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("amount")
                 .num_args(1)
                 .value_parser(value_parser!(f32))
+                .value_name("value")
                 .help("Pass an amount to convert into another world currency"))
             .arg(Arg::new("currency")
                 .num_args(1)
+                .value_name("currency code")
                 .value_parser(value_parser!(String))
                 .value_parser(["USD", "EUR", "GBP", "JPY", "CAD", "CNY", "AUD", "CHF", "SEK", "INR", "KRW", "NOK", "NZD", "RUB", "BRL", "SAR", "ILS", "DKK", "PLN", "MXN"])
                 .help("Pass a three letter ISO 4217 currency code to indicate the starting currency"))
             .arg(Arg::new("convert")
                 .num_args(1)
+                .value_name("currency code")
                 .value_parser(value_parser!(String))
                 .value_parser(["USD", "EUR", "GBP", "JPY", "CAD", "CNY", "AUD", "CHF", "SEK", "INR", "KRW", "NOK", "NZD", "RUB", "BRL", "SAR", "ILS", "DKK", "PLN", "MXN"])
                 .help("Enter the three letter ISO 4217 currency code you wish to convert your intial amount to")))
@@ -270,10 +279,10 @@ fn update_config<'a>(matches: &ArgMatches) {
 
         if let Err(error) = config.save() {
             eprintln!("##==>>>> ERROR: Unable to save configuration: {}: {}", config_path.display(), error);
-            std::process::exit(1);
+            std::process::exit(1)
         }
         println!("##==> Successfully Wrote Configuration to: {}", config_path.display());
-        std::process::exit(0);
+        std::process::exit(0)
     }
 
     // Deal With Determining Hashing Algorithm to Use
@@ -738,7 +747,7 @@ fn main() {
                             filename.to_string(),
                         ).unwrap_or_else(|error| {
                             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error.red());
-                            process::exit(1);
+                            process::exit(1)
                         });
                         if let Err(error) = dave_grep::run(config) {
                             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
