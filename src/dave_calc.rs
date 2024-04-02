@@ -56,23 +56,23 @@ pub fn dave_calc_loop() -> io::Result<()> {
 		match choice {
 			1 => {
 				let result = value1 + value2;
-				let result_string = format!("##==>> {} + {} = {}\n", value1, value2, result);
+				let result_string = format!("##==>> Answer: {} + {} = {}\n", value1, value2, result);
 				println!("{}", result_string.yellow());
 			},
 			2 => {
 				let result = value1 - value2;
-				let result_string = format!("##==>> {} - {} = {}\n", value1, value2, result);
+				let result_string = format!("##==>> Answer: {} - {} = {}\n", value1, value2, result);
 				println!("{}", result_string.yellow());
 			},
 			3 => {
 				let result = value1 * value2;
-				let result_string = format!("##==>> {} x {} = {}\n", value1, value2, result);
+				let result_string = format!("##==>> Answer: {} x {} = {}\n", value1, value2, result);
 				println!("{}", result_string.yellow());
 			},
 			4 => {
 				if value2 != 0.0 {
 					let result = value1 / value2;
-					let result_string = format!("##==>> {} / {} = {}\n", value1, value2, result);
+					let result_string = format!("##==>> Answer: {} / {} = {}\n", value1, value2, result);
 					println!("{}", result_string.yellow());
 				} else {
 					eprintln!("{}", "##==>>> Warning: Cannot Divide by 0\n".bright_yellow());

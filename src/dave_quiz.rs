@@ -52,6 +52,10 @@ pub fn dave_quiz(quiz_choice: String, total_questions: usize, user_difficulty: &
 		quiz_tsv_filename = "./dave_conf/var/daves_quiz/strek_quiz.tsv";
 	} else if quiz_choice == "swars" {
 		quiz_tsv_filename = "./dave_conf/var/daves_quiz/swars_quiz.tsv";
+	} else if quiz_choice == "mil-av" {
+		quiz_tsv_filename = "./dave_conf/var/daves_quiz/mil_av_quiz.tsv";
+	} else if quiz_choice == "gen-av" {
+		quiz_tsv_filename = "./dave_conf/var/daves_quiz/gen_av_quiz.tsv";
 	} else {
 		std::process::exit(1);
 	}

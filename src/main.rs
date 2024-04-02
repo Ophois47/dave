@@ -74,6 +74,14 @@ fn argument_parser() -> ArgMatches {
                 .long("animals")
                 .action(ArgAction::SetTrue)
                 .help("Take the Quiz about Animals"))
+            .arg(Arg::new("m-aviation")
+                .long("mil-av")
+                .action(ArgAction::SetTrue)
+                .help("Take the military aviation Quiz"))
+            .arg(Arg::new("g-aviation")
+                .long("gen-av")
+                .action(ArgAction::SetTrue)
+                .help("Take the general aviation Quiz"))
             .arg(Arg::new("strek")
                 .long("strek")
                 .action(ArgAction::SetTrue)
@@ -405,6 +413,18 @@ fn main() {
             } else if matches.get_flag("swars") {
                 println!("{}", "### David's Star Wars Quiz ###\n".yellow());
                 let quiz_choice = "swars".to_string();
+                if let Err(error) = dave_quiz(quiz_choice, total_questions, chosen_difficulty) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            } else if matches.get_flag("mil-av") {
+                println!("{}", "<<< David's Military Aviation Quiz >>>\n".yellow());
+                let quiz_choice = "mil-av".to_string();
+                if let Err(error) = dave_quiz(quiz_choice, total_questions, chosen_difficulty) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            } else if matches.get_flag("gen-av") {
+                println!("{}", ">>> David's General Aviation Quiz <<<\n".yellow());
+                let quiz_choice = "gen-av".to_string();
                 if let Err(error) = dave_quiz(quiz_choice, total_questions, chosen_difficulty) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
