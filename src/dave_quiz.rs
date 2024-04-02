@@ -7,7 +7,13 @@ use std::thread;
 use std::time::Duration;
 
 fn test_question(question: &str, answer: &str, timeout: u32) -> Option<bool> {
-	let question_string = format!("{}{}\n{}", "Q: ".purple(), question.white(), "A: ".purple());
+	// Print Question String and Answer Prompt
+	let question_string = format!(
+		"{}{}\n{}",
+		"Q: ".purple(),
+		question.white(),
+		"A: ".purple(),
+	);
 	print!("{}", question_string);
 	// Flush Question to Display
 	io::stdout().flush().expect("Failed to flush buffer");

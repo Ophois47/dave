@@ -83,6 +83,5 @@ pub fn dave_rep_max_calc(
 	println!("##=> 75% for  10   reps");
 	println!("##=> 70% for 12-20 reps");
 	println!("##=> 50% for  20+  reps");
-
 	Ok(())
 }
