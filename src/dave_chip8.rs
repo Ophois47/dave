@@ -40,14 +40,15 @@ const FONT_SPRITES: [[u8; 5]; 16] = [
 const SCREEN_HEIGHT: usize = 32;
 const SCREEN_WIDTH: usize = 64;
 
+#[allow(non_snake_case)]
 pub struct Chip8 {
 	memory: [u8; MEM_SIZE],
-	vx: [u8; VX_REGISTERS],
-	i: u16,
-	st: u8,
-	dt: u8,
-	pc: usize,
-	sp: usize,
+	Vx: [u8; VX_REGISTERS],
+	I: u16,
+	ST: u8,
+	DT: u8,
+	PC: usize,
+	SP: usize,
 	stack: [usize; STACK_SIZE],
 	keyboard: [bool; KEYBOARD_SIZE], // true = pressed, false = not pressed
 	monitor: [[u8; SCREEN_WIDTH]; SCREEN_HEIGHT],
@@ -58,12 +59,12 @@ impl Chip8 {
 	fn new() -> Self {
 		Self {
 			memory: [0u8; MEM_SIZE],
-			vx: [0u8; VX_REGISTERS],
-			i: 0,
-			st: 0,
-			dt: 0,
-			pc: START_LOCATION,
-			sp: 0,
+			Vx: [0u8; VX_REGISTERS],
+			I: 0,
+			ST: 0,
+			DT: 0,
+			PC: START_LOCATION,
+			SP: 0,
 			stack: [0; STACK_SIZE],
 			keyboard: [false; KEYBOARD_SIZE],
 			monitor: [[0u8; SCREEN_WIDTH]; SCREEN_HEIGHT],
@@ -83,38 +84,38 @@ impl Chip8 {
 		} // Load Fonts in Memory
 
 		for i in program {
-			chip_8.memory[chip_8.pc] = *i;
-			chip_8.pc += 1;
+			chip_8.memory[chip_8.PC] = *i;
+			chip_8.PC += 1;
 		} // Load Program in Memory
 
-		chip_8.pc = START_LOCATION; // Resets PC
+		chip_8.PC = START_LOCATION; // Resets PC
 		chip_8
 	}
 
 	// Removes 1 From the "Timer Register" and "Sound Timer"
 	fn update(&mut self) {
-		self.dt -= if self.dt > 0 { 1 } else { 0 };
-		self.st -= if self.st > 0 { 1 } else { 0 };
+		self.DT -= if self.DT > 0 { 1 } else { 0 };
+		self.ST -= if self.ST > 0 { 1 } else { 0 };
 	}
 
 	// Runs Through One Opcode and Returns Run Opcode
 	fn execute_next_opcode(&mut self) -> u16 {
-		let opcode = u16::from_be_bytes([self.memory[self.pc], self.memory[self.pc + 1]]);
+		let opcode = u16::from_be_bytes([self.memory[self.PC], self.memory[self.PC + 1]]);
 
-		// Divide Opcode Into Four 4-Bit Values
-		let x = ((opcode >> 8) & 0xF) as usize; // Lower 4 Bits of First Byte
-		let y = ((opcode >> 4) & 0xF) as usize; // Higher 4 Bits of Second Byte
-		let n = (opcode & 0xF) as u8; // Lower 4 Bits of Second Byte
-		let nnn = (opcode & 0xFFF) as u16; // Lower 12 Bits of Opcode
-		let kk = (opcode & 0xFF) as u8; // Lower 8 Bits of Opcode
-
-		match &opcode & 0xF000 {
-			0x0000 => match opcode {
-				0x00E0 => self._00_e0(),
-				0x00EE => self._00_ee(),
-				_ => self.no_opcode_found(),
-			},
-			0x1000 => self._1nnn(nnn as usize),
+        //we divide the opcode into 4 4 bits values
+        let x = ((opcode >> 8) & 0xF) as usize; //lower 4 bits of first byte
+        let y = ((opcode >> 4) & 0xF) as usize; //higher 4 bits of second byte
+        let n = (opcode & 0xF) as u8; //lower 4 bits of second byte
+        let nnn = (opcode & 0xFFF) as u16; //lower 12 bits of opcode
+        let kk = (opcode & 0xFF) as u8; //lower bits 8 of opcode
+        
+        match &opcode & 0xF000 {
+            0x0000 => match opcode {
+                0x00E0 => self._00E0(),
+                0x00EE => self._00EE(),
+                _ => self.no_opcode_found(),
+            },
+            0x1000 => self._1nnn(nnn as usize),
             0x2000 => self._2nnn(nnn as usize),
             0x3000 => self._3xkk(x, kk),
             0x4000 => self._4xkk(x, kk),
@@ -130,29 +131,29 @@ impl Chip8 {
                 0x0005 => self._8xy5(x, y),
                 0x0006 => self._8xy6(x, y),
                 0x0007 => self._8xy7(x, y),
-                0x000E => self._8xy0(x, y),
+                0x000E => self._8xyE(x, y),
                 _ => self.no_opcode_found(),
             },
             0x9000 => self._9xy0(x, y),
-            0xA000 => self._annn(nnn),
-            0xB000 => self._bnnn(nnn),
-            0xC000 => self._cxkk(x, kk),
-            0xD000 => self._dxyn(x, y, n as usize),
+            0xA000 => self._Annn(nnn),
+            0xB000 => self._Bnnn(nnn),
+            0xC000 => self._Cxkk(x, kk),
+            0xD000 => self._Dxyn(x, y, n as usize),
             0xE000 => match opcode & 0xFF {
-                0x009E => self._ex9_e(x),
-                0x00A1 => self._ex_a1(x),
+                0x009E => self._Ex9E(x),
+                0x00A1 => self._ExA1(x),
                 _ => self.no_opcode_found(),
             },
             0xF000 => match opcode & 0xFF {
-                0x0007 => self._fx07(x),
-                0x000A => self._fx0_a(x),
-                0x0015 => self._fx15(x),
-                0x0018 => self._fx18(x),
-                0x001E => self._fx15(x),
-                0x0029 => self._fx29(x),
-                0x0033 => self._fx33(x),
-                0x0055 => self._fx55(x),
-                0x0065 => self._fx65(x),
+                0x0007 => self._Fx07(x),
+                0x000A => self._Fx0A(x),
+                0x0015 => self._Fx15(x),
+                0x0018 => self._Fx18(x),
+                0x001E => self._Fx1E(x),
+                0x0029 => self._Fx29(x),
+                0x0033 => self._Fx33(x),
+                0x0055 => self._Fx55(x),
+                0x0065 => self._Fx65(x),
                 _ => self.no_opcode_found(),
             },
 
@@ -181,151 +182,152 @@ impl Chip8 {
 }
 
 // Opcodes for Chip8 (No Chip-48 Instructions)
+#[allow(non_snake_case)]
 impl Chip8 {
-	fn no_opcode_found(&mut self) {
-		self.pc += 2;
-	}
-
-	fn _00_e0(&mut self) {
-		self.pc = self.stack[self.sp];
-		self.sp -= 1;
-	}
-
-	fn _00_ee(&mut self) {
-		self.pc = self.stack[self.sp];
-		self.sp -= 1;
-	}
-
-	fn _1nnn(&mut self, addr: usize) {
-		self.pc = addr;
-	}
-
-	fn _2nnn(&mut self, addr: usize) {
-		self.pc += 2;
-		self.sp += 1;
-		self.stack[self.sp] = self.pc;
-		self.pc = addr;
-	}
-
-	fn _3xkk(&mut self, vx_reg: usize, kk: u8) {
-		if self.vx[vx_reg] == kk {
-			self.pc += 2;
-		}
-		self.pc += 2;
-	}
-
-	fn _4xkk(&mut self, vx_reg: usize, kk: u8) {
-		if self.vx[vx_reg] != kk {
-			self.pc += 2;
-		}
-		self.pc += 2;
-	}
-
-	fn _5xy0(&mut self, vx_reg: usize, vy_reg: usize) {
-		if self.vx[vx_reg] == self.vx[vy_reg] {
-			self.pc += 2;
-		}
-		self.pc += 2;
-	}
-
-	fn _6xkk(&mut self, vx_reg: usize, kk: u8) {
-		self.vx[vx_reg] = kk;
-		self.pc += 2;
-	}
-
-	fn _7xkk(&mut self, vx_reg: usize, kk: u8) {
-        self.vx[vx_reg] = self.vx[vx_reg].wrapping_add(kk);
-        self.pc += 2;
+    fn no_opcode_found(&mut self) {
+        self.PC += 2;
     }
 
-    fn _8xy0(&mut self, vx_reg: usize, vy_reg: usize) {
-        self.vx[vx_reg] = self.vx[vy_reg];
-        self.pc += 2;
+    fn _00E0(&mut self) {
+        self.monitor = [[0u8; SCREEN_WIDTH]; SCREEN_HEIGHT];
+        self.PC += 2;
     }
 
-    fn _8xy1(&mut self, vx_reg: usize, vy_reg: usize) {
-        self.vx[vx_reg] |= self.vx[vy_reg];
-        self.pc += 2;
+    fn _00EE(&mut self) {
+        self.PC = self.stack[self.SP];
+        self.SP -= 1;
     }
 
-    fn _8xy2(&mut self, vx_reg: usize, vy_reg: usize) {
-        self.vx[vx_reg] &= self.vx[vy_reg];
-        self.pc += 2;
+    fn _1nnn(&mut self, addr: usize) {
+        self.PC = addr;
     }
 
-    fn _8xy3(&mut self, vx_reg: usize, vy_reg: usize) {
-        self.vx[vx_reg] ^= self.vx[vy_reg];
-        self.pc += 2;
+    fn _2nnn(&mut self, addr: usize) {
+        self.PC += 2;
+        self.SP += 1;
+        self.stack[self.SP] = self.PC;
+        self.PC = addr;
     }
 
-    fn _8xy4(&mut self, vx_reg: usize, vy_reg: usize) {
-        let tmp: u16 = self.vx[vx_reg] as u16 + self.vx[vy_reg] as u16;
-        self.vx[15] = if tmp > 255 { 1 } else { 0 };
-        self.vx[vx_reg] = (tmp & 0xFF) as u8;
-        self.pc += 2;
-    }
-
-    fn _8xy5(&mut self, vx_reg: usize, vy_reg: usize) {
-        self.vx[15] = if self.vx[vx_reg] > self.vx[vy_reg] {
-            1
-        } else {
-            0
-        };
-        self.vx[vx_reg] -= self.vx[vy_reg];
-        self.pc += 2;
-    }
-
-    fn _8xy6(&mut self, vx_reg: usize, _vy_reg: usize) {
-        self.vx[15] = if (self.vx[vx_reg] & 0x1) == 1 { 1 } else { 0 };
-        self.vx[vx_reg] /= 2;
-        self.pc += 2;
-    }
-
-    fn _8xy7(&mut self, vx_reg: usize, vy_reg: usize) {
-        self.vx[15] = if self.vx[vy_reg] > self.vx[vx_reg] {
-            1
-        } else {
-            0
-        };
-        self.vx[vx_reg] = self.vx[vy_reg] - self.vx[vx_reg];
-        self.pc += 2;
-    }
-
-    fn _8xy_e(&mut self, vx_reg: usize, _vy_reg: usize) {
-        let shifted_register = self.vx[vx_reg] << 1;
-        self.vx[15] = if (shifted_register & 0x1) == 1 { 1 } else { 0 };
-        self.vx[vx_reg] *= 2;
-        self.pc += 2;
-    }
-
-    fn _9xy0(&mut self, vx_reg: usize, vy_reg: usize) {
-        if self.vx[vx_reg] != self.vx[vy_reg] {
-            self.pc += 2
+    fn _3xkk(&mut self, Vx_reg: usize, kk: u8) {
+        if self.Vx[Vx_reg] == kk {
+            self.PC += 2;
         }
-        self.pc += 2;
+        self.PC += 2;
     }
 
-    fn _annn(&mut self, nnn: u16) {
-        self.i = nnn;
-        self.pc += 2;
+    fn _4xkk(&mut self, Vx_reg: usize, kk: u8) {
+        if self.Vx[Vx_reg] != kk {
+            self.PC += 2;
+        }
+        self.PC += 2;
     }
 
-    fn _bnnn(&mut self, nnn: u16) {
-        self.pc = (nnn as usize) + (self.vx[0] as usize);
+    fn _5xy0(&mut self, Vx_reg: usize, Vy_reg: usize) {
+        if self.Vx[Vx_reg] == self.Vx[Vy_reg] {
+            self.PC += 2;
+        }
+        self.PC += 2;
     }
 
-    fn _cxkk(&mut self, vx_reg: usize, kk: u8) {
-        self.vx[vx_reg] = kk & rand::random::<u8>();
-        self.pc += 2;
+    fn _6xkk(&mut self, Vx_reg: usize, kk: u8) {
+        self.Vx[Vx_reg] = kk;
+        self.PC += 2;
     }
 
-    fn _dxyn(&mut self, vx_reg: usize, vy_reg: usize, bytes_to_read: usize) {
-        let row = self.vx[vy_reg];
-        let col = self.vx[vx_reg];
-        self.vx[0xF] = 0;
+    fn _7xkk(&mut self, Vx_reg: usize, kk: u8) {
+        self.Vx[Vx_reg] = self.Vx[Vx_reg].wrapping_add(kk);
+        self.PC += 2;
+    }
+
+    fn _8xy0(&mut self, Vx_reg: usize, Vy_reg: usize) {
+        self.Vx[Vx_reg] = self.Vx[Vy_reg];
+        self.PC += 2;
+    }
+
+    fn _8xy1(&mut self, Vx_reg: usize, Vy_reg: usize) {
+        self.Vx[Vx_reg] |= self.Vx[Vy_reg];
+        self.PC += 2;
+    }
+
+    fn _8xy2(&mut self, Vx_reg: usize, Vy_reg: usize) {
+        self.Vx[Vx_reg] &= self.Vx[Vy_reg];
+        self.PC += 2;
+    }
+
+    fn _8xy3(&mut self, Vx_reg: usize, Vy_reg: usize) {
+        self.Vx[Vx_reg] ^= self.Vx[Vy_reg];
+        self.PC += 2;
+    }
+
+    fn _8xy4(&mut self, Vx_reg: usize, Vy_reg: usize) {
+        let tmp: u16 = self.Vx[Vx_reg] as u16 + self.Vx[Vy_reg] as u16;
+        self.Vx[15] = if tmp > 255 { 1 } else { 0 };
+        self.Vx[Vx_reg] = (tmp & 0xFF) as u8;
+        self.PC += 2;
+    }
+
+    fn _8xy5(&mut self, Vx_reg: usize, Vy_reg: usize) {
+        self.Vx[15] = if self.Vx[Vx_reg] > self.Vx[Vy_reg] {
+            1
+        } else {
+            0
+        };
+        self.Vx[Vx_reg] -= self.Vx[Vy_reg];
+        self.PC += 2;
+    }
+
+    fn _8xy6(&mut self, Vx_reg: usize, _Vy_reg: usize) {
+        self.Vx[15] = if (self.Vx[Vx_reg] & 0x1) == 1 { 1 } else { 0 };
+        self.Vx[Vx_reg] /= 2;
+        self.PC += 2;
+    }
+
+    fn _8xy7(&mut self, Vx_reg: usize, Vy_reg: usize) {
+        self.Vx[15] = if self.Vx[Vy_reg] > self.Vx[Vx_reg] {
+            1
+        } else {
+            0
+        };
+        self.Vx[Vx_reg] = self.Vx[Vy_reg] - self.Vx[Vx_reg];
+        self.PC += 2;
+    }
+
+    fn _8xyE(&mut self, Vx_reg: usize, _Vy_reg: usize) {
+        let shifted_register = self.Vx[Vx_reg] << 1;
+        self.Vx[15] = if (shifted_register & 0x1) == 1 { 1 } else { 0 };
+        self.Vx[Vx_reg] *= 2;
+        self.PC += 2;
+    }
+
+    fn _9xy0(&mut self, Vx_reg: usize, Vy_reg: usize) {
+        if self.Vx[Vx_reg] != self.Vx[Vy_reg] {
+            self.PC += 2
+        }
+        self.PC += 2;
+    }
+
+    fn _Annn(&mut self, nnn: u16) {
+        self.I = nnn;
+        self.PC += 2;
+    }
+
+    fn _Bnnn(&mut self, nnn: u16) {
+        self.PC = (nnn as usize) + (self.Vx[0] as usize);
+    }
+
+    fn _Cxkk(&mut self, Vx_reg: usize, kk: u8) {
+        self.Vx[Vx_reg] = kk & rand::random::<u8>();
+        self.PC += 2;
+    }
+
+    fn _Dxyn(&mut self, Vx_reg: usize, Vy_reg: usize, bytes_to_read: usize) {
+        let row = self.Vx[Vy_reg];
+        let col = self.Vx[Vx_reg];
+        self.Vx[0xF] = 0;
 
         for i in 0..bytes_to_read {
-            let memory_pixel = self.memory[(self.i as usize) + i];
+            let memory_pixel = self.memory[(self.I as usize) + i];
 
             for j in 0..8 {
                 let bit = (memory_pixel >> j) & 0x1;
@@ -333,7 +335,7 @@ impl Chip8 {
                     [(col as usize + 7 - j) % SCREEN_WIDTH];
 
                 if bit == 1 && pixel_screen == 1 {
-                    self.vx[0xF] = 1;
+                    self.Vx[0xF] = 1;
                 }
 
                 self.monitor[(row as usize + i) % SCREEN_HEIGHT]
@@ -341,84 +343,89 @@ impl Chip8 {
             }
         }
 
-        self.pc += 2;
+        self.PC += 2;
     }
 
-    fn _ex9_e(&mut self, vx_reg: usize) {
-        if self.keyboard[self.vx[vx_reg] as usize] == true {
-            self.keyboard[self.vx[vx_reg] as usize] = false;
-            self.pc += 2;
+    fn _Ex9E(&mut self, Vx_reg: usize) {
+        if self.keyboard[self.Vx[Vx_reg] as usize] == true {
+            self.keyboard[self.Vx[Vx_reg] as usize] = false;
+            self.PC += 2;
         }
-        self.pc += 2;
+        self.PC += 2;
     }
 
-    fn _ex_a1(&mut self, vx_reg: usize) {
-        if self.keyboard[self.vx[vx_reg] as usize] == false {
-            self.pc += 2;
+    fn _ExA1(&mut self, Vx_reg: usize) {
+        if self.keyboard[self.Vx[Vx_reg] as usize] == false {
+            self.PC += 2;
         }
-        self.pc += 2;
-        self.keyboard[self.vx[vx_reg] as usize] = false;
+        self.PC += 2;
+        self.keyboard[self.Vx[Vx_reg] as usize] = false;
+/* 
+        for i in &mut self.keyboard{
+            *i = false;
+        } */
     }
 
-    fn _fx07(&mut self, vx_reg: usize) {
-        self.vx[vx_reg] = self.dt;
-        self.pc += 2;
+    fn _Fx07(&mut self, Vx_reg: usize) {
+        self.Vx[Vx_reg] = self.DT;
+        self.PC += 2;
     }
 
-    fn _fx0_a(&mut self, vx_reg: usize) {
+    fn _Fx0A(&mut self, Vx_reg: usize) {
         if let Some(k) = self.keyboard.iter().position(|x| *x == true){
             
             self.keyboard[k] = false;
-            self.vx[vx_reg] = k as u8;
-            self.pc += 2;
+            self.Vx[Vx_reg] = k as u8;
+            self.PC += 2;
         }
     }
 
-    fn _fx15(&mut self, vx_reg: usize) {
-        self.dt = self.vx[vx_reg];
-        self.pc += 2;
+    fn _Fx15(&mut self, Vx_reg: usize) {
+        self.DT = self.Vx[Vx_reg];
+        self.PC += 2;
     }
 
-    fn _fx18(&mut self, vx_reg: usize) {
-        self.st = self.vx[vx_reg];
-        self.pc += 2;
+    fn _Fx18(&mut self, Vx_reg: usize) {
+        self.ST = self.Vx[Vx_reg];
+        self.PC += 2;
     }
 
-    fn _fx1_e(&mut self, vx_reg: usize) {
-        self.i = self.i.wrapping_add(self.vx[vx_reg] as u16);
-        self.pc += 2;
+    fn _Fx1E(&mut self, Vx_reg: usize) {
+        self.I = self.I.wrapping_add(self.Vx[Vx_reg] as u16);
+        self.PC += 2;
     }
 
-    fn _fx29(&mut self, vx_reg: usize) {
-        self.i = (5 * self.vx[vx_reg]) as u16;
-        self.pc += 2;
+    fn _Fx29(&mut self, Vx_reg: usize) {
+        self.I = (5 * self.Vx[Vx_reg]) as u16;
+        self.PC += 2;
     }
 
-    fn _fx33(&mut self, vx_reg: usize) {
-        self.memory[self.i as usize] = (((self.vx[vx_reg] as i32) % 1000) / 100) as u8;
-        self.memory[(self.i + 1) as usize] = (self.vx[vx_reg] % 100) / 10;
-        self.memory[(self.i + 2) as usize] = self.vx[vx_reg] % 10;
-        self.pc += 2;
+    #[allow(unused_parens)]
+    fn _Fx33(&mut self, Vx_reg: usize) {
+        self.memory[self.I as usize] = (((self.Vx[Vx_reg] as i32) % 1000) / 100) as u8;
+        self.memory[(self.I + 1) as usize] = (self.Vx[Vx_reg] % 100) / 10;
+        self.memory[(self.I + 2) as usize] = (self.Vx[Vx_reg] % 10);
+        self.PC += 2;
     }
 
-    fn _fx55(&mut self, vx_reg: usize) {
-        let mut tmp = self.i as usize;
+    fn _Fx55(&mut self, Vx_reg: usize) {
+        let mut tmp = self.I as usize;
 
-        for i in 0..=vx_reg {
-            self.memory[tmp] = self.vx[i];
+        for i in 0..=Vx_reg {
+            self.memory[tmp] = self.Vx[i];
             tmp += 1;
         }
-        self.pc += 2;
+        self.PC += 2;
     }
 
-    fn _fx65(&mut self, vx_reg: usize) {
-        let mut tmp = self.i as usize;
+    fn _Fx65(&mut self, Vx_reg: usize) {
+        let mut tmp = self.I as usize;
 
-        for i in 0..=vx_reg {
-            self.vx[i] = self.memory[tmp];
+        for i in 0..=Vx_reg {
+            self.Vx[i] = self.memory[tmp];
             tmp += 1;
         }
-        self.pc += 2;
+        self.PC += 2;
     }
 }
 
@@ -481,11 +488,11 @@ where
         chip8.update();
 
         for _i in 0..opcodes_per_cycle {
-        	if event::poll(Duration::from_micros(1))? {
-        		if let Event::Key(key) = event::read()? {
-        			let _ = match key.code {
-        				// Chip8 Commands
-        				KeyCode::Char('w') => chip8.set_key(5),
+            if event::poll(Duration::from_micros(1))? {
+                if let Event::Key(key) = event::read()? {
+                    let _ = match key.code {
+                        // Chip8 Commands
+                        KeyCode::Char('w') => chip8.set_key(5),
                         KeyCode::Char('a') => chip8.set_key(7),
                         KeyCode::Char('s') => chip8.set_key(8),
                         KeyCode::Char('d') => chip8.set_key(9),
@@ -501,48 +508,47 @@ where
                         KeyCode::Char('r') => chip8.set_key(13),
                         KeyCode::Char('f') => chip8.set_key(14),
                         KeyCode::Char('v') => chip8.set_key(15),
-
                         // New Emulator Commands
                         KeyCode::Esc => return Ok(()),
                         KeyCode::Up => {
                             opcodes_per_cycle += if opcodes_per_cycle < u8::MAX { 1 } else { 0 };
                             Ok(())
-                        },
+                        }
                         KeyCode::Down => {
-                        	opcodes_per_cycle -= if opcodes_per_cycle > 1 { 1 } else { 0 };
-                        	Ok(())
-                        },
+                            opcodes_per_cycle -= if opcodes_per_cycle > 1 { 1 } else { 0 };
+                            Ok(())
+                        }
                         KeyCode::Right => {
-                        	timer_hz += if timer_hz < u8::MAX { 1 } else { 0 };
-                        	Ok(())
-                        },
+                            timer_hz += if timer_hz < u8::MAX { 1 } else { 0 };
+                            Ok(())
+                        }
                         KeyCode::Left => {
-                        	timer_hz -= if timer_hz > 1 { 1 } else { 0 };
-                        	Ok(())
-                        },
+                            timer_hz -= if timer_hz > 1 { 1 } else { 0 };
+                            Ok(())
+                        }
                         KeyCode::Char('l') => {
-                        	screen_height = if screen_height == SCREEN_HEIGHT {
-                        		terminal.size().unwrap().height as usize
-                        	} else {
-                        		SCREEN_HEIGHT
-                        	};
-                        	screen_width = if screen_width == SCREEN_WIDTH {
-                        		terminal.size().unwrap().width as usize
-                        	} else {
-                        		SCREEN_WIDTH
-                        	};
-                        	Ok(())
-                        },
+                            screen_height = if screen_height == SCREEN_HEIGHT {
+                                terminal.size()?.height as usize
+                            } else {
+                                SCREEN_HEIGHT
+                            };
+                            screen_width = if screen_width == SCREEN_WIDTH {
+                                terminal.size()?.width as usize
+                            } else {
+                                SCREEN_WIDTH
+                            };
+                            Ok(())
+                        }
                         _ => Ok(()),
-        			};
-        		}
-        	}
-
-        	chip8.execute_next_opcode();
+                    };
+                }
+            }
 
         	if timer_hz > 105 {
         		return Ok(());
         	}
+
+        	chip8.execute_next_opcode();
 
         	terminal
         		.draw(|f| {
@@ -576,14 +582,18 @@ mod test {
 			.read(true)
 			.create(false)
 			.open("./dave_conf/var/daves_roms/TETRIS")
-			.unwrap();
+			.expect("Unable to Open File");
 
 		let mut file_contents: Vec<u8> = Vec::new();
-		file.read_to_end(&mut file_contents).unwrap();
+		println!("FILE CONTENTS 1: {:?}", file_contents);
+		let data = file.read_to_end(&mut file_contents).expect("Unable to Read File");
+		println!("FILE CONTENTS 2: {}", data);
 
 		let mut chip_8 = Chip8::start(&file_contents[..]);
 
-		chip_8.execute_next_opcode();
-		println!();
+		while data > 0 {
+			chip_8.execute_next_opcode();
+			println!();
+		}
 	}
 }
