@@ -6,13 +6,22 @@ use clap::{
     value_parser,
 };
 use colored::*;
+use crossterm::{
+    event::{DisableMouseCapture, EnableMouseCapture},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use sha2::Digest;
+use tui::{
+    backend::CrosstermBackend,
+    Terminal,
+};
 use std::borrow::BorrowMut;
 use std::env;
-use std::fs::{self, OpenOptions};
-use std::io::Write;
+use std::fs::{self, File, OpenOptions};
+use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process;
 use std::str::FromStr;
@@ -20,6 +29,7 @@ use std::time::Instant;
 use davelib::config::*;
 use davelib::dave_budget::DaveBudget;
 use davelib::dave_calc::dave_calc_loop;
+use davelib::dave_chip8::*;
 use davelib::dave_currency::dave_currency_conv;
 use davelib::dave_db::DaveDatabase;
 use davelib::dave_encrypt::*;
@@ -68,6 +78,12 @@ fn argument_parser() -> ArgMatches {
                 .num_args(1)))
         .subcommand(Command::new("calc")
             .about("Use the program's calculator"))
+        .subcommand(Command::new("chip8")
+            .about("Use Dave's Chip8 emulator. Created in 1977, CHIP-8 is the original fantasy console. Initially designed to ease game development for the COSMAC VIP kit computer")
+            .arg(Arg::new("filename")
+                .value_parser(value_parser!(String))
+                .value_name("path")
+                .num_args(1)))
         .subcommand(Command::new("quiz")
             .about("Take David's quiz")
             .arg(Arg::new("animals")
@@ -369,6 +385,45 @@ fn main() {
         Some(("calc", _matches)) => {
             if let Err(error) = dave_calc_loop() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("chip8", _matches)) => {
+            // Get File and File Contents From User
+            if let Some(passed_rom) = matches.get_one::<String>("filename") {
+                let path = Path::new(passed_rom);
+                if path.exists() && path.metadata().unwrap().is_file() {
+                    let mut file = File::options()
+                        .read(true)
+                        .create(false)
+                        .open(path)
+                        .unwrap();
+                    let mut file_contents: Vec<u8> = Vec::new();
+                    if let Err(error) = file.read_to_end(&mut file_contents) {
+                        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    }
+
+                    let mut chip_8 = Chip8::start(&file_contents[..]);
+
+                    enable_raw_mode().unwrap();
+
+                    let mut output = io::stdout();
+                    execute!(output, EnterAlternateScreen, EnableMouseCapture).unwrap();
+
+                    let crossterm = CrosstermBackend::new(output);
+                    let mut terminal = Terminal::new(crossterm).unwrap();
+                    let result = run_dave_chip8_emulator(&mut terminal, &mut chip_8);
+
+                    execute!(
+                        terminal.backend_mut(),
+                        LeaveAlternateScreen,
+                        DisableMouseCapture,
+                    ).unwrap();
+                    disable_raw_mode().unwrap();
+
+                    println!("RESULT: {:?}", result);
+                }
+            } else {
+                println!("##==> A valid ROM file must be passed to the program. Try running 'dave chip8 --help' for more information");
             }
         },
         Some(("quiz", matches)) => {

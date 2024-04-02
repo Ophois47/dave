@@ -13,6 +13,7 @@ dave allows you to budget your income with 'budget'
 dave allows you to ponder and record your own thoughts using 'note'
 dave makes it possible to do complicated calculations with 'calc'
 dave lets you learn about the world around you with 'quiz'
+dave allows you to emulate a simple Chip8 processor with 'chip8'
 
 To Install Dave:
 ===================
@@ -62,9 +63,8 @@ Ideas I Want To Learn:
 16. Operating System Kernel
 17. Compiler or Interpreter
 18. Driver Code
-19. Interface with C libraries
-	- Experiment with unsafe
-20. Make Rep Max Calculator for weight lifting (X)
+19. Make Rep Max Calculator for weight lifting (X)
+20. Make a Chip8 Emulator (X)
 
 Dave Land!
 =============
@@ -75,3 +75,15 @@ $ cd dave_land_map
 $ awk -f dave_map.awk ../dave_land_file.ron > map.gv
 $ dot -Tpng -o dave_map.png map.gv
 $ cd ../
+
+
+Dave Chip8 Emulator!
+=======================
+The 'l', '↓'' and '↑'' are new keys only for the emulator:
+
+- The l switches between having the emulator fill the whole terminal or being confined to the resolution of the original Chip8 screen
+- The ↓ decrements the number of opcodes per cpu cycle
+- The ↑ increments the number of opcodes per cpu cycle
+- The ↓ decrements the number of opcodes per cpu cycle
+- The ← decrements the number of hz per cpu cycle
+- The → increments the number of hz per cpu cycle
