@@ -7,7 +7,8 @@ use std::thread;
 use std::time::Duration;
 
 fn test_question(question: &str, answer: &str, timeout: u32) -> Option<bool> {
-	print!("Q: {}\nA: ", question);
+	let question_string = format!("{}{}\n{}", "Q: ".purple(), question.white(), "A: ".purple());
+	print!("{}", question_string);
 	// Flush Question to Display
 	io::stdout().flush().expect("Failed to flush buffer");
 
@@ -36,6 +37,7 @@ fn test_question(question: &str, answer: &str, timeout: u32) -> Option<bool> {
 		.ok() // 'ok' Changes 'Result<A,B>' into 'Option<A>'
 		.map(|buffer| buffer == answer); // Use Mapping Function to Transform Option<String> to Option<bool>
 
+	println!();
 	// Function Will Return 1 of 3 Things
 	// Some(true) if Answer Correct
 	// Some(false) if Answer Wrong
