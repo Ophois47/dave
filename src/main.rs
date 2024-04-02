@@ -79,7 +79,7 @@ fn argument_parser() -> ArgMatches {
         .subcommand(Command::new("calc")
             .about("Use the program's calculator"))
         .subcommand(Command::new("chip8")
-            .about("Use Dave's Chip8 emulator. Created in 1977, CHIP-8 is the original fantasy console. Initially designed to ease game development for the COSMAC VIP kit computer")
+            .about("Use Dave's very own Chip8 emulator")
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
                 .value_name("path")
@@ -387,7 +387,7 @@ fn main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
-        Some(("chip8", _matches)) => {
+        Some(("chip8", matches)) => {
             // Get File and File Contents From User
             if let Some(passed_rom) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_rom);
@@ -403,15 +403,16 @@ fn main() {
                     }
 
                     let mut chip_8 = Chip8::start(&file_contents[..]);
-
+                    
                     enable_raw_mode().unwrap();
-
                     let mut output = io::stdout();
                     execute!(output, EnterAlternateScreen, EnableMouseCapture).unwrap();
 
                     let crossterm = CrosstermBackend::new(output);
                     let mut terminal = Terminal::new(crossterm).unwrap();
-                    let result = run_dave_chip8_emulator(&mut terminal, &mut chip_8);
+                    if let Err(error) = run_dave_chip8_emulator(&mut terminal, &mut chip_8) {
+                        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    }
 
                     execute!(
                         terminal.backend_mut(),
@@ -420,7 +421,7 @@ fn main() {
                     ).unwrap();
                     disable_raw_mode().unwrap();
 
-                    println!("RESULT: {:?}", result);
+                    println!("{}", "!!! Thank you for using David's Chip8 Emulator !!!".yellow());
                 }
             } else {
                 println!("##==> A valid ROM file must be passed to the program. Try running 'dave chip8 --help' for more information");

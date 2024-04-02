@@ -14,7 +14,7 @@ use tui::{
 	Terminal,
 };
 
-const MEM_SIZE: usize = 400;
+const MEM_SIZE: usize = 4096;
 const STACK_SIZE: usize = 16;
 const VX_REGISTERS: usize = 16;
 const START_LOCATION: usize = 0x200;
@@ -358,9 +358,6 @@ impl Chip8 {
         }
         self.pc += 2;
         self.keyboard[self.vx[vx_reg] as usize] = false;
-        /* for i in &mut self.keyboard{
-            *i = false;
-        } */
     }
 
     fn _fx07(&mut self, vx_reg: usize) {
@@ -436,7 +433,7 @@ fn ui<B>(
 	B: Backend,
 {
 	let title = format!(
-		"Chip8|opcodes per cycle:{}|timer between cpu cycles:{} hz",
+		"| David's Chip8 Emulator | Opcodes Per Cycle: {} | Timer Between CPU Cycles: {} Hz | Press (Esc) to Exit |",
 		opcodes_per_cycle,
 		timer_hz,
 	);
@@ -543,6 +540,10 @@ where
 
         	chip8.execute_next_opcode();
 
+        	if timer_hz > 105 {
+        		return Ok(());
+        	}
+
         	terminal
         		.draw(|f| {
         			ui(
@@ -574,7 +575,7 @@ mod test {
 		let mut file = File::options()
 			.read(true)
 			.create(false)
-			.open("./daves_roms/TETRIS")
+			.open("./dave_conf/var/daves_roms/TETRIS")
 			.unwrap();
 
 		let mut file_contents: Vec<u8> = Vec::new();
@@ -582,9 +583,7 @@ mod test {
 
 		let mut chip_8 = Chip8::start(&file_contents[..]);
 
-		loop {
-			chip_8.execute_next_opcode();
-			println!();
-		}
+		chip_8.execute_next_opcode();
+		println!();
 	}
 }
