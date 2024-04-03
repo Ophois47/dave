@@ -451,7 +451,8 @@ fn ui<B>(
                         ctx.print(
                             x as f64,
                             (screen_height - y) as f64,
-                            Span::styled("█", Style::default().fg(Color::White)),
+                            // Span::styled("█", Style::default().fg(Color::White)),
+                            Span::styled("Dave", Style::default().fg(Color::Blue)),
                         );
                     }
                 }
@@ -538,10 +539,6 @@ where
                 }
             }
 
-        	if timer_hz > 105 {
-        		return Ok(());
-        	}
-
         	chip8.execute_next_opcode();
 
         	terminal
@@ -577,17 +574,10 @@ mod test {
 			.create(false)
 			.open("./dave_conf/var/daves_roms/TETRIS")
 			.expect("Unable to Open File");
-
 		let mut file_contents: Vec<u8> = Vec::new();
-		println!("FILE CONTENTS 1: {:?}", file_contents);
-		let data = file.read_to_end(&mut file_contents).expect("Unable to Read File");
-		println!("FILE CONTENTS 2: {}", data);
-
+		file.read_to_end(&mut file_contents).expect("Unable to Read File");
 		let mut chip_8 = Chip8::start(&file_contents[..]);
 
-		while data > 0 {
-			chip_8.execute_next_opcode();
-			println!();
-		}
+		chip_8.execute_next_opcode();
 	}
 }

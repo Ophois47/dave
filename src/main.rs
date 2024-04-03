@@ -79,7 +79,7 @@ fn argument_parser() -> ArgMatches {
         .subcommand(Command::new("calc")
             .about("Use the program's calculator"))
         .subcommand(Command::new("chip8")
-            .about("Use Dave's very own Chip8 emulator")
+            .about("Use Dave's very own rudimentary Chip8 emulator")
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
                 .value_name("path")
@@ -403,7 +403,7 @@ fn main() {
                     }
 
                     let mut chip_8 = Chip8::start(&file_contents[..]);
-                    
+
                     enable_raw_mode().unwrap();
                     let mut output = io::stdout();
                     execute!(output, EnterAlternateScreen, EnableMouseCapture).unwrap();
