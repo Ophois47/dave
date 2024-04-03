@@ -431,6 +431,7 @@ fn ui<B>(
     timer_hz: u8,
     screen_height: usize,
     screen_width: usize,
+    pixel_string: String,
 ) where
     B: Backend,
 {
@@ -451,8 +452,12 @@ fn ui<B>(
                         ctx.print(
                             x as f64,
                             (screen_height - y) as f64,
-                            // Span::styled("█", Style::default().fg(Color::White)),
-                            Span::styled("Dave", Style::default().fg(Color::Blue)),
+                            Span::styled(pixel_string.clone(), Style::default().fg(Color::Blue)),
+                            /*if pixel_string == "Default" || pixel_string == "default" {
+                            	Span::styled("█", Style::default().fg(Color::White));
+                            } else {
+                            	Span::styled(pixel_string.clone(), Style::default().fg(Color::Blue));
+                            }*/
                         );
                     }
                 }
@@ -464,7 +469,7 @@ fn ui<B>(
     f.render_widget(canvas, f.size());
 }
 
-pub fn run_dave_chip8_emulator<B>(terminal: &mut Terminal<B>, chip8: &mut Chip8) -> io::Result<()>
+pub fn run_dave_chip8_emulator<B>(terminal: &mut Terminal<B>, chip8: &mut Chip8, pixel_string: String) -> io::Result<()>
 where
 	B: Backend,
 {
@@ -550,6 +555,7 @@ where
         				timer_hz,
         				screen_height,
         				screen_width,
+        				pixel_string.clone(),
         			)
         		})
         		.expect("It was not possible to draw any more");

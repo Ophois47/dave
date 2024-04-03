@@ -81,9 +81,9 @@ Dave Chip8 Emulator!
 =======================
 The 'l', '↓'' and '↑'' are new keys only for the emulator:
 
-- The l switches between having the emulator fill the whole terminal or being confined to the resolution of the original Chip8 screen
-- The ↓ decrements the number of opcodes per cpu cycle
-- The ↑ increments the number of opcodes per cpu cycle
-- The ↓ decrements the number of opcodes per cpu cycle
-- The ← decrements the number of hz per cpu cycle
-- The → increments the number of hz per cpu cycle
+- The 'l' key switches between having the emulator fill the whole terminal or being confined to the resolution of the original Chip8 screen
+- The ↓ Decrements the Number of Opcodes Per CPU Cycle
+- The ↑ Increments the Number of Opcodes Per CPU Cycle
+- The ↓ Decrements the Number of Opcodes Per CPU Cycle
+- The ← Decrements the Number of Hz Per CPU Cycle
+- The → Increments the Number of Hz Per CPU Cycle

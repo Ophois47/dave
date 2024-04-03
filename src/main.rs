@@ -80,6 +80,13 @@ fn argument_parser() -> ArgMatches {
             .about("Use the program's calculator"))
         .subcommand(Command::new("chip8")
             .about("Use Dave's very own rudimentary Chip8 emulator")
+            .arg(Arg::new("pixel")
+                .long("pixel")
+                .short('p')
+                .value_parser(value_parser!(String))
+                .value_name("char/string")
+                .num_args(1)
+                .help("Choose the pixel string or character for the Chip8 Emulator to use"))
             .arg(Arg::new("filename")
                 .value_parser(value_parser!(String))
                 .value_name("path")
@@ -388,6 +395,24 @@ fn main() {
             }
         },
         Some(("chip8", matches)) => {
+            // Check if User Has Chosen a Different Pixel Style
+            let mut pixel_choice = "█";
+            if let Some(user_pixel) = matches.get_one::<String>("pixel") {
+                if user_pixel.len() > 6 {
+                    eprintln!(
+                        "{}",
+                        "##==>>>> ERROR: Pixel String Length Must Not Exceed 6 Characters. Using Default\n".red()
+                    );
+                } else if user_pixel.len() == 0 || user_pixel == " " {
+                    eprintln!(
+                        "{}",
+                        "##==>>>> ERROR: Pixel String Length Cannot be Empty. Using Default\n".red()
+                    );
+                } else {
+                    pixel_choice = user_pixel;
+                }
+            }
+
             // Get File and File Contents From User
             if let Some(passed_rom) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_rom);
@@ -410,7 +435,7 @@ fn main() {
 
                     let crossterm = CrosstermBackend::new(output);
                     let mut terminal = Terminal::new(crossterm).unwrap();
-                    if let Err(error) = run_dave_chip8_emulator(&mut terminal, &mut chip_8) {
+                    if let Err(error) = run_dave_chip8_emulator(&mut terminal, &mut chip_8, pixel_choice.to_string()) {
                         eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                     }
 
