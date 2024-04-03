@@ -94,20 +94,20 @@ impl Chip8 {
 
 	// Removes 1 From the "Timer Register" and "Sound Timer"
 	fn update(&mut self) {
-		self.DT -= if self.DT > 0 { 1 } else { 0 };
-		self.ST -= if self.ST > 0 { 1 } else { 0 };
+		self.DT -= if self.DT > 0 { 1 } else {0};
+        self.ST -= if self.ST > 0 { 1 } else {0};
 	}
 
 	// Runs Through One Opcode and Returns Run Opcode
 	fn execute_next_opcode(&mut self) -> u16 {
 		let opcode = u16::from_be_bytes([self.memory[self.PC], self.memory[self.PC + 1]]);
 
-        //we divide the opcode into 4 4 bits values
-        let x = ((opcode >> 8) & 0xF) as usize; //lower 4 bits of first byte
-        let y = ((opcode >> 4) & 0xF) as usize; //higher 4 bits of second byte
-        let n = (opcode & 0xF) as u8; //lower 4 bits of second byte
-        let nnn = (opcode & 0xFFF) as u16; //lower 12 bits of opcode
-        let kk = (opcode & 0xFF) as u8; //lower bits 8 of opcode
+        // Divide Opcode Into Four 4 Bit Values
+        let x = ((opcode >> 8) & 0xF) as usize; // Lower 4 Bits of First Byte
+        let y = ((opcode >> 4) & 0xF) as usize; // Higher 4 Bits of Second Byte
+        let n = (opcode & 0xF) as u8; // Lower 4 Bits of Second Byte
+        let nnn = (opcode & 0xFFF) as u16; // Lower 12 Bits of Opcode
+        let kk = (opcode & 0xFF) as u8; // Lower Bits 8 of Opcode
         
         match &opcode & 0xF000 {
             0x0000 => match opcode {
@@ -159,25 +159,24 @@ impl Chip8 {
 
             _ => self.no_opcode_found(),
         };
-        
         opcode
     }
 
     // Sets to True the Desired Key and Returns Ok or Error
-    fn set_key<'a>(&'a mut self, x: usize) -> Result<(), &'a str> {
-    	*(self.keyboard.get_mut(x).unwrap()) = true;
-    	Ok(())
+    pub fn set_key<'a>(&'a mut self,x: usize) -> Result<(),&'a str> {
+        *(self.keyboard.get_mut(x).unwrap()) = true;
+        Ok(())
     }
 
     // Sets All of the Keys to Those of the Array Passed in Args
-    pub fn set_keys(&mut self, keys: &[bool]) {
-    	for i in 0..16 {
-    		self.keyboard[i] = keys[i];
-    	}
+    pub fn set_keys(&mut self,keys: &[bool]) {
+        for i in 0..16{
+            self.keyboard[i] = keys[i];
+        }
     }
 
-    fn get_pixel(&self, x: usize, y: usize) -> u8 {
-    	self.monitor[y % SCREEN_HEIGHT][x % SCREEN_WIDTH]
+    fn get_pixel(&self,x: usize,y: usize) -> u8 {
+        self.monitor[y % SCREEN_HEIGHT][x % SCREEN_WIDTH]
     }
 }
 
@@ -360,10 +359,6 @@ impl Chip8 {
         }
         self.PC += 2;
         self.keyboard[self.Vx[Vx_reg] as usize] = false;
-/* 
-        for i in &mut self.keyboard{
-            *i = false;
-        } */
     }
 
     fn _Fx07(&mut self, Vx_reg: usize) {
@@ -430,43 +425,42 @@ impl Chip8 {
 }
 
 fn ui<B>(
-	f: &mut Frame<B>,
-	chip8: &Chip8,
-	opcodes_per_cycle: u8,
-	timer_hz: u8,
-	screen_height: usize,
-	screen_width: usize,
+    f: &mut Frame<B>,
+    chip8: &Chip8,
+    opcodes_per_cycle: u8,
+    timer_hz: u8,
+    screen_height: usize,
+    screen_width: usize,
 ) where
-	B: Backend,
+    B: Backend,
 {
-	let title = format!(
-		"| David's Chip8 Emulator | Opcodes Per Cycle: {} | Timer Between CPU Cycles: {} Hz | Press (Esc) to Exit |",
-		opcodes_per_cycle,
-		timer_hz,
-	);
-	let canvas = Canvas::default()
-		.block(
-			Block::default()
-				.borders(Borders::ALL)
-				.title(title.to_owned()),
-		)
-		.paint(|ctx| {
-			for y in 0..SCREEN_HEIGHT {
-				for x in 0..SCREEN_WIDTH {
-					if chip8.get_pixel(x, y) == 1 {
-						ctx.print(
-							x as f64,
-							(screen_height - y) as f64,
-							Span::styled("", Style::default().fg(Color::White)),
-						);
-					}
-				}
-			}
-		})
-		.x_bounds([0.0, screen_width as f64])
-		.y_bounds([0.0, screen_height as f64]);
+    let title = format!(
+        "| David's Chip8 Emulator | Opcodes Per Cycle: {} | Timer Between CPU Cycles: {} Hz | Press (Esc) to Exit |",
+        opcodes_per_cycle, timer_hz
+    );
+    let canvas = Canvas::default()
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(title.to_owned()),
+        )
+        .paint(|ctx| {
+            for y in 0..SCREEN_HEIGHT {
+                for x in 0..SCREEN_WIDTH {
+                    if chip8.get_pixel(x, y) == 1 {
+                        ctx.print(
+                            x as f64,
+                            (screen_height - y) as f64,
+                            Span::styled("█", Style::default().fg(Color::White)),
+                        );
+                    }
+                }
+            }
+        })
+        .x_bounds([0.0, screen_width as f64])
+        .y_bounds([0.0, screen_height as f64]);
 
-	f.render_widget(canvas, f.size());
+    f.render_widget(canvas, f.size());
 }
 
 pub fn run_dave_chip8_emulator<B>(terminal: &mut Terminal<B>, chip8: &mut Chip8) -> io::Result<()>
