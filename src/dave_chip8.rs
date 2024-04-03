@@ -453,11 +453,6 @@ fn ui<B>(
                             x as f64,
                             (screen_height - y) as f64,
                             Span::styled(pixel_string.clone(), Style::default().fg(Color::Blue)),
-                            /*if pixel_string == "Default" || pixel_string == "default" {
-                            	Span::styled("█", Style::default().fg(Color::White));
-                            } else {
-                            	Span::styled(pixel_string.clone(), Style::default().fg(Color::Blue));
-                            }*/
                         );
                     }
                 }

@@ -416,7 +416,10 @@ fn main() {
             // Get File and File Contents From User
             if let Some(passed_rom) = matches.get_one::<String>("filename") {
                 let path = Path::new(passed_rom);
-                if path.exists() && path.metadata().unwrap().is_file() {
+                if !path.exists() {
+                    let bad_path_string = format!("##==>>>> ERROR: Invalid Path - '{}'", path.display());
+                    eprintln!("{}", bad_path_string.red());
+                } else if path.exists() && path.metadata().unwrap().is_file() {
                     let mut file = File::options()
                         .read(true)
                         .create(false)

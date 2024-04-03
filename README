@@ -35,6 +35,28 @@ To Run Dave:
 For now, use the release binary in '{PROJECT_DIR}/target/release/dave'.
 Run 'dave --help' to get started, or copy the 'dave' binary to '/usr/bin'.
 
+Dave Land!
+=============
+Run these commands when creating a new dave_land PNG map image after changing locations or 
+creating new ones or altering connections for locations or possible pathways between locations.
+
+$ cd dave_land_map
+$ awk -f dave_map.awk ../dave_land_file.ron > map.gv
+$ dot -Tpng -o dave_map.png map.gv
+$ cd ../
+
+
+Dave Chip8 Emulator!
+=======================
+The 'l', '↓'' and '↑'' are new keys only for the emulator:
+
+- The 'l' key switches between having the emulator fill the whole terminal or being confined to the resolution of the original Chip8 screen
+- The ↓ Decrements the Number of Opcodes Per CPU Cycle
+- The ↑ Increments the Number of Opcodes Per CPU Cycle
+- The ↓ Decrements the Number of Opcodes Per CPU Cycle
+- The ← Decrements the Number of Hz Per CPU Cycle
+- The → Increments the Number of Hz Per CPU Cycle
+
 Ideas I Want To Learn:
 ==========================
 1.  Text Based Adventure Game (X)
@@ -65,25 +87,3 @@ Ideas I Want To Learn:
 18. Driver Code
 19. Make Rep Max Calculator for weight lifting (X)
 20. Make a Chip8 Emulator (X)
-
-Dave Land!
-=============
-Run these commands when creating a new dave_land PNG map image after changing locations or 
-creating new ones or altering connections for locations or possible pathways between locations.
-
-$ cd dave_land_map
-$ awk -f dave_map.awk ../dave_land_file.ron > map.gv
-$ dot -Tpng -o dave_map.png map.gv
-$ cd ../
-
-
-Dave Chip8 Emulator!
-=======================
-The 'l', '↓'' and '↑'' are new keys only for the emulator:
-
-- The 'l' key switches between having the emulator fill the whole terminal or being confined to the resolution of the original Chip8 screen
-- The ↓ Decrements the Number of Opcodes Per CPU Cycle
-- The ↑ Increments the Number of Opcodes Per CPU Cycle
-- The ↓ Decrements the Number of Opcodes Per CPU Cycle
-- The ← Decrements the Number of Hz Per CPU Cycle
-- The → Increments the Number of Hz Per CPU Cycle
