@@ -458,7 +458,7 @@ fn main() {
         Some(("quiz", matches)) => {
             let mut total_questions = 5;
             if let Some(gotten_question_amount) = matches.get_one::<usize>("#") {
-                if *gotten_question_amount > 0 && *gotten_question_amount < 16 {
+                if *gotten_question_amount < 16 {
                     total_questions = *gotten_question_amount;
                 } else {
                     println!(
