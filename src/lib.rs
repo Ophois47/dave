@@ -17,5 +17,6 @@ pub mod dave_notes;
 pub mod dave_perceptron;
 pub mod dave_quiz;
 pub mod dave_rep_max;
+pub mod dave_scrape;
 pub mod release;
 pub mod utils;

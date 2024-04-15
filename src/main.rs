@@ -42,6 +42,7 @@ use davelib::dave_notes::*;
 use davelib::dave_perceptron::daves_perceptron;
 use davelib::dave_quiz::*;
 use davelib::dave_rep_max::dave_rep_max_calc;
+use davelib::dave_scrape::*;
 use davelib::utils::*;
 use davelib::release;
 use davelib::release::*;
@@ -186,6 +187,12 @@ fn argument_parser() -> ArgMatches {
                 .value_name("filename")
                 .num_args(1)
                 .help("The file or directory passed to DCRYPT for it to do all its crypty business with")))
+        .subcommand(Command::new("scraper")
+            .about("This program will scrape the internet for valuable and tasty information")
+            .arg(Arg::new("top100")
+                .long("top100")
+                .action(ArgAction::SetTrue)
+                .help("See the IMDB top 100 list")))
         .subcommand(Command::new("perceptron")
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
@@ -392,6 +399,13 @@ fn main() {
         Some(("calc", _matches)) => {
             if let Err(error) = dave_calc_loop() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("scraper", matches)) => {
+            if matches.get_flag("top100") {
+                if let Err(error) = imdb_top100_scraper() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
             }
         },
         Some(("chip8", matches)) => {
