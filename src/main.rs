@@ -187,12 +187,16 @@ fn argument_parser() -> ArgMatches {
                 .value_name("filename")
                 .num_args(1)
                 .help("The file or directory passed to DCRYPT for it to do all its crypty business with")))
-        .subcommand(Command::new("scraper")
+        .subcommand(Command::new("scrape")
             .about("This program will scrape the internet for valuable and tasty information")
             .arg(Arg::new("top100")
                 .long("top100")
                 .action(ArgAction::SetTrue)
-                .help("See the IMDB top 100 list")))
+                .help("See the IMDB top 100 list"))
+            .arg(Arg::new("bball")
+                .long("bball")
+                .action(ArgAction::SetTrue)
+                .help("Basketball scores")))
         .subcommand(Command::new("perceptron")
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
@@ -401,9 +405,14 @@ fn main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
-        Some(("scraper", matches)) => {
+        Some(("scrape", matches)) => {
             if matches.get_flag("top100") {
                 if let Err(error) = imdb_top100_scraper() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("bball") {
+                if let Err(error) = bball_scraper() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
