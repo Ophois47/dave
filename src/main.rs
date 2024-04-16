@@ -193,6 +193,10 @@ fn argument_parser() -> ArgMatches {
                 .long("top100")
                 .action(ArgAction::SetTrue)
                 .help("See the IMDB top 100 list"))
+            .arg(Arg::new("nba")
+                .long("nba")
+                .action(ArgAction::SetTrue)
+                .help("See the NBA games for today"))
             .arg(Arg::new("dcs")
                 .long("dcs")
                 .action(ArgAction::SetTrue)
@@ -413,6 +417,11 @@ fn main() {
             }
             if matches.get_flag("dcs") {
                 if let Err(error) = dcs_news_scraper() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("nba") {
+                if let Err(error) = nba_scores_scraper() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
