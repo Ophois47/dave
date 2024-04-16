@@ -193,10 +193,10 @@ fn argument_parser() -> ArgMatches {
                 .long("top100")
                 .action(ArgAction::SetTrue)
                 .help("See the IMDB top 100 list"))
-            .arg(Arg::new("bball")
-                .long("bball")
+            .arg(Arg::new("dcs")
+                .long("dcs")
                 .action(ArgAction::SetTrue)
-                .help("Basketball scores")))
+                .help("Recent DCS: Digital Combat Simulator news")))
         .subcommand(Command::new("perceptron")
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
@@ -411,8 +411,8 @@ fn main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
-            if matches.get_flag("bball") {
-                if let Err(error) = bball_scraper() {
+            if matches.get_flag("dcs") {
+                if let Err(error) = dcs_news_scraper() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }

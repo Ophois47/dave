@@ -1,6 +1,6 @@
 [package]
 name = "dave"
-version = "8.1.0"
+version = "8.1.1"
 edition = "2021"
 
 [lib]
@@ -19,6 +19,7 @@ chrono = "0.4"
 age = "0.10"
 bincode = "1"
 bytesize = "1"
+chrono = "0.4"
 clap = "4"
 colored = "2"
 crossterm = "0.27"

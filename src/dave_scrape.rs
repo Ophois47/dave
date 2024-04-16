@@ -1,6 +1,14 @@
 use std::io;
+use chrono::{DateTime, Local};
 
 pub fn imdb_top100_scraper() -> io::Result<()> {
+	let current_local: DateTime<Local> = Local::now();
+	let date_format = current_local.format("%m-%d-%Y");
+	println!(
+		"##==>> Current IMDB Top 100 as of {}\n",
+		date_format,
+	);
+
 	let response = reqwest::blocking::get(
 		"https://www.imdb.com/search/title/?groups=top_100&sort=user_rating,desc&count=100",
 	)
@@ -10,38 +18,40 @@ pub fn imdb_top100_scraper() -> io::Result<()> {
 	let document = scraper::Html::parse_document(&response);
 	let title_selector = scraper::Selector::parse("h3.ipc-title__text").unwrap();
 	let titles = document.select(&title_selector).map(|x| x.inner_html());
-	titles.zip(1..101).for_each(|(item, _number)| println!("{}", item));
 
+	titles.zip(1..101).for_each(|(item, _number)| println!("{}", item));
 	Ok(())
 }
 
-pub fn bball_scraper() -> io::Result<()> {
-	let html_content = reqwest::blocking::get(
-		"https://www.espn.com/nba/scoreboard",
+pub fn dcs_news_scraper() -> io::Result<()> {
+	let current_local: DateTime<Local> = Local::now();
+	let date_format = current_local.format("%m-%d-%Y");
+	println!(
+		"##==>> Current News Stories Posted on 'https://www.digitalcombatsimulator.com/en/' as of {}\n",
+		date_format,
+	);
+
+	let response = reqwest::blocking::get(
+		"https://www.digitalcombatsimulator.com/en/"
 	)
 	.unwrap()
 	.text()
 	.unwrap();
-	let document = scraper::Html::parse_document(&html_content);
-	let html_score_selector = scraper::Selector::parse("ul.ScoreboardScoreCell__Competitors").unwrap();
-	let html_scores = document.select(&html_score_selector);
+	let document = scraper::Html::parse_document(&response);
+	let news_selector = scraper::Selector::parse("div.news-item").unwrap();
+	let news_posts = document.select(&news_selector).map(|x| x.inner_html());
 
-	for html_score in html_scores {
-		println!("HTML SCORE: {:?}", html_score);
-		let winner = html_score
-			.select(&scraper::Selector::parse("li").unwrap())
-			.next()
-			.and_then(|a| a.value().attr("ScoreboardScoreCell__Item--winner"))
-			.map(str::to_owned);
-		println!("WINNER: {:?}", winner);
+	for post in news_posts {
+		let fragment = scraper::Html::parse_fragment(&post);
+		let date_selector = scraper::Selector::parse("div.date").unwrap();
+		let post_selector = scraper::Selector::parse("a").unwrap();
 
-		let loser = html_score
-			.select(&scraper::Selector::parse("li").unwrap())
-			.next()
-			.and_then(|a| a.value().attr("ScoreboardScoreCell__Item--loser"))
-			.map(str::to_owned);
-		println!("LOSER: {:?}", loser);
+		let post_input = fragment.select(&post_selector).next().unwrap().inner_html();
+		println!("##==> Post Title: {:?}", post_input);
+		let date_input = fragment.select(&date_selector).next().unwrap().inner_html();
+		println!("##==> Date Posted: {:?}", date_input);
+		println!();
 	}
-	
+
 	Ok(())
 }
