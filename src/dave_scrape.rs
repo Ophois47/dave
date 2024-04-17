@@ -67,38 +67,61 @@ pub fn nba_scores_scraper() -> io::Result<()> {
 
 	let date_reqwest_format = current_local.format("%Y%m%d");
 	let reqwest_string = format!("https://www.cbssports.com/nba/scoreboard/{}/", date_reqwest_format);
-	let response = reqwest::blocking::get(reqwest_string)
+	let response = reqwest::blocking::get(reqwest_string.clone())
 		.unwrap()
 		.text()
 		.unwrap();
 
+	let mut game_number = 0;
 	let document = scraper::Html::parse_document(&response);
-	let nba_game_selector = scraper::Selector::parse("div.in-progress-table.section").unwrap();
+	let nba_game_selector = scraper::Selector::parse("div.live-update").unwrap();
 	let nba_game_results = document.select(&nba_game_selector).map(|x| x.inner_html());
 
 	for game in nba_game_results {
+		game_number += 1;
 		let game_fragment = scraper::Html::parse_fragment(&game);
 		let game_selector = scraper::Selector::parse("table").unwrap();
 		let game_status = game_fragment.select(&game_selector).next().unwrap().inner_html();
 		let fragment = scraper::Html::parse_fragment(&game_status);
 
+		// Get Team Names
 		let team_selector = scraper::Selector::parse("a.team-name-link").unwrap();
 		let teams = fragment.select(&team_selector).map(|x| x.inner_html());
 		let mut teams_vec = vec![];
 		for team in teams.clone() {
 			teams_vec.push(team);
 		}
+		println!("##==> Game #{}", game_number);
 		println!("##==> The {} vs The {}", teams_vec[0], teams_vec[1]);
 
-		// let score_selector = scraper::Selector::parse("td.total").unwrap();
-		// let scores = fragment.select(&score_selector).map(|x| x.inner_html());
-		/*let mut scores_vec = vec![];
-		for score in scores {
-			println!("SCORE: {:?}", score);
-			scores_vec.push(score);
+		// Get Odds For Future Games When Applicable
+		let odds_selector = scraper::Selector::parse("td.in-progress-odds").unwrap();
+		let odds = game_fragment.select(&odds_selector).map(|x| x.inner_html());
+		let mut odds_vec = vec![];
+		for odd in odds {
+			odds_vec.push(odd);
 		}
-		println!("SCORE_VEC: {:?}", scores_vec);*/
+		println!("##==> Home Team {} Points Spread: {}", teams_vec[1], odds_vec[1]);
+		println!("##==> Away Team {} Odds: {}", teams_vec[0], odds_vec[0]);
 
+		// Find What Network is Broadcasting the Game
+		let broadcaster_selector = scraper::Selector::parse("div.broadcaster").unwrap();
+		let broadcasters = game_fragment.select(&broadcaster_selector).map(|x| x.inner_html());
+		let mut broadcaster_vec = vec![];
+		for broadcaster in broadcasters {
+			broadcaster_vec.push(broadcaster);
+		}
+		// Find Game Time
+		let browser = headless_chrome::Browser::default().unwrap();
+		let tab = browser.new_tab().unwrap();
+		tab.navigate_to(&reqwest_string.as_str()).unwrap();
+		let game_times = tab.wait_for_elements("span.formatter").unwrap();
+		let mut times_vec = vec![];
+		for game_time in game_times {
+			times_vec.push(game_time.get_inner_text().unwrap());
+		}
+
+		println!("##==> This Match Will Be Shown On {} at {}", broadcaster_vec[0], times_vec[game_number - 1]);
 		println!();
 	}
 	Ok(())
