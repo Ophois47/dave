@@ -73,6 +73,8 @@ pub fn scores_scraper(chosen_sport: String) -> io::Result<()> {
 		sport = "nba";
 	} else if chosen_sport == "NHL" {
 		sport = "nhl";
+	} else if chosen_sport == "MLB" {
+		sport = "mlb";
 	}
 
 	// Look Up Scoreboard Based on User Chosen Sport
@@ -87,6 +89,7 @@ pub fn scores_scraper(chosen_sport: String) -> io::Result<()> {
 	let document = scraper::Html::parse_document(&response);
 	let nba_game_selector = scraper::Selector::parse("div.live-update").unwrap();
 	let nba_game_results = document.select(&nba_game_selector).map(|x| x.inner_html());
+	let mut is_live = false;
 
 	for game in nba_game_results {
 		game_number += 1;
@@ -150,11 +153,32 @@ pub fn scores_scraper(chosen_sport: String) -> io::Result<()> {
 			times_vec.push(game_time.get_inner_text().unwrap());
 		}
 
+		// Find How Many Matches Are In Progress
+		let live_matches_selector = scraper::Selector::parse("div.game-status.ingame").unwrap();
+		let live_matches = game_fragment.select(&live_matches_selector).map(|x| x.inner_html());
+		let mut live_matches_vec = vec![];
+		for live_match in live_matches {
+			live_matches_vec.push(live_match);
+		}
+
+		// TODO: Handle When Live Games Are Currently Happening
+		// For Now It Wont Print Game Times Or Networks When 
+		// Live Games Are Happening
+		if live_matches_vec.len() > 0 {
+			is_live = true;
+		}
+
 		// Print Information For Future Games
-		if broadcaster_vec[0] != "" && times_vec.len() > 0 {
-			println!("##==> This Match Will Be Shown On {} at {}", broadcaster_vec[0], times_vec[game_number - 1]);
-		} else if broadcaster_vec[0] == "" && times_vec.len() > 0 {
-			println!("##==> This Match Will Be Shown at {}", times_vec[game_number - 1]);
+		if !is_live {
+			if broadcaster_vec[0] != "" && times_vec.len() > 0 {
+				println!(
+					"##==> This Match Will Be Shown On {} at {}",
+					broadcaster_vec[0],
+					times_vec[game_number - 1]
+				);
+			} else if broadcaster_vec[0] == "" && times_vec.len() > 0 {
+				println!("##==> This Match Will Be Shown at {}", times_vec[game_number - 1]);
+			}
 		}
 		println!("##==> -------------------------------------------");
 		println!();

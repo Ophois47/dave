@@ -198,7 +198,7 @@ fn argument_parser() -> ArgMatches {
                 .value_parser(value_parser!(String))
                 .value_name("sport")
                 .num_args(1)
-                .value_parser(["NBA", "NHL"])
+                .value_parser(["NBA", "NHL", "MLB"])
                 .help("See the scores for today"))
             .arg(Arg::new("dcs")
                 .long("dcs")
