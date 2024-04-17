@@ -193,10 +193,13 @@ fn argument_parser() -> ArgMatches {
                 .long("top100")
                 .action(ArgAction::SetTrue)
                 .help("See the IMDB top 100 list"))
-            .arg(Arg::new("nba")
-                .long("nba")
-                .action(ArgAction::SetTrue)
-                .help("See the NBA games for today"))
+            .arg(Arg::new("sports")
+                .long("sports")
+                .value_parser(value_parser!(String))
+                .value_name("sport")
+                .num_args(1)
+                .value_parser(["NBA", "NHL"])
+                .help("See the scores for today"))
             .arg(Arg::new("dcs")
                 .long("dcs")
                 .action(ArgAction::SetTrue)
@@ -420,8 +423,8 @@ fn main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
-            if matches.get_flag("nba") {
-                if let Err(error) = nba_scores_scraper() {
+            if let Some(chosen_sport) = matches.get_one::<String>("sports") {
+                if let Err(error) = scores_scraper(chosen_sport.to_string()) {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }

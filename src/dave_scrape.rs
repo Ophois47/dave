@@ -57,21 +57,32 @@ pub fn dcs_news_scraper() -> io::Result<()> {
 	Ok(())
 }
 
-pub fn nba_scores_scraper() -> io::Result<()> {
+pub fn scores_scraper(chosen_sport: String) -> io::Result<()> {
 	let current_local: DateTime<Local> = Local::now();
 	let date_format = current_local.format("%m-%d-%Y");
 	println!(
-		"##==>> Checking Current Basketball Scores for {} ...\n",
+		"##==>> Checking Current {} Scores for {} ...\n",
+		chosen_sport,
 		date_format,
 	);
 
+	// Format Current Date String to Match CBS-Sports URL Style
 	let date_reqwest_format = current_local.format("%Y%m%d");
-	let reqwest_string = format!("https://www.cbssports.com/nba/scoreboard/{}/", date_reqwest_format);
+	let mut sport = "";
+	if chosen_sport == "NBA" {
+		sport = "nba";
+	} else if chosen_sport == "NHL" {
+		sport = "nhl";
+	}
+
+	// Look Up Scoreboard Based on User Chosen Sport
+	let reqwest_string = format!("https://www.cbssports.com/{}/scoreboard/{}/", sport, date_reqwest_format);
 	let response = reqwest::blocking::get(reqwest_string.clone())
 		.unwrap()
 		.text()
 		.unwrap();
 
+	// Keep Track of How Many Games Are/Were Scheduled
 	let mut game_number = 0;
 	let document = scraper::Html::parse_document(&response);
 	let nba_game_selector = scraper::Selector::parse("div.live-update").unwrap();
@@ -142,6 +153,8 @@ pub fn nba_scores_scraper() -> io::Result<()> {
 		// Print Information For Future Games
 		if broadcaster_vec[0] != "" && times_vec.len() > 0 {
 			println!("##==> This Match Will Be Shown On {} at {}", broadcaster_vec[0], times_vec[game_number - 1]);
+		} else if broadcaster_vec[0] == "" && times_vec.len() > 0 {
+			println!("##==> This Match Will Be Shown at {}", times_vec[game_number - 1]);
 		}
 		println!("##==> -------------------------------------------");
 		println!();
