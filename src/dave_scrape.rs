@@ -75,6 +75,16 @@ pub fn scores_scraper(chosen_sport: String) -> io::Result<()> {
 		sport = "nhl";
 	} else if chosen_sport == "MLB" {
 		sport = "mlb";
+	} else if chosen_sport == "MLS" {
+		sport = "mls";
+	} else if chosen_sport == "NFL" {
+		sport = "nfl";
+	} else if chosen_sport == "WNBA" {
+		sport = "wnba";
+	} else if chosen_sport == "NCAA-FB" {
+		sport = "college-football";
+	} else if chosen_sport == "NCAA-BB" {
+		sport = "college-basketball";
 	}
 
 	// Look Up Scoreboard Based on User Chosen Sport
@@ -174,7 +184,7 @@ pub fn scores_scraper(chosen_sport: String) -> io::Result<()> {
 				println!(
 					"##==> This Match Will Be Shown On {} at {}",
 					broadcaster_vec[0],
-					times_vec[game_number - 1]
+					times_vec[game_number - 1],
 				);
 			} else if broadcaster_vec[0] == "" && times_vec.len() > 0 {
 				println!("##==> This Match Will Be Shown at {}", times_vec[game_number - 1]);
@@ -182,6 +192,10 @@ pub fn scores_scraper(chosen_sport: String) -> io::Result<()> {
 		}
 		println!("##==> -------------------------------------------");
 		println!();
+	}
+
+	if game_number == 0 {
+		println!("##==>> There are no {} games today!", chosen_sport);
 	}
 	Ok(())
 }
