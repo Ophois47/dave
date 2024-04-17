@@ -58,6 +58,7 @@ pub fn dcs_news_scraper() -> io::Result<()> {
 }
 
 pub fn scores_scraper(chosen_sport: String) -> io::Result<()> {
+	// Get Current Date
 	let current_local: DateTime<Local> = Local::now();
 	let date_format = current_local.format("%m-%d-%Y");
 	println!(
@@ -68,23 +69,19 @@ pub fn scores_scraper(chosen_sport: String) -> io::Result<()> {
 
 	// Format Current Date String to Match CBS-Sports URL Style
 	let date_reqwest_format = current_local.format("%Y%m%d");
-	let mut sport = "";
-	if chosen_sport == "NBA" {
-		sport = "nba";
-	} else if chosen_sport == "NHL" {
-		sport = "nhl";
-	} else if chosen_sport == "MLB" {
-		sport = "mlb";
-	} else if chosen_sport == "MLS" {
-		sport = "mls";
-	} else if chosen_sport == "NFL" {
-		sport = "nfl";
-	} else if chosen_sport == "WNBA" {
-		sport = "wnba";
-	} else if chosen_sport == "NCAA-FB" {
-		sport = "college-football";
-	} else if chosen_sport == "NCAA-BB" {
-		sport = "college-basketball";
+
+	// Determine User Chosen Sport
+	let sport;
+	match chosen_sport.as_str() {
+		"NBA" => sport = "nba",
+		"NHL" => sport = "nhl",
+		"MLB" => sport = "mlb",
+		"MLS" => sport = "mls",
+		"NFL" => sport = "nfl",
+		"WNBA" => sport = "wnba",
+		"NCAA-FB" => sport = "college-football",
+		"NCAA-BB" => sport = "college-basketball",
+		_ => return Ok(()),
 	}
 
 	// Look Up Scoreboard Based on User Chosen Sport
