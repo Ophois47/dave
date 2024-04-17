@@ -61,7 +61,7 @@ pub fn nba_scores_scraper() -> io::Result<()> {
 	let current_local: DateTime<Local> = Local::now();
 	let date_format = current_local.format("%m-%d-%Y");
 	println!(
-		"##==>> Checking Current Basketball Scores for {}\n",
+		"##==>> Checking Current Basketball Scores for {} ...\n",
 		date_format,
 	);
 
@@ -92,7 +92,8 @@ pub fn nba_scores_scraper() -> io::Result<()> {
 			teams_vec.push(team);
 		}
 		println!("##==> Game #{}", game_number);
-		println!("##==> The {} vs The {}", teams_vec[0], teams_vec[1]);
+		println!("##==> {} vs {}", teams_vec[0], teams_vec[1]);
+		println!("##==> ------------------------------------------");
 
 		// Get Odds For Future Games When Applicable
 		let odds_selector = scraper::Selector::parse("td.in-progress-odds").unwrap();
@@ -101,8 +102,24 @@ pub fn nba_scores_scraper() -> io::Result<()> {
 		for odd in odds {
 			odds_vec.push(odd);
 		}
-		println!("##==> Home Team {} Points Spread: {}", teams_vec[1], odds_vec[1]);
-		println!("##==> Away Team {} Odds: {}", teams_vec[0], odds_vec[0]);
+		// Only Display Odds When They Are Found
+		if odds_vec.len() > 0 {
+			println!("##==> Home Team {} Points Spread: {}", teams_vec[1], odds_vec[1]);
+			println!("##==> Away Team {} Odds: {}", teams_vec[0], odds_vec[0]);
+		}
+
+		// Get Scores for Games That Happened
+		let score_selector = scraper::Selector::parse("td.total").unwrap();
+		let scores = game_fragment.select(&score_selector).map(|x| x.inner_html());
+		let mut scores_vec = vec![];
+		for score in scores {
+			scores_vec.push(score);
+		}
+		// Only Display Scores When They Are Found
+		if scores_vec.len() > 0 {
+			println!("##==> The {} Scored {} pts", teams_vec[0], scores_vec[0]);
+			println!("##==> The {} Scored {} pts", teams_vec[1], scores_vec[1]);
+		}
 
 		// Find What Network is Broadcasting the Game
 		let broadcaster_selector = scraper::Selector::parse("div.broadcaster").unwrap();
@@ -121,7 +138,10 @@ pub fn nba_scores_scraper() -> io::Result<()> {
 			times_vec.push(game_time.get_inner_text().unwrap());
 		}
 
-		println!("##==> This Match Will Be Shown On {} at {}", broadcaster_vec[0], times_vec[game_number - 1]);
+		// Print Information For Future Games
+		if broadcaster_vec[0] != "" && times_vec.len() > 0 {
+			println!("##==> This Match Will Be Shown On {} at {}", broadcaster_vec[0], times_vec[game_number - 1]);
+		}
 		println!();
 	}
 	Ok(())
