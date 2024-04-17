@@ -91,9 +91,10 @@ pub fn nba_scores_scraper() -> io::Result<()> {
 		for team in teams.clone() {
 			teams_vec.push(team);
 		}
+		println!("##==> -------------------------------------------");
 		println!("##==> Game #{}", game_number);
 		println!("##==> {} vs {}", teams_vec[0], teams_vec[1]);
-		println!("##==> ------------------------------------------");
+		println!("##==> -------------------------------------------");
 
 		// Get Odds For Future Games When Applicable
 		let odds_selector = scraper::Selector::parse("td.in-progress-odds").unwrap();
@@ -142,6 +143,7 @@ pub fn nba_scores_scraper() -> io::Result<()> {
 		if broadcaster_vec[0] != "" && times_vec.len() > 0 {
 			println!("##==> This Match Will Be Shown On {} at {}", broadcaster_vec[0], times_vec[game_number - 1]);
 		}
+		println!("##==> -------------------------------------------");
 		println!();
 	}
 	Ok(())
