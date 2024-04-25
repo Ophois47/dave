@@ -39,6 +39,7 @@ use davelib::dave_guess::guess_number;
 use davelib::dave_hash::*;
 use davelib::dave_land::dave_game_loop;
 use davelib::dave_notes::*;
+use davelib::dave_parse::parse_handle_file;
 use davelib::dave_perceptron::daves_perceptron;
 use davelib::dave_quiz::*;
 use davelib::dave_rep_max::dave_rep_max_calc;
@@ -208,13 +209,20 @@ fn argument_parser() -> ArgMatches {
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
             .about("This is a text based adventure game by Dave"))
+        .subcommand(Command::new("parse")
+            .about("Parse and get information for any sort of file.")
+            .arg(Arg::new("file")
+                .value_name("FILE")
+                .num_args(1)
+                .value_parser(value_parser!(String))
+                .help("Pass the file you wish to have parsed")))
         .subcommand(Command::new("note")
             .about("This is a notes keeping program")
             .arg(Arg::new("add")
                 .long("add")
                 .short('a')
                 .value_parser(value_parser!(String))
-                .value_name("note")
+                .value_name("NOTE NAME")
                 .num_args(1)
                 .help("Add a new note"))
             .arg(Arg::new("list")
@@ -231,7 +239,7 @@ fn argument_parser() -> ArgMatches {
                 .long("complete")
                 .short('c')
                 .value_parser(value_parser!(u64))
-                .value_name("id #")
+                .value_name("ID #")
                 .num_args(1)
                 .help("Complete an existing note by passing the Note ID#, found when running note with '--list'")))
         .subcommand(Command::new("budget")
@@ -245,7 +253,7 @@ fn argument_parser() -> ArgMatches {
                 .long("income")
                 .short('i')
                 .num_args(1)
-                .value_name("amount")
+                .value_name("AMOUNT")
                 .value_parser(value_parser!(f64))
                 .help("Add an amount of income to your budget"))
             .arg(Arg::new("expense")
@@ -273,17 +281,17 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("amount")
                 .num_args(1)
                 .value_parser(value_parser!(f32))
-                .value_name("value")
+                .value_name("VALUE")
                 .help("Pass an amount to convert into another world currency"))
             .arg(Arg::new("currency")
                 .num_args(1)
-                .value_name("currency code")
+                .value_name("CODE")
                 .value_parser(value_parser!(String))
                 .value_parser(["USD", "EUR", "GBP", "JPY", "CAD", "CNY", "AUD", "CHF", "SEK", "INR", "KRW", "NOK", "NZD", "RUB", "BRL", "SAR", "ILS", "DKK", "PLN", "MXN"])
                 .help("Pass a three letter ISO 4217 currency code to indicate the starting currency"))
             .arg(Arg::new("convert")
                 .num_args(1)
-                .value_name("currency code")
+                .value_name("CODE")
                 .value_parser(value_parser!(String))
                 .value_parser(["USD", "EUR", "GBP", "JPY", "CAD", "CNY", "AUD", "CHF", "SEK", "INR", "KRW", "NOK", "NZD", "RUB", "BRL", "SAR", "ILS", "DKK", "PLN", "MXN"])
                 .help("Enter the three letter ISO 4217 currency code you wish to convert your intial amount to")))
@@ -301,12 +309,12 @@ fn argument_parser() -> ArgMatches {
                 .value_name("weight lifted")
                 .num_args(1)
                 .value_parser(value_parser!(u16))
-                .help("Enter the weight lifted during the movement."))
+                .help("Enter the weight lifted during the movement"))
             .arg(Arg::new("reps")
                 .value_name("repetitions completed")
                 .num_args(1)
                 .value_parser(value_parser!(u16))
-                .help("Enter the amount of reps completed during the movement.")))
+                .help("Enter the amount of reps completed during the movement")))
         .get_matches()
 }
 
@@ -410,6 +418,20 @@ fn main() {
         Some(("calc", _matches)) => {
             if let Err(error) = dave_calc_loop() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("parse", matches)) => {
+            if let Some(passed_file) = matches.get_one::<String>("file") {
+                let passed_path = PathBuf::from(passed_file);
+                if passed_path.exists() {
+                    if let Err(error) = parse_handle_file(passed_path) {
+                        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    }
+                } else {
+                    println!("##==> '{}' is not a valid path.", passed_file);
+                }
+            } else {
+                println!("##==> A file must be passed to the program. Try running 'dave parse --help' for more information");
             }
         },
         Some(("scrape", matches)) => {
