@@ -101,10 +101,10 @@ mod tests {
 	fn can_grep_case_sensitive() {
 		let pattern = "duct";
 		let contents = "\
-Rust:
-safe, fast, productive.
-Pick three.
-Duct tape.";
+			Rust:
+			safe, fast, productive.
+			Pick three.
+			Duct tape.";
 
 		assert_eq!(vec!["safe, fast, productive."], search(pattern, contents));
 	}
@@ -113,10 +113,10 @@ Duct tape.";
 	fn can_grep_case_insensitive() {
 		let pattern = "rUsT";
 		let contents = "\
-Rust:
-safe, fast, productive.
-Pick three.
-Trust me.";
+			Rust:
+			safe, fast, productive.
+			Pick three.
+			Trust me.";
 
 		assert_eq!(vec!["Rust:", "Trust me."], search_case_insensitive(pattern, contents));
 	}

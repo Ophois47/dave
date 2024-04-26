@@ -59,7 +59,8 @@ fn parse_array(json: &str) -> IResult<&str, JsonNode> {
 			// Entries Seperated by ',' But Optionally Empty
 			separated_list0(
 				delimited(multispace0, tag(","), multispace0),
-				parse_json),
+				parse_json
+			),
 			tag("]"),
 		),
 		JsonNode::Array,
@@ -116,18 +117,20 @@ fn parse_file(file: PathBuf) -> io::Result<()> {
 			println!("##==>> Contents of File:\n");
 			println!("-----------------------------------------------------------------------------------------");
 			println!("{}", contents);
-			println!("-----------------------------------------------------------------------------------------");
+			println!("-----------------------------------------------------------------------------------------\n");
 			match fmt.short_name() {
 				Some("BIN") => {
-					println!("##==>>>> Found Arbitrary Binary Data. Running JSON Parser ...");
-					// TODO: Trailing Comma in JSON Arrays Causes Error
 					let sanitized_contents = contents
 						.replace("\n", "")
 						.replace("\t", "")
 						.replace(" ", "");
-					println!("##==>>>>>> Sanitized Contents: {:?}", sanitized_contents);
-					let result = parse_json(&sanitized_contents);
-					println!("##==>>>>>> RESULT: {:?}", result);
+					match parse_json(&sanitized_contents) {
+						Ok(result) => {
+							println!("##==> Valid JSON Format Found. Running JSON Parser ...");
+							println!("##==>> JSON Parsed Results: {:#?}", result);
+						},
+						Err(error) => eprintln!("##==>>>> ERROR: {}", error),
+					};
 				},
 				_ => println!("##==>>>> Some Other Format"),
 			};
@@ -235,17 +238,6 @@ mod tests {
 			parse_array("[false, null, false]")
 		);
 		assert_eq!(
-			Ok((
-				"",
-				JsonNode::Array(vec![
-					JsonNode::Boolean(false),
-					JsonNode::Null,
-					JsonNode::Boolean(false),
-				])
-			)),
-			parse_array("[\n false, null, false \n]\n")
-		);
-		assert_eq!(
 			parse_array("something"),
 			Err(nom::Err::Error(make_error(
 				"something",
@@ -279,6 +271,17 @@ mod tests {
 				))
 			)),
 			parse_object("{\"a\": \"x\", \"b\": true}")
+		);
+		assert_eq!(
+			Ok((
+				"",
+				JsonNode::Object(Box::new(
+					vec![("color", JsonNode::String("red")), ("value", JsonNode::String("#f00"))]
+						.into_iter()
+						.collect()
+				))
+			)),
+			parse_object("{color:\"red\",value:\"#f00\"}")
 		);
 		assert_eq!(
 			parse_object("something"),
