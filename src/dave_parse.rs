@@ -120,6 +120,7 @@ fn parse_file(file: PathBuf) -> io::Result<()> {
 			match fmt.short_name() {
 				Some("BIN") => {
 					println!("##==>>>> Found Arbitrary Binary Data. Running JSON Parser ...");
+					// TODO: Trailing Comma in JSON Arrays Causes Error
 					let sanitized_contents = contents
 						.replace("\n", "")
 						.replace("\t", "")
