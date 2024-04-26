@@ -565,7 +565,7 @@ where
 #[cfg(test)]
 mod test {
 	#[test]
-	fn chip_8_testing_emulation() {
+	fn can_test_chip_8_emulation() {
 		use crate::dave_chip8::Chip8;
 		use std::fs::File;
 		use std::io::*;

@@ -28,14 +28,14 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn wrong_guess() {
+    fn can_guess_incorrectly() {
         let guess = 13;
         let random_value = generate_random_number();
         assert_eq!(guess, random_value);
     }
 
     #[test]
-    fn correct_guess() {
+    fn can_guess_correctly() {
         let guess = 5;
         let random_value = 5;
         assert_eq!(guess, random_value);

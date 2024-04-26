@@ -98,7 +98,7 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn case_sensitive() {
+	fn can_grep_case_sensitive() {
 		let pattern = "duct";
 		let contents = "\
 Rust:
@@ -110,7 +110,7 @@ Duct tape.";
 	}
 
 	#[test]
-	fn case_insensitive() {
+	fn can_grep_case_insensitive() {
 		let pattern = "rUsT";
 		let contents = "\
 Rust:
