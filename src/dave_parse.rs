@@ -129,7 +129,7 @@ fn parse_file(file: PathBuf) -> io::Result<()> {
 							println!("##==> Valid JSON Format Found. Running JSON Parser ...");
 							println!("##==>> JSON Parsed Results: {:#?}", result);
 						},
-						Err(error) => eprintln!("##==>>>> ERROR: {}", error),
+						Err(_) => eprintln!("##==>>>> ERROR: Non-Standard JSON Format Found"),
 					};
 				},
 				_ => println!("##==>>>> Some Other Format"),
