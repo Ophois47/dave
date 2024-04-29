@@ -5,6 +5,7 @@ pub mod config;
 pub mod dave_budget;
 pub mod dave_calc;
 pub mod dave_chip8;
+pub mod dave_conversions;
 pub mod dave_currency;
 pub mod dave_db;
 pub mod dave_encrypt;

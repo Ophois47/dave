@@ -30,6 +30,7 @@ use davelib::config::*;
 use davelib::dave_budget::DaveBudget;
 use davelib::dave_calc::dave_calc_loop;
 use davelib::dave_chip8::*;
+use davelib::dave_conversions::*;
 use davelib::dave_currency::dave_currency_conv;
 use davelib::dave_db::DaveDatabase;
 use davelib::dave_encrypt::*;
@@ -131,6 +132,53 @@ fn argument_parser() -> ArgMatches {
                 .default_value("5")
                 .value_name("questions")
                 .help("Set the number of questions to answer. Maximum 15")))
+        .subcommand(Command::new("conv")
+            .about("An amount of conversions the program will perform for you")
+            .arg(Arg::new("F")
+                .long("F")
+                .short('f')
+                .num_args(1)
+                .value_parser(value_parser!(f32))
+                .value_name("DEGREES")
+                .help("Convert From Fahrenheit"))
+            .arg(Arg::new("C")
+                .long("C")
+                .short('c')
+                .num_args(1)
+                .value_parser(value_parser!(f32))
+                .value_name("DEGREES")
+                .help("Convert From Celsius"))
+            .arg(Arg::new("K")
+                .long("K")
+                .short('k')
+                .num_args(1)
+                .value_parser(value_parser!(f32))
+                .value_name("DEGREES")
+                .help("Convert From Kelvin"))
+            .arg(Arg::new("LB")
+                .long("LB")
+                .num_args(1)
+                .value_parser(value_parser!(f32))
+                .value_name("LBS")
+                .help("Convert Pounds to Kilograms"))
+            .arg(Arg::new("KG")
+                .long("KG")
+                .num_args(1)
+                .value_parser(value_parser!(f32))
+                .value_name("KGS")
+                .help("Convert Kilograms to Pounds"))
+            .arg(Arg::new("MPH")
+                .long("MPH")
+                .num_args(1)
+                .value_parser(value_parser!(f32))
+                .value_name("MPH")
+                .help("Convert Miles per Hour to Kilometers per Hour"))
+            .arg(Arg::new("KPH")
+                .long("KPH")
+                .num_args(1)
+                .value_parser(value_parser!(f32))
+                .value_name("KPH")
+                .help("Convert Kilometers per Hour to Miles per Hour")))
         .subcommand(Command::new("hash")
             .about("Hash a file using a preferred hashing algorithm")
             .arg(Arg::new("filename")
@@ -418,6 +466,64 @@ fn main() {
         Some(("calc", _matches)) => {
             if let Err(error) = dave_calc_loop() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("conv", matches)) => {
+            if let Some(fahrenheit_amount) = matches.get_one::<f32>("F") {
+                let celsius_result = fahrenheit_to_celsius(*fahrenheit_amount);
+                let kelvin_result = fahrenheit_to_kelvin(*fahrenheit_amount);
+                println!(
+                    "##==>> {} Degrees Fahrenheit is equal to {} Degrees Celsius and {:.2} Degrees Kelvin",
+                    *fahrenheit_amount as i32,
+                    celsius_result as i32,
+                    kelvin_result,
+                );
+            } else if let Some(celsius_amount) = matches.get_one::<f32>("C") {
+                let fahrenheit_result = celsius_to_fahrenheit(*celsius_amount);
+                let kelvin_result = celsius_to_kelvin(*celsius_amount);
+                println!(
+                    "##==>> {} Degrees Celsius is equal to {} Degrees Fahrenheit and {:.2} Degrees Kelvin",
+                    *celsius_amount as i32,
+                    fahrenheit_result as i32,
+                    kelvin_result,
+                );
+            } else if let Some(kelvin_amount) = matches.get_one::<f32>("K") {
+                let fahrenheit_result = kelvin_to_fahrenheit(*kelvin_amount);
+                let celsius_result = kelvin_to_celsius(*kelvin_amount);
+                println!(
+                    "##==>> {:.2} Degrees Kelvin is equal to {} Degrees Fahrenheit and {} Degrees Celsius",
+                    kelvin_amount,
+                    fahrenheit_result as i32,
+                    celsius_result as i32,
+                );
+            } else if let Some(pounds_kilos_conversion_amount) = matches.get_one::<f32>("LB") {
+                let result = pounds_to_kilos(*pounds_kilos_conversion_amount);
+                println!(
+                    "##==>> {}lbs is equal to {}kgs",
+                    pounds_kilos_conversion_amount,
+                    result as i32,
+                );
+            } else if let Some(kilos_pounds_conversion_amount) = matches.get_one::<f32>("KG") {
+                let result = kilos_to_pounds(*kilos_pounds_conversion_amount);
+                println!(
+                    "##==>> {}kgs is equal to {}lbs",
+                    kilos_pounds_conversion_amount,
+                    result as i32,
+                );
+            } else if let Some(mph_kph_conversion_amount) = matches.get_one::<f32>("MPH") {
+                let result = mph_to_kph(*mph_kph_conversion_amount);
+                println!(
+                    "##==>> {} MPH is equal to {} KPH",
+                    mph_kph_conversion_amount,
+                    result as i32,
+                );
+            } else if let Some(kph_mph_conversion_amount) = matches.get_one::<f32>("KPH") {
+                let result = kph_to_mph(*kph_mph_conversion_amount);
+                println!(
+                    "##==>> {} KPH is equal to {} MPH",
+                    kph_mph_conversion_amount,
+                    result as i32,
+                );
             }
         },
         Some(("parse", matches)) => {
