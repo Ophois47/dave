@@ -39,6 +39,7 @@ use davelib::dave_grep::Config;
 use davelib::dave_guess::guess_number;
 use davelib::dave_hash::*;
 use davelib::dave_land::dave_game_loop;
+use davelib::dave_machine::*;
 use davelib::dave_notes::*;
 use davelib::dave_parse::parse_handle_file;
 use davelib::dave_perceptron::daves_perceptron;
@@ -198,6 +199,13 @@ fn argument_parser() -> ArgMatches {
                 .value_parser(value_parser!(u16))
                 .value_name("value")
                 .num_args(1)))
+        .subcommand(Command::new("machine")
+            .about("Run a series of machine learning algorithms")
+            .arg(Arg::new("kmeans")
+                .long("kmeans")
+                .short('k')
+                .action(ArgAction::SetTrue)
+                .help("Run a standard NumPy compatible K-Means algorithm")))
         .subcommand(Command::new("dgrep")
             .about("Behold Dave's glorious implementation of GREP in Rust.")
             .arg(Arg::new("option")
@@ -470,6 +478,15 @@ fn main() {
         Some(("calc", _matches)) => {
             if let Err(error) = dave_calc_loop() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("machine", matches)) => {
+            if matches.get_flag("kmeans") {
+                if let Err(error) = kmeans_task() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            } else {
+                println!("##==> A valid Machine Learning algorithm must be chosen. Try running 'dave machine --help' for more information")
             }
         },
         Some(("conv", matches)) => {

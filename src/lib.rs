@@ -14,6 +14,7 @@ pub mod dave_guess;
 pub mod dave_hash;
 pub mod dave_land;
 pub mod dave_land_lib;
+pub mod dave_machine;
 pub mod dave_notes;
 pub mod dave_parse;
 pub mod dave_perceptron;
