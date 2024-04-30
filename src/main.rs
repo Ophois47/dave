@@ -238,6 +238,10 @@ fn argument_parser() -> ArgMatches {
                 .help("The file or directory passed to DCRYPT for it to do all its crypty business with")))
         .subcommand(Command::new("scrape")
             .about("This program will scrape the internet for valuable and tasty information")
+            .arg(Arg::new("weather")
+                .long("weather")
+                .action(ArgAction::SetTrue)
+                .help("See the current weather"))
             .arg(Arg::new("top100")
                 .long("top100")
                 .action(ArgAction::SetTrue)
@@ -541,6 +545,11 @@ fn main() {
             }
         },
         Some(("scrape", matches)) => {
+            if matches.get_flag("weather") {
+                if let Err(error) = weather_scraper() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
             if matches.get_flag("top100") {
                 if let Err(error) = imdb_top100_scraper() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);

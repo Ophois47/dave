@@ -1,5 +1,47 @@
 use std::io;
 use chrono::{DateTime, Local};
+use nom::IResult;
+use nom::bytes::complete::take_until;
+
+fn parse_temperature(temperature_string: &str) -> IResult<&str, &str> {
+	take_until("<")(temperature_string)
+}
+
+pub fn weather_scraper() -> io::Result<()> {
+	let response = reqwest::blocking::get(
+		"https://weather.com/weather/today",
+	)
+	.unwrap()
+	.text()
+	.unwrap();
+
+	let document = scraper::Html::parse_document(&response);
+	let weather_selector = scraper::Selector::parse("div.CurrentConditions--CurrentConditions--1XEyg").unwrap();
+	let weathers = document.select(&weather_selector).map(|x| x.inner_html());
+
+	for weather in weathers {
+		let fragment = scraper::Html::parse_fragment(&weather);
+		let temperature_selector = scraper::Selector::parse("span.CurrentConditions--tempValue--MHmYY").unwrap();
+		let location_selector = scraper::Selector::parse("h1.CurrentConditions--location--1YWj_").unwrap();
+
+		let temperature_input = fragment.select(&temperature_selector).next().unwrap().inner_html();
+		let temperature = match parse_temperature(&temperature_input) {
+			Ok((_, temp_str)) => temp_str,
+			_ => "##==>>>> ERROR: Unknown Error Getting Temperature",
+		};
+		let location_input = fragment.select(&location_selector).next().unwrap().inner_html();
+		let current_local: DateTime<Local> = Local::now();
+		let date_format = current_local.format("%m-%d-%Y");
+		println!(
+			"##==>> It is currently {} degrees in {} on {}",
+			temperature,
+			location_input,
+			date_format,
+		);
+	}
+
+	Ok(())
+}
 
 pub fn imdb_top100_scraper() -> io::Result<()> {
 	let current_local: DateTime<Local> = Local::now();
