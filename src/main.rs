@@ -205,7 +205,12 @@ fn argument_parser() -> ArgMatches {
                 .long("kmeans")
                 .short('k')
                 .action(ArgAction::SetTrue)
-                .help("Run a standard NumPy compatible K-Means algorithm")))
+                .help("Run a standard NumPy compatible K-Means algorithm"))
+            .arg(Arg::new("dbscan")
+                .long("dbscan")
+                .short('d')
+                .action(ArgAction::SetTrue)
+                .help("Run a standard NumPy compatible DBScan algorithm")))
         .subcommand(Command::new("dgrep")
             .about("Behold Dave's glorious implementation of GREP in Rust.")
             .arg(Arg::new("option")
@@ -483,6 +488,10 @@ fn main() {
         Some(("machine", matches)) => {
             if matches.get_flag("kmeans") {
                 if let Err(error) = kmeans_task() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            } else if matches.get_flag("dbscan") {
+                if let Err(error) = dbscan_task() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else {

@@ -1,8 +1,10 @@
 use std::fs::File;
 use std::io;
-use linfa::traits::{Fit, Predict};
+use linfa::dataset::{Labels, Records};
+use linfa::metrics::SilhouetteScore;
+use linfa::traits::{Fit, Predict, Transformer};
 use linfa::DatasetBase;
-use linfa_clustering::KMeans;
+use linfa_clustering::{Dbscan, KMeans};
 use linfa_datasets::generate;
 use linfa_nn::distance::LInfDist;
 use ndarray::{array, Axis};
@@ -12,7 +14,7 @@ use ndarray_npy::write_npy;
 // Build Synthetic Dataset, Fit Algorithm On It
 // Save Training Data and Predictions to Disk
 pub fn kmeans_task() -> io::Result<()> {
-	// Get Random Value
+	// Get Random Value Generator
 	let mut rng = rand::thread_rng();
 
 	// For Each Expected Centroid, Generate 'n' Data Points
@@ -38,24 +40,98 @@ pub fn kmeans_task() -> io::Result<()> {
 
 	// Save Dataset to Disk and Cluster Label Assigned to Each
 	// Observation. Using 'npy' Format for Compatibility with NumPy
-	let dataset_file_string = "./dave_conf/var/daves_machines/clustered_dataset.npy";
+	let dataset_file_string = "./dave_conf/var/daves_machines/kmeans_clustered_dataset.npy";
 	File::create(dataset_file_string)?;
-	let memberships_file_string = "./dave_conf/var/daves_machines/clustered_memberships.npy";
+	let memberships_file_string = "./dave_conf/var/daves_machines/kmeans_clustered_memberships.npy";
 	File::create(memberships_file_string)?;
 
-	println!("##==> Writing Records to Dataset File ...");
+	println!("---------------------------------------------------------");
+	println!("##==> Writing KMeans Records to Dataset File ...");
 	write_npy(
 		dataset_file_string,
 		&records,
-	).expect("Failed to write clustered_dataset.npy file");
-	println!("##==> INFO! Dataset File Written Successfully\n");
+	).expect("Failed to write kmeans_clustered_dataset.npy file");
+	println!("##==> INFO! KMeans Dataset File Written Successfully\n");
 
-	println!("##==> Writing Targets to Memberships File ...");
+	println!("##==> Writing KMeans Targets to Memberships File ...");
 	write_npy(
 		memberships_file_string,
 		&targets.map(|&x| x as u64),
-	).expect("Failed to write to clustered_memberships.npy file");
-	println!("##==> INFO! Memberships File Written Successfully");
+	).expect("Failed to write to kmeans_clustered_memberships.npy file");
+	println!("##==> INFO! KMeans Memberships File Written Successfully");
+	println!("---------------------------------------------------------");
+
+	Ok(())
+}
+
+// Routine DBScan Task:
+// Build Synthetic Dataset
+// Predict Clusters For It
+// Save Training Data + Predictions to Disk
+pub fn dbscan_task() -> io::Result<()> {
+	// Get Random Value Generator
+	let mut rng = rand::thread_rng();
+
+	// For Each Expected Centroid, Generate 'n' Data Points
+	// Around it in a Blob
+	let expected_centroids = array![[10., 10.], [1., 12.], [20., 30.], [-20., 30.],];
+	let n = 100;
+	let dataset: DatasetBase<_, _> = generate::blobs(n, &expected_centroids, &mut rng).into();
+
+	// Configure Training Algorithm
+	let min_points = 3;
+
+	println!(
+		"##==> Clustering #{} Data Points Grouped In 4 Clusters Of {} Points Each",
+		dataset.nsamples(),
+		n,
+	);
+
+	// Infer An Optimal Set Of Centroids Based On Training Data Distribution
+	let cluster_memberships = Dbscan::params(min_points)
+		.tolerance(1.)
+		.transform(dataset)
+		.unwrap();
+
+	// Single Target Dataset
+	let label_count = cluster_memberships.label_count().remove(0);
+
+	println!();
+	println!("##==>> Result: ");
+	for (label, count) in label_count {
+		match label {
+			None => println!(" - {} Noise Points", count),
+			Some(i) => println!(" - {} Points In Cluster {}", count, i),
+		}
+	}
+	println!();
+
+	let silhouette_score = cluster_memberships.silhouette_score().unwrap();
+	println!("##==> Silhouette Score: {}\n", silhouette_score);
+
+	// Save Dataset + Cluster Label Assigned To Each Observation
+	// To Disk Using 'npy' Format For Compatibility With NumPy
+	let dataset_file_string = "./dave_conf/var/daves_machines/dbscan_clustered_dataset.npy";
+	File::create(dataset_file_string)?;
+	let memberships_file_string = "./dave_conf/var/daves_machines/dbscan_clustered_memberships.npy";
+	File::create(memberships_file_string)?;
+	let (records, cluster_memberships) = (cluster_memberships.records, cluster_memberships.targets);
+
+	println!("---------------------------------------------------------");
+	println!("##==> Writing DBScan Records to Dataset File ...");
+	write_npy(
+		dataset_file_string,
+		&records,
+	).expect("Failed to write dbscan_clustered_dataset.npy file");
+	println!("##==> INFO! DBScan Dataset File Written Successfully\n");
+
+	println!("##==> Writing DBScan Targets to Memberships File ...");
+	write_npy(
+		memberships_file_string,
+		&cluster_memberships.map(|&x| x.map(|c| c as i64).unwrap_or(-1)),
+	).expect("Failed to write to dbscan_clustered_memberships.npy file");
+	println!("##==> INFO! DBScan Memberships File Written Successfully");
+	println!("---------------------------------------------------------");
 
 	Ok(())
 }
