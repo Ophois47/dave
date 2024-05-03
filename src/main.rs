@@ -28,7 +28,7 @@ use std::str::FromStr;
 use std::time::Instant;
 use davelib::config::*;
 use davelib::dave_budget::DaveBudget;
-use davelib::dave_calc::dave_calc_loop;
+use davelib::dave_calcs::*;
 use davelib::dave_chip8::*;
 use davelib::dave_conversions::*;
 use davelib::dave_currency::dave_currency_conv;
@@ -81,7 +81,22 @@ fn argument_parser() -> ArgMatches {
                 .value_name("path")
                 .num_args(1)))
         .subcommand(Command::new("calc")
-            .about("Use the program's calculator"))
+            .about("Use the program's calculator")
+            .arg(Arg::new("simple")
+                .long("simple")
+                .short('s')
+                .action(ArgAction::SetTrue)
+                .help("Simple Calculator by Dave"))
+            .arg(Arg::new("income")
+                .long("income")
+                .short('i')
+                .action(ArgAction::SetTrue)
+                .help("Simple Income Calculator by Dave"))
+            .arg(Arg::new("interest")
+                .long("interest")
+                .short('n')
+                .action(ArgAction::SetTrue)
+                .help("Simple Interest Calculator by Dave")))
         .subcommand(Command::new("chip8")
             .about("Use Dave's very own rudimentary Chip8 emulator")
             .arg(Arg::new("pixel")
@@ -480,9 +495,19 @@ fn main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
-        Some(("calc", _matches)) => {
-            if let Err(error) = dave_calc_loop() {
-                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+        Some(("calc", matches)) => {
+            if matches.get_flag("simple") {
+                if let Err(error) = dave_simple_calc_loop() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            } else if matches.get_flag("income") {
+                if let Err(error) = dave_income_calc_loop() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            } else if matches.get_flag("interest") {
+                if let Err(error) = dave_interest_calc_loop() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
             }
         },
         Some(("machine", matches)) => {

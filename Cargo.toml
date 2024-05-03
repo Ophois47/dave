@@ -1,6 +1,6 @@
 [package]
 name = "dave"
-version = "8.4.7"
+version = "8.4.8"
 edition = "2021"
 
 [lib]
