@@ -523,6 +523,7 @@ fn main() {
             }
         },
         Some(("snake", _matches)) => {
+            print!("{esc}c", esc = 27 as char);
             Game::new(stdout(), 15, 10).run();
         },
         Some(("calc", matches)) => {

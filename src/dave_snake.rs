@@ -323,7 +323,7 @@ impl Game {
 		enable_raw_mode().unwrap();
 		self.stdout
 			.execute(SetSize(self.width + 3, self.height + 3)).unwrap()
-			.execute(Clear(ClearType::Purge)).unwrap()
+			.execute(Clear(ClearType::All)).unwrap()
 			.execute(Hide).unwrap();
 	}
 
