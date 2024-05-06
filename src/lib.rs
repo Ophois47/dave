@@ -21,5 +21,6 @@ pub mod dave_perceptron;
 pub mod dave_quiz;
 pub mod dave_rep_max;
 pub mod dave_scrape;
+pub mod dave_snake;
 pub mod release;
 pub mod utils;

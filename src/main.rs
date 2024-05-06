@@ -7,11 +7,22 @@ use clap::{
 };
 use colored::*;
 use crossterm::{
-    event::{DisableMouseCapture, EnableMouseCapture},
+    event::{
+        DisableMouseCapture,
+        EnableMouseCapture,
+    },
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{
+        disable_raw_mode,
+        enable_raw_mode,
+        EnterAlternateScreen,
+        LeaveAlternateScreen,
+    },
 };
-use rand::{thread_rng, Rng};
+use rand::{
+    thread_rng,
+    Rng,
+};
 use rand::distributions::Alphanumeric;
 use sha2::Digest;
 use tui::{
@@ -20,9 +31,21 @@ use tui::{
 };
 use std::borrow::BorrowMut;
 use std::env;
-use std::fs::{self, File, OpenOptions};
-use std::io::{self, Read, Write};
-use std::path::{Path, PathBuf};
+use std::fs::{
+    self,
+    File,
+    OpenOptions,
+};
+use std::io::{
+    self,
+    Read,
+    stdout,
+    Write,
+};
+use std::path::{
+    Path,
+    PathBuf,
+};
 use std::process;
 use std::str::FromStr;
 use std::time::Instant;
@@ -46,6 +69,7 @@ use davelib::dave_perceptron::daves_perceptron;
 use davelib::dave_quiz::*;
 use davelib::dave_rep_max::dave_rep_max_calc;
 use davelib::dave_scrape::*;
+use davelib::dave_snake::Game;
 use davelib::utils::*;
 use davelib::release;
 use davelib::release::*;
@@ -289,6 +313,8 @@ fn argument_parser() -> ArgMatches {
             .about("Behold Dave's glorious Perceptron in Rust. A Perceptron\nis a computer model or computerized machine devised to represent or\nsimulate the ability of the brain to recognize and discriminate"))
         .subcommand(Command::new("dave-land")
             .about("This is a text based adventure game by Dave"))
+        .subcommand(Command::new("snake")
+            .about("This is a classic Snake game by Dave"))
         .subcommand(Command::new("parse")
             .about("Parse and get information for any sort of file.")
             .arg(Arg::new("file")
@@ -492,8 +518,12 @@ fn main() {
         },
         Some(("perceptron", _matches)) => {
             if let Err(error) = daves_perceptron() {
-                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error)
+                ;
             }
+        },
+        Some(("snake", _matches)) => {
+            Game::new(stdout(), 15, 10).run();
         },
         Some(("calc", matches)) => {
             if matches.get_flag("simple") {
