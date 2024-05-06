@@ -159,8 +159,11 @@ pub fn dave_interest_calc_loop() -> io::Result<()> {
 		}
 	};
 	
-	let interest = principal * rate * time;
-	let result_string = format!("##==>> Interest: ${}", interest);
-	println!("{}", result_string.yellow());
+	let total_accrued = principal * (1.0 + ((rate/100.0) * time));
+	let interest = total_accrued - principal;
+	let accrued_string = format!("##==>> Total Accrued Amount: ${}", total_accrued);
+	let interest_string = format!("##==>> Interest Paid: ${}", interest);
+	println!("{}", accrued_string.yellow());
+	println!("{}", interest_string.yellow());
 	Ok(())
 }
