@@ -137,7 +137,7 @@ pub fn dave_interest_calc_loop() -> io::Result<()> {
 		}
 	};
 
-	println!("##==> Enter the interest rate (.decimal): ");
+	println!("##==> Enter the interest rate (%): ");
 	let mut rate = String::new();
 	io::stdin().read_line(&mut rate)?;
 	let rate: f64 = match rate.trim().parse() {
