@@ -18,6 +18,7 @@ dave allows you to scrape the internet for juicy and valuable information with '
 dave allows for a number of value conversions for your convenience with 'conv'
 dave allows you to parse different types of files using 'parse'
 dave lets you play the classic snake game with 'snake'
+dave gives you the privilege of battling his AI with 'tic-tac-toe'
 
 To Install Dave:
 ===================
