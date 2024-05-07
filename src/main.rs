@@ -70,6 +70,7 @@ use davelib::dave_quiz::*;
 use davelib::dave_rep_max::dave_rep_max_calc;
 use davelib::dave_scrape::*;
 use davelib::dave_snake::Game;
+use davelib::dave_tic_tac_toe::tic_tac_toe_main;
 use davelib::utils::*;
 use davelib::release;
 use davelib::release::*;
@@ -315,6 +316,8 @@ fn argument_parser() -> ArgMatches {
             .about("This is a text based adventure game by Dave"))
         .subcommand(Command::new("snake")
             .about("This is a classic Snake game by Dave"))
+        .subcommand(Command::new("tic-tac-toe")
+            .about("This is a classic Tic-Tac-Toe game by Dave"))
         .subcommand(Command::new("parse")
             .about("Parse and get information for any sort of file.")
             .arg(Arg::new("file")
@@ -518,13 +521,17 @@ fn main() {
         },
         Some(("perceptron", _matches)) => {
             if let Err(error) = daves_perceptron() {
-                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error)
-                ;
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
         Some(("snake", _matches)) => {
             print!("{esc}c", esc = 27 as char);
             Game::new(stdout(), 15, 10).run();
+        },
+        Some(("tic-tac-toe", _matches)) => {
+            if let Err(error) = tic_tac_toe_main() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
         },
         Some(("calc", matches)) => {
             if matches.get_flag("simple") {

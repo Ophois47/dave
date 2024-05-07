@@ -22,5 +22,6 @@ pub mod dave_quiz;
 pub mod dave_rep_max;
 pub mod dave_scrape;
 pub mod dave_snake;
+pub mod dave_tic_tac_toe;
 pub mod release;
 pub mod utils;

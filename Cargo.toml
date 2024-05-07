@@ -1,6 +1,6 @@
 [package]
 name = "dave"
-version = "8.5.0"
+version = "8.6.0"
 edition = "2021"
 
 [lib]
@@ -49,5 +49,6 @@ serde_json = "1"
 sha2 = "0.10"
 sled = "0.34"
 spinners = "4"
+tabled = "0.13"
 tui = "0.19"
 walkdir = "2"
