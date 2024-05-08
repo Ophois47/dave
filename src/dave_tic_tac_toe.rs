@@ -1,8 +1,12 @@
-use std::fs::OpenOptions;
+use std::fs::{
+	self,
+	OpenOptions,
+};
 use std::io::{
 	self,
 	Write,
 };
+use std::path::Path;
 use tabled::{
 	builder::Builder,
 	settings::Style,
@@ -17,7 +21,12 @@ fn clearscreen() {
 	print!("\x1B[2J\x1B[1;1H");
 }
 
-fn fill_box(board: &mut Vec<Vec<char>>, x: usize, y: usize, player_char: char) -> Result<(), String> {
+fn fill_box(
+	board: &mut Vec<Vec<char>>,
+	x: usize,
+	y: usize,
+	player_char: char,
+) -> Result<(), String> {
 	if x >= TOTAL_ROWS || y >= TOTAL_COLUMNS {
 		return Err("Filling an out of bounds box".to_string());
 	}
@@ -40,6 +49,7 @@ fn print_board(board: &Vec<Vec<char>>) {
 		}
 		builder.push_record(row);
 	}
+	
 	let table = builder.build().with(Style::modern()).to_string();
 	println!("{}", table);
 }
@@ -97,6 +107,7 @@ fn is_win(board: &Vec<Vec<char>>, player_char: char) -> bool {
 // User Input Logic
 fn ask_player_char() -> Result<char, String> {
 	loop {
+		println!("[***] Choose Your Symbol! [***]");
 		println!("[*] First/Second (X/O)?:");
 		let mut input = String::new();
 		io::stdin()
@@ -118,13 +129,17 @@ fn ask_player_char() -> Result<char, String> {
 	}
 }
 
-fn ask_player_move(board: &Vec<Vec<char>>, human_char: char) -> Result<[usize; 2], String> {
+fn ask_player_move(
+	board: &Vec<Vec<char>>,
+	human_char: char,
+) -> Result<[usize; 2], String> {
 	loop {
 		println!("[+] Your Move {} -> (1-9)?:", human_char);
 		let mut input = String::new();
 		io::stdin()
 			.read_line(&mut input)
 			.map_err(|_| "Failed to read line".to_string())?;
+
 		match input.trim().parse() {
 			Ok(player_move) => {
 				if player_move < 1 || player_move > 9 {
@@ -178,7 +193,13 @@ fn minimax(
 			for j in 0..TOTAL_COLUMNS {
 				if board[i][j] == ' ' {
 					board[i][j] = ai_char;
-					let score = minimax(board, false, depth + 1, ai_char, human_char);
+					let score = minimax(
+						board,
+						false,
+						depth + 1,
+						ai_char,
+						human_char,
+					);
 					board[i][j] = ' ';
 					if score > best_score {
 						best_score = score;
@@ -194,7 +215,13 @@ fn minimax(
             for j in 0..TOTAL_COLUMNS {
                 if board[i][j] == ' ' {
                     board[i][j] = human_char;
-                    let score = minimax(board, true, depth + 1, ai_char, human_char);
+                    let score = minimax(
+                    	board,
+                    	true,
+                    	depth + 1,
+                    	ai_char,
+                    	human_char,
+                    );
                     board[i][j] = ' ';
                     if score < best_score {
                         best_score = score;
@@ -207,7 +234,11 @@ fn minimax(
 	}
 }
 
-fn ai_best_move(board: &mut Vec<Vec<char>>, ai_char: char, human_char: char) -> Result<[usize; 2], String> {
+fn ai_best_move(
+	board: &mut Vec<Vec<char>>,
+	ai_char: char,
+	human_char: char,
+) -> Result<[usize; 2], String> {
 	let mut best_score = -100;
 	let mut best_move: [usize; 2] = Default::default();
 
@@ -218,7 +249,9 @@ fn ai_best_move(board: &mut Vec<Vec<char>>, ai_char: char, human_char: char) -> 
                 let score = minimax(board, false, 1, ai_char, human_char);
                 board[i][j] = ' ';
                 let move_num = move_array_to_num([i, j]);
-                write_ai_log(&format!("- {} -> Score: {}\n", move_num, score))?;
+                write_ai_log(
+                	&format!("- {} -> Score: {}\n", move_num, score),
+                )?;
                 if score > best_score {
                     best_score = score;
                     best_move = [i, j];
@@ -226,27 +259,38 @@ fn ai_best_move(board: &mut Vec<Vec<char>>, ai_char: char, human_char: char) -> 
             }
 		}
 	}
-	write_ai_log(&format!("AI's Best Move: {}\n\n", move_array_to_num(best_move)))?;
+
+	write_ai_log(
+		&format!("AI's Best Move: {}\n\n", move_array_to_num(best_move)),
+	)?;
 	Ok(best_move)
 }
 
 fn write_ai_log(data: &str) -> Result<(), String> {
 	// Open File in Append Mode
+	let ai_log_file_string = "./dave_conf/var/dave_ai.log";
+	if Path::new(ai_log_file_string).exists() {
+		fs::remove_file(ai_log_file_string)
+			.map_err(|_| "File cannot be removed".to_string())?;
+	}
+
 	let mut file = OpenOptions::new()
+		.create_new(true)
 		.write(true)
 		.append(true)
-		.open("./dave_conf/var/dave_ai.log")
+		.open(ai_log_file_string)
 		.map_err(|_| "Failed to open AI log file".to_string())?;
 
 	// Write Data to File
-	file.write_all(data.as_bytes()).map_err(|error| format!("Error writing to log file: {}", error))
+	file.write_all(data.as_bytes())
+		.map_err(|error| format!("Error writing to log file: {}", error))
 }
 
 // Main Game Loop
 pub fn tic_tac_toe_main() -> io::Result<()> {
 	if let Err(error) = play() {
 		eprintln!("{}", error);
-		std::process::exit(1);
+		std::process::exit(1)
 	}
 	Ok(())
 }
@@ -273,6 +317,7 @@ fn play() -> Result<(), String> {
 			} else {
 				println!("[+] AI Move : {} -> {}", ai_char, ai_last_move);
 			}
+
 			let human_move = ask_player_move(board, human_char)?;
 			fill_box(board, human_move[0], human_move[1], human_char)?;
 		} else {
@@ -280,6 +325,7 @@ fn play() -> Result<(), String> {
 			fill_box(board, ai_move[0], ai_move[1], ai_char)?;
 			ai_last_move = move_array_to_num(ai_move);
 		}
+
 		match check_winner(board) {
 			' ' => (),
 			w => {
@@ -300,5 +346,6 @@ fn play() -> Result<(), String> {
 		println!("[*] DRAW! [*]");
 	}
 	print_board(board);
+
 	Ok(())
 }
