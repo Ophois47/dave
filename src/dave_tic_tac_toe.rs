@@ -113,12 +113,14 @@ fn ask_player_char() -> Result<char, String> {
 		io::stdin()
 			.read_line(&mut input)
 			.map_err(|_| "Failed to read line".to_string())?;
+			
 		let character = input
 			.trim()
 			.chars()
 			.next()
 			.ok_or("No Input Provided".to_string())
 			.map(|c| c.to_ascii_uppercase())?;
+
 		match character {
 			'X' | 'O' => return Ok(character),
 			c => {
