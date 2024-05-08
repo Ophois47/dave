@@ -49,7 +49,7 @@ fn print_board(board: &Vec<Vec<char>>) {
 		}
 		builder.push_record(row);
 	}
-	
+
 	let table = builder.build().with(Style::modern()).to_string();
 	println!("{}", table);
 }
@@ -107,7 +107,7 @@ fn is_win(board: &Vec<Vec<char>>, player_char: char) -> bool {
 // User Input Logic
 fn ask_player_char() -> Result<char, String> {
 	loop {
-		println!("[***] Choose Your Symbol! [***]");
+		println!("[**] Choose Your Symbol! [**]");
 		println!("[*] First/Second (X/O)?:");
 		let mut input = String::new();
 		io::stdin()
@@ -298,7 +298,7 @@ pub fn tic_tac_toe_main() -> io::Result<()> {
 fn play() -> Result<(), String> {
 	let ref mut board = create_board();
 	clearscreen();
-	println!("[*] Welcome to Dave's Tic-Tac-Toe Game [*]");
+	println!("[***] Welcome to Dave's Tic-Tac-Toe Game [***]");
 
 	let human_char = ask_player_char()?;
 	let ai_char = if human_char == 'X' { 'O' } else { 'X' };
