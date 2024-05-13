@@ -7,9 +7,9 @@ use rand::Rng;
 use spinners::{Spinner, Spinners};
 use walkdir::WalkDir;
 
-pub fn generate_random_number() -> u16 {
+pub fn generate_random_number(min_value: u16, max_value: u16) -> u16 {
     let mut rng = rand::thread_rng();
-    let random_value: u16 = rng.gen_range(1..10);
+    let random_value: u16 = rng.gen_range(min_value..max_value);
     random_value
 }
 

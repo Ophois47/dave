@@ -318,6 +318,14 @@ fn argument_parser() -> ArgMatches {
             .about("This is a classic Snake game by Dave"))
         .subcommand(Command::new("tic-tac-toe")
             .about("This is a classic Tic-Tac-Toe game by Dave"))
+        .subcommand(Command::new("get-rand")
+            .about("Get a random value by supplying the minimum and maximum possible values")
+            .arg(Arg::new("bounds")
+                .num_args(2)
+                .value_delimiter(' ')
+                .value_names(["MIN_VALUE", "MAX_VALUE"])
+                .value_parser(value_parser!(u16))
+                .help("Pass a minimum and maximum value to get a random value from")))
         .subcommand(Command::new("parse")
             .about("Parse and get information for any sort of file.")
             .arg(Arg::new("file")
@@ -531,6 +539,23 @@ fn main() {
         Some(("tic-tac-toe", _matches)) => {
             if let Err(error) = tic_tac_toe_main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("get-rand", matches)) => {
+            if let Some(bounds) = matches.get_many::<u16>("bounds") {
+                let mut bounds_vec = vec![];
+                for bound in bounds {
+                    bounds_vec.push(bound);
+                }
+                let random_value = generate_random_number(*bounds_vec[0], *bounds_vec[1]);
+                println!(
+                    "##==>> Random Value Between {} and {}: {}",
+                    bounds_vec[0],
+                    bounds_vec[1],
+                    random_value,
+                );
+            } else {
+                println!("##==> A valid minimum and maximum value must be chosen. Try running 'dave get-rand --help' for more information")
             }
         },
         Some(("calc", matches)) => {

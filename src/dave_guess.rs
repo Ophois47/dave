@@ -8,7 +8,7 @@ pub fn guess_number(guess: u16) -> io::Result<()> {
         return Ok(())
     }
 
-    let random_value = generate_random_number();
+    let random_value = generate_random_number(1, 100);
     if random_value == guess {
         println!("{}", "#=> CORRECT! You guessed correctly.".green());
     } else if random_value < guess {
@@ -30,7 +30,7 @@ mod tests {
     #[should_panic]
     fn can_guess_incorrectly() {
         let guess = 13;
-        let random_value = generate_random_number();
+        let random_value = generate_random_number(1, 100);
         assert_eq!(guess, random_value);
     }
 
