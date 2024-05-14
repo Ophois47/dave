@@ -332,10 +332,12 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("verbose")
                 .help("Display more detailed information")
                 .long("verbose")
-                .short('v'))
+                .short('v')
+                .action(ArgAction::SetTrue))
             .arg(Arg::new("full")
                 .help("Scan all 65535 ports")
-                .long("full"))
+                .long("full")
+                .action(ArgAction::SetTrue))
             .arg(Arg::new("timeout")
                 .help("Connection timeout")
                 .long("timeout")
@@ -577,7 +579,17 @@ fn main() {
                 .unwrap()
                 .parse::<u64>()
                 .unwrap_or(3);
-            let target = matches.get_one::<String>("target").unwrap();
+            let default_target_string = "None".to_string();
+            let target = matches
+                .get_one::<String>("target")
+                .unwrap_or(&default_target_string);
+
+            if target == "None" {
+                println!(
+                    "##==>>>> ERROR: A valid IP Address must be passed to the program. Try running 'dave port-scan --help' for more information\n",
+                );
+                return
+            }
 
             if verbose {
                 let ports = if full {
@@ -586,7 +598,7 @@ fn main() {
                     String::from("the most common 1002 ports")
                 };
                 println!(
-                    "Scanning {} of {}. Concurrency: {:?}. Timeout: {:?}",
+                    "##==> Scanning {} of {}\n##==> Concurrency: {:?}\n##==> Timeout: {:?}\n",
                     &ports,
                     target,
                     concurrency,
