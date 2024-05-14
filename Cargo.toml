@@ -1,6 +1,6 @@
 [package]
 name = "dave"
-version = "8.6.2"
+version = "8.6.3"
 edition = "2021"
 
 [lib]
@@ -24,6 +24,7 @@ clap = "4"
 colored = "2"
 crossterm = "0.27"
 file-format = "0.24"
+futures = "0.3"
 headless_chrome = "1"
 hex = "0.4"
 indexmap = "2"
@@ -50,5 +51,6 @@ sha2 = "0.10"
 sled = "0.34"
 spinners = "4"
 tabled = "0.13"
+tokio = { version = "1", features = ["full"] }
 tui = "0.19"
 walkdir = "2"

@@ -66,6 +66,7 @@ use davelib::dave_machine::*;
 use davelib::dave_notes::*;
 use davelib::dave_parse::parse_handle_file;
 use davelib::dave_perceptron::daves_perceptron;
+use davelib::dave_port_scan::port_scan_main;
 use davelib::dave_quiz::*;
 use davelib::dave_rep_max::dave_rep_max_calc;
 use davelib::dave_scrape::*;
@@ -318,6 +319,28 @@ fn argument_parser() -> ArgMatches {
             .about("This is a classic Snake game by Dave"))
         .subcommand(Command::new("tic-tac-toe")
             .about("This is a classic Tic-Tac-Toe game by Dave"))
+        .subcommand(Command::new("port-scan")
+            .about("This is a port scanner by Dave")
+            .arg(Arg::new("target")
+                .help("The target to scan")
+                .index(1))
+            .arg(Arg::new("concurrency")
+                .help("Concurrency")
+                .long("concurrency")
+                .short('c')
+                .default_value("1002"))
+            .arg(Arg::new("verbose")
+                .help("Display more detailed information")
+                .long("verbose")
+                .short('v'))
+            .arg(Arg::new("full")
+                .help("Scan all 65535 ports")
+                .long("full"))
+            .arg(Arg::new("timeout")
+                .help("Connection timeout")
+                .long("timeout")
+                .short('t')
+                .default_value("3")))
         .subcommand(Command::new("get-rand")
             .about("Get a random value by supplying the minimum and maximum possible values")
             .arg(Arg::new("bounds")
@@ -541,17 +564,62 @@ fn main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
+        Some(("port-scan", matches)) => {
+            let full = matches.get_flag("full");
+            let verbose = matches.get_flag("verbose");
+            let concurrency = matches
+                .get_one::<String>("concurrency")
+                .unwrap()
+                .parse::<usize>()
+                .unwrap_or(1002);
+            let timeout = matches
+                .get_one::<String>("timeout")
+                .unwrap()
+                .parse::<u64>()
+                .unwrap_or(3);
+            let target = matches.get_one::<String>("target").unwrap();
+
+            if verbose {
+                let ports = if full {
+                    String::from("all the 65535 ports")
+                } else {
+                    String::from("the most common 1002 ports")
+                };
+                println!(
+                    "Scanning {} of {}. Concurrency: {:?}. Timeout: {:?}",
+                    &ports,
+                    target,
+                    concurrency,
+                    timeout,
+                );
+            }
+
+            if let Err(error) = port_scan_main(full, concurrency, timeout, target.to_string()) {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
         Some(("get-rand", matches)) => {
             if let Some(bounds) = matches.get_many::<u16>("bounds") {
                 let mut bounds_vec = vec![];
                 for bound in bounds {
                     bounds_vec.push(bound);
                 }
-                let random_value = generate_random_number(*bounds_vec[0], *bounds_vec[1]);
+                let min_value = bounds_vec[0];
+                let max_value = bounds_vec[1];
+
+                if min_value > max_value {
+                    eprintln!(
+                        "{}",
+                        "##==>>>> ERROR: Minimum value cannot be greater than max value\n".red(),
+                    );
+                    return
+                }
+
+                let random_value = generate_random_number(*min_value, *max_value);
                 println!(
                     "##==>> Random Value Between {} and {}: {}",
-                    bounds_vec[0],
-                    bounds_vec[1],
+                    min_value,
+                    max_value,
                     random_value,
                 );
             } else {

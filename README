@@ -19,6 +19,7 @@ dave allows for a number of value conversions for your convenience with 'conv'
 dave allows you to parse different types of files using 'parse'
 dave lets you play the classic snake game with 'snake'
 dave gives you the privilege of battling his AI with 'tic-tac-toe'
+dave will supply you with a random value based on a range given by the user with 'get-rand'
 
 To Install Dave:
 ===================
@@ -66,12 +67,11 @@ Ideas I Want To Learn:
 1.  Text Based Adventure Game (X)
 2.  Grep text and pattern matching in files (X)
 	- Bonus: Implement REGEX Matching Capabilities (X)
-3.  Basic Web Scraper
-	- Build a web scraper that fetches and parses the content of a webpage
-		- Extract specific information like headlines or links
+3.  Basic Web Scraper (X)
+	- Build a web scraper that fetches and parses the content of a webpage (X)
+		- Extract specific information like headlines or links (X)
 		- HTTP requests using libraries like reqwest
 	 	- HTML parsing using libraries like scraper or select
-	 	- String manipulation and regular expressions
 4.  File Encryption and Decryption (X)
 5.  Currency Converter (X)
 6.  Real-Time Object Detection System
