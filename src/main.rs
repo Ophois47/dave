@@ -319,6 +319,8 @@ fn argument_parser() -> ArgMatches {
             .about("This is a classic Snake game by Dave"))
         .subcommand(Command::new("tic-tac-toe")
             .about("This is a classic Tic-Tac-Toe game by Dave"))
+        .subcommand(Command::new("my-sys")
+            .about("This lets you view your current system info"))
         .subcommand(Command::new("port-scan")
             .about("This is a port scanner by Dave")
             .arg(Arg::new("target")
@@ -563,6 +565,11 @@ fn main() {
         },
         Some(("tic-tac-toe", _matches)) => {
             if let Err(error) = tic_tac_toe_main() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("my-sys", _matches)) => {
+            if let Err(error) = get_system_info() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
