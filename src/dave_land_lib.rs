@@ -582,13 +582,27 @@ impl World {
 	}
 
 	pub fn do_look(&self, noun: &str) -> String {
+		let player_loc = match self.objects[LOC_PLAYER].location {
+			Some(pl) => pl,
+			None => {
+				eprintln!("##==>>>> ERROR: Player Location Not Found");
+				std::process::exit(1)
+			},
+		};
+		let index_loc = match self.objects[LOC_PLAYER].location {
+			Some(il) => il,
+			None => {
+				eprintln!("##==>>>> ERROR: Index Location Not Found");
+				std::process::exit(1)
+			},
+		};
         match noun {
             "around" | "" => {
-                let (list_string, _) = self.list_objects_at_location(self.objects[LOC_PLAYER].location.unwrap());
+                let (list_string, _) = self.list_objects_at_location(player_loc);
                 format!(
                     "{}\nYou are in {}.\n",
-                    self.objects[self.objects[LOC_PLAYER].location.unwrap()].labels[0],
-                    self.objects[self.objects[LOC_PLAYER].location.unwrap()].description,
+                    self.objects[player_loc].labels[0],
+                    self.objects[player_loc].description,
                 ) + list_string.as_str()
             }
             _ => {
@@ -605,11 +619,11 @@ impl World {
             		}
             		(Distance::UnknownObject, _) => output_vis,
             		(Distance::Location, Some(obj_idx)) => {
-            			let (list_string, _) = self.list_objects_at_location(self.objects[LOC_PLAYER].location.unwrap());
+            			let (list_string, _) = self.list_objects_at_location(player_loc);
             			output_vis + &format!("{}\n{}\n", self.objects[obj_idx].details, list_string)
             		}
             		(_, Some(obj_idx)) => {
-            			let (list_string, _) = self.list_objects_at_location(self.objects[obj_idx].location.unwrap());
+            			let (list_string, _) = self.list_objects_at_location(index_loc);
             			output_vis + &format!("{}\n{}\n", self.objects[obj_idx].details, list_string)
             		}
             		(_, None) => {
@@ -622,7 +636,14 @@ impl World {
     }
 
     fn move_player(&mut self, obj_opt: Option<usize>) -> String {
-    	let go_string = format!("{}\n", self.objects[obj_opt.unwrap()].text_go);
+    	let object_existence = match obj_opt {
+    		Some(oe) => oe,
+    		None => {
+    			eprintln!("##==>>>> ERROR: Object Not Found");
+    			std::process::exit(1)
+    		},
+    	};
+    	let go_string = format!("{}\n", self.objects[object_existence].text_go);
     	let obj_dst = obj_opt.and_then(|a| self.objects[a].destination);
     	if obj_dst != None {
     		self.objects[LOC_PLAYER].location = obj_dst;
@@ -679,9 +700,15 @@ impl World {
 			(Distance::UnknownObject, _) => output_vis,
 			_ => {
 				let obj_loc = obj_opt.and_then(|a| self.objects[a].location);
-
-				if obj_loc.is_some() && self.objects[obj_loc.unwrap()].health > 0 {
-					output_vis + &format!("You should ask {} nicely.\n", self.objects[obj_loc.unwrap()].labels[0])
+				let location_existance = match obj_loc {
+					Some(le) => le,
+					None => {
+						eprintln!("##==>>>> ERROR: Object Location Not Found");
+						std::process::exit(1)
+					},
+				};
+				if obj_loc.is_some() && self.objects[location_existance].health > 0 {
+					output_vis + &format!("You should ask {} nicely.\n", self.objects[location_existance].labels[0])
 				} else {
 					self.move_object(obj_opt, Some(LOC_PLAYER))
 				}
@@ -887,10 +914,10 @@ pub fn parse(input_str: String) -> Command {
     }
 }
 
-pub fn get_input() -> Command {
+pub fn get_input() -> io::Result<Command> {
 	// Prompt
 	print!("> ");
-	io::stdout().flush().unwrap();
+	io::stdout().flush()?;
 
 	let mut input_str = String::new();
 
@@ -900,7 +927,7 @@ pub fn get_input() -> Command {
 	println!();
 
 	// Parse and Return
-	parse(input_str)
+	Ok(parse(input_str))
 }
 
 pub fn update_screen(output: String) {

@@ -164,7 +164,14 @@ impl Chip8 {
 
     // Sets to True the Desired Key and Returns Ok or Error
     pub fn set_key<'a>(&'a mut self,x: usize) -> Result<(),&'a str> {
-        *(self.keyboard.get_mut(x).unwrap()) = true;
+        let key_press = match self.keyboard.get_mut(x) {
+            Some(k) => k,
+            None => {
+                eprintln!("##==>>>> ERROR: Unknown Key Press Found");
+                std::process::exit(1)
+            },
+        };
+        *(key_press) = true;
         Ok(())
     }
 

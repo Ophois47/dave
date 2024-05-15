@@ -1347,12 +1347,26 @@ pub fn dave_currency_conv(
         final_amount: result
     };
 
+    let from_symbol = match from_currency_symbol {
+    	Some(ref fs) => fs,
+    	None => {
+    		eprintln!("##==>>>> ERROR: From Currency Symbol Not Found");
+    		std::process::exit(1)
+    	},
+    };
+    let to_symbol = match to_currency_symbol {
+    	Some(ref fs) => fs,
+    	None => {
+    		eprintln!("##==>>>> ERROR: To Currency Symbol Not Found");
+    		std::process::exit(1)
+    	},
+    };
 	println!(
 		"##==>> {}{} {} was converted to {}{} {}",
-		from_currency_symbol.unwrap(),
+		from_symbol,
 		exchange_result.original_amount,
 		exchange_result.original_currency,
-		to_currency_symbol.unwrap(),
+		to_symbol,
 		exchange_result.final_amount,
 		exchange_result.final_currency,
 	);

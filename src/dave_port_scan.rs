@@ -113,7 +113,7 @@ pub async fn port_scan_main(
 	timeout: u64,
 	target: String,
 ) -> io::Result<()> {
-	let socket_addresses: Vec<SocketAddr> = format!("{}:0", target).to_socket_addrs().unwrap().collect();
+	let socket_addresses: Vec<SocketAddr> = format!("{}:0", target).to_socket_addrs()?.collect();
 	if socket_addresses.is_empty() {
 		std::process::exit(1)
 	}

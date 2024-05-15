@@ -27,7 +27,7 @@ pub fn dave_encrypt(passphrase: &str, path: &Path) -> io::Result<Vec<u8>> {
 			},
 			_ => unreachable!(),
 		};
-		writer.write_all(plain_text.as_bytes()).unwrap();
+		writer.write_all(plain_text.as_bytes())?;
 		writer.finish()?;
 		encrypted
 	};

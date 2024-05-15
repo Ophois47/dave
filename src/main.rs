@@ -561,7 +561,9 @@ fn main() {
         },
         Some(("snake", _matches)) => {
             print!("{esc}c", esc = 27 as char);
-            Game::new(stdout(), 15, 10).run();
+            if let Err(error) = Game::new(stdout(), 15, 10).unwrap().run() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
         },
         Some(("tic-tac-toe", _matches)) => {
             if let Err(error) = tic_tac_toe_main() {

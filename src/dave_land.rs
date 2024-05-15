@@ -26,7 +26,7 @@ fn dave_do_game(mut world: dave_land_lib::World) -> io::Result<()> {
 
 	// Main Loop
 	loop {
-		command = dave_land_lib::get_input();
+		command = dave_land_lib::get_input()?;
 		output = world.update_state(&command);
 		dave_land_lib::update_screen(output);
 

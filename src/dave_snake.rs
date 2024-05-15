@@ -1,4 +1,7 @@
-use std::io::Stdout;
+use std::io::{
+	self,
+	Stdout,
+};
 use std::time::{
 	Duration,
 	Instant,
@@ -120,8 +123,15 @@ impl Snake {
 		Self { body, direction, digesting: false }
 	}
 
-	fn get_head_point(&self) -> Point {
-		self.body.first().unwrap().clone()
+	fn get_head_point(&self) -> io::Result<Point> {
+		let p = match self.body.first() {
+			Some(b) => b,
+			None => {
+				eprintln!("##==>>>> ERROR: ");
+				std::process::exit(1)
+			},
+		};
+		Ok(p.clone())
 	}
 
 	fn get_body_points(&self) -> Vec<Point> {
@@ -137,7 +147,14 @@ impl Snake {
 	}
 
 	fn slither(&mut self) {
-		self.body.insert(0, self.body.first().unwrap().transform(self.direction, 1));
+		let first_of_body = match self.body.first() {
+			Some(f) => f,
+			None => {
+				eprintln!("##==>>>> ERROR: Cannot Find Body First");
+				std::process::exit(1)
+			},
+		};
+		self.body.insert(0, first_of_body.transform(self.direction, 1));
 		if !self.digesting {
 			self.body.remove(self.body.len() - 1);
 		} else {
@@ -168,9 +185,9 @@ pub struct Game {
 }
 
 impl Game {
-	pub fn new(stdout: Stdout, width: u16, height: u16) -> Self {
-		let original_terminal_size: (u16, u16) = size().unwrap();
-		Self {
+	pub fn new(stdout: Stdout, width: u16, height: u16) -> io::Result<Self> {
+		let original_terminal_size: (u16, u16) = size()?;
+		Ok(Self {
 			stdout,
 			original_terminal_size,
 			width,
@@ -188,13 +205,17 @@ impl Game {
 			),
 			speed: 0,
 			score: 0,
-		}
+		})
 	}
 
-	pub fn run(&mut self) {
+	pub fn run(&mut self) -> io::Result<()> {
 		self.place_food();
-		self.prepare_ui();
-		self.render();
+		if let Err(error) = self.prepare_ui() {
+			eprintln!("##==>>>> ERROR: {}", error);
+		}
+		if let Err(error) = self.render() {
+			eprintln!("##==>>>> ERROR: {}", error);
+		}
 
 		let mut done = false;
 		while !done {
@@ -218,13 +239,13 @@ impl Game {
 				}
 			}
 
-			if self.has_collided_with_wall() || self.has_bitten_itself() {
+			if self.has_collided_with_wall()? || self.has_bitten_itself()? {
 				done = true;
 			} else {
 				self.snake.slither();
 
 				if let Some(food_point) = self.food {
-					if self.snake.get_head_point() == food_point {
+					if self.snake.get_head_point()? == food_point {
 						self.snake.grow();
 						self.place_food();
 						self.score += 1;
@@ -235,12 +256,17 @@ impl Game {
 					}
 				}
 
-				self.render();
+				if let Err(error) = self.render() {
+					eprintln!("##==>>>> ERROR: {}", error);
+				}
 			}
 		}
 
-		self.restore_ui();
+		if let Err(error) = self.restore_ui() {
+			eprintln!("#==>>>> ERROR: {}", error);
+		}
 		println!("!!! Game Over, Man. Your Score: {} !!!", self.score);
+		Ok(())
 	}
 
 	fn calculate_interval(&self) -> Duration {
@@ -280,24 +306,25 @@ impl Game {
 		}
 	}
 
-	fn has_collided_with_wall(&self) -> bool {
+	fn has_collided_with_wall(&self) -> io::Result<bool> {
 		let head_point = self.snake.get_head_point();
 
-		match self.snake.get_direction() {
-			Direction::Up => head_point.y == 0,
-			Direction::Right => head_point.x == self.width - 1,
-			Direction::Down => head_point.y == self.height - 1,
-			Direction::Left => head_point.x == 0,
-		}
+		let result = match self.snake.get_direction() {
+			Direction::Up => head_point?.y == 0,
+			Direction::Right => head_point?.x == self.width - 1,
+			Direction::Down => head_point?.y == self.height - 1,
+			Direction::Left => head_point?.x == 0,
+		};
+		Ok(result)
 	}
 
-	fn has_bitten_itself(&self) -> bool {
-		let next_head_point = self.snake.get_head_point().transform(self.snake.get_direction(), 1);
+	fn has_bitten_itself(&self) -> io::Result<bool> {
+		let next_head_point = self.snake.get_head_point()?.transform(self.snake.get_direction(), 1);
 		let mut next_body_points = self.snake.get_body_points().clone();
 		next_body_points.remove(next_body_points.len() - 1);
 		next_body_points.remove(0);
 
-		next_body_points.contains(&next_head_point)
+		Ok(next_body_points.contains(&next_head_point))
 	}
 
 	fn place_food(&mut self) {
@@ -312,38 +339,42 @@ impl Game {
 		}
 	}
 
-	fn render(&mut self) {
-		self.draw_borders();
-		self.draw_background();
-		self.draw_food();
-		self.draw_snake();
+	fn render(&mut self) -> io::Result<()> {
+		self.draw_borders()?;
+		self.draw_background()?;
+		self.draw_food()?;
+		self.draw_snake()?;
+		Ok(())
 	}
 
-	fn prepare_ui(&mut self) {
-		enable_raw_mode().unwrap();
+	fn prepare_ui(&mut self) -> io::Result<()> {
+		enable_raw_mode()?;
 		self.stdout
-			.execute(SetSize(self.width + 3, self.height + 3)).unwrap()
-			.execute(Clear(ClearType::All)).unwrap()
-			.execute(Hide).unwrap();
+			.execute(SetSize(self.width + 3, self.height + 3))?
+			.execute(Clear(ClearType::All))?
+			.execute(Hide)?;
+
+		Ok(())
 	}
 
-	fn restore_ui(&mut self) {
+	fn restore_ui(&mut self) -> io::Result<()> {
 		let (cols, rows) = self.original_terminal_size;
 		self.stdout
-			.execute(SetSize(cols, rows)).unwrap()
-			.execute(Clear(ClearType::All)).unwrap()
-			.execute(Show).unwrap()
-			.execute(ResetColor).unwrap();
-		disable_raw_mode().unwrap();
+			.execute(SetSize(cols, rows))?
+			.execute(Clear(ClearType::All))?
+			.execute(Show)?
+			.execute(ResetColor)?;
+		disable_raw_mode()?;
+		Ok(())
 	}
 
-	fn draw_snake(&mut self) {
+	fn draw_snake(&mut self) -> io::Result<()> {
 		let fg = SetForegroundColor(match self.speed % 3 {
 			0 => Color::Green,
 			1 => Color::Cyan,
 			_ => Color::Yellow,
 		});
-		self.stdout.execute(fg).unwrap();
+		self.stdout.execute(fg)?;
 
 		let body_points = self.snake.get_body_points();
 		for (i, body) in body_points.iter().enumerate() {
@@ -384,60 +415,64 @@ impl Game {
 			};
 
 			self.stdout
-				.execute(MoveTo(body.x + 1, body.y + 1)).unwrap()
-				.execute(Print(symbol)).unwrap();
+				.execute(MoveTo(body.x + 1, body.y + 1))?
+				.execute(Print(symbol))?;
 		}
+		Ok(())
 	}
 
-	fn draw_food(&mut self) {
-		self.stdout.execute(SetForegroundColor(Color::White)).unwrap();
+	fn draw_food(&mut self) -> io::Result<()> {
+		self.stdout.execute(SetForegroundColor(Color::White))?;
 
 		for food in self.food.iter() {
 			self.stdout
-				.execute(MoveTo(food.x + 1, food.y + 1)).unwrap()
-				.execute(Print("•")).unwrap();
+				.execute(MoveTo(food.x + 1, food.y + 1))?
+				.execute(Print("•"))?;
 		}
+		Ok(())
 	}
 
-	fn draw_background(&mut self) {
-		self.stdout.execute(ResetColor).unwrap();
+	fn draw_background(&mut self) -> io::Result<()> {
+		self.stdout.execute(ResetColor)?;
 
 		for y in 1..self.height + 1 {
 			for x in 1..self.width + 1 {
 				self.stdout
-					.execute(MoveTo(x, y)).unwrap()
-					.execute(Print(" ")).unwrap();
+					.execute(MoveTo(x, y))?
+					.execute(Print(" "))?;
 			}
 		}
+		Ok(())
 	}
 
-	fn draw_borders(&mut self) {
-		self.stdout.execute(SetForegroundColor(Color::DarkGrey)).unwrap();
+	fn draw_borders(&mut self) -> io::Result<()> {
+		self.stdout.execute(SetForegroundColor(Color::DarkGrey))?;
 
 		for y in 0..self.height + 2 {
 			self.stdout
-				.execute(MoveTo(0, y)).unwrap()
-				.execute(Print("#")).unwrap()
-				.execute(MoveTo(self.width + 1, y)).unwrap()
-				.execute(Print("#")).unwrap();
+				.execute(MoveTo(0, y))?
+				.execute(Print("#"))?
+				.execute(MoveTo(self.width + 1, y))?
+				.execute(Print("#"))?;
 		}
 
 		for x in 0..self.width + 2 {
 			self.stdout
-				.execute(MoveTo(x, 0)).unwrap()
-				.execute(Print("#")).unwrap()
-				.execute(MoveTo(x, self.height + 1)).unwrap()
-				.execute(Print("#")).unwrap();
+				.execute(MoveTo(x, 0))?
+				.execute(Print("#"))?
+				.execute(MoveTo(x, self.height + 1))?
+				.execute(Print("#"))?;
 		}
 
 		self.stdout
-			.execute(MoveTo(0, 0)).unwrap()
-            .execute(Print("#")).unwrap()
-            .execute(MoveTo(self.width + 1, self.height + 1)).unwrap()
-            .execute(Print("#")).unwrap()
-            .execute(MoveTo(self.width + 1, 0)).unwrap()
-            .execute(Print("#")).unwrap()
-            .execute(MoveTo(0, self.height + 1)).unwrap()
-            .execute(Print("#")).unwrap();
+			.execute(MoveTo(0, 0))?
+            .execute(Print("#"))?
+            .execute(MoveTo(self.width + 1, self.height + 1))?
+            .execute(Print("#"))?
+            .execute(MoveTo(self.width + 1, 0))?
+            .execute(Print("#"))?
+            .execute(MoveTo(0, self.height + 1))?
+            .execute(Print("#"))?;
+		Ok(())
 	}
 }

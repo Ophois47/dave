@@ -1,13 +1,29 @@
 use std::fs::File;
-use std::io;
-use linfa::dataset::{Labels, Records};
+use std::io::{
+	self,
+	ErrorKind,
+};
+use linfa::dataset::{
+	Labels,
+	Records,
+};
 use linfa::metrics::SilhouetteScore;
-use linfa::traits::{Fit, Predict, Transformer};
+use linfa::traits::{
+	Fit,
+	Predict,
+	Transformer,
+};
 use linfa::DatasetBase;
-use linfa_clustering::{Dbscan, KMeans};
+use linfa_clustering::{
+	Dbscan,
+	KMeans,
+};
 use linfa_datasets::generate;
 use linfa_nn::distance::LInfDist;
-use ndarray::{array, Axis};
+use ndarray::{
+	array,
+	Axis,
+};
 use ndarray_npy::write_npy;
 
 // Routine K-Means Task:
@@ -91,10 +107,10 @@ pub fn dbscan_task() -> io::Result<()> {
 	let cluster_memberships = Dbscan::params(min_points)
 		.tolerance(1.)
 		.transform(dataset)
-		.unwrap();
+		.map_err(|_| ErrorKind::NotFound);
 
 	// Single Target Dataset
-	let label_count = cluster_memberships.label_count().remove(0);
+	let label_count = cluster_memberships.clone()?.label_count().remove(0);
 
 	println!();
 	println!("##==>> Result: ");
@@ -106,7 +122,13 @@ pub fn dbscan_task() -> io::Result<()> {
 	}
 	println!();
 
-	let silhouette_score = cluster_memberships.silhouette_score().unwrap();
+	let silhouette_score = match cluster_memberships.clone()?.silhouette_score() {
+		Ok(sil_score) => sil_score,
+		Err(error) => {
+			eprintln!("##==>>>> ERROR: {}", error);
+			std::process::exit(1)
+		},
+	};
 	println!("##==> Silhouette Score: {}\n", silhouette_score);
 
 	// Save Dataset + Cluster Label Assigned To Each Observation
@@ -115,7 +137,7 @@ pub fn dbscan_task() -> io::Result<()> {
 	File::create(dataset_file_string)?;
 	let memberships_file_string = "./dave_conf/var/daves_machines/dbscan_clustered_memberships.npy";
 	File::create(memberships_file_string)?;
-	let (records, cluster_memberships) = (cluster_memberships.records, cluster_memberships.targets);
+	let (records, cluster_memberships) = (cluster_memberships.clone()?.records, cluster_memberships?.targets);
 
 	println!("---------------------------------------------------------");
 	println!("##==> Writing DBScan Records to Dataset File ...");
