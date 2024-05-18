@@ -15,6 +15,7 @@ use tabled::{
 const TOTAL_ROWS: usize = 3;
 const TOTAL_COLUMNS: usize = 3;
 const MAX_FILL: usize = TOTAL_ROWS * TOTAL_COLUMNS;
+const AI_LOG_FILE: &str = "./dave_conf/var/dave_ai.log";
 
 // Board Drawing Functions
 fn clearscreen() {
@@ -265,27 +266,32 @@ fn ai_best_move(
 	write_ai_log(
 		&format!("AI's Best Move: {}\n\n", move_array_to_num(best_move)),
 	)?;
+
 	Ok(best_move)
 }
 
 fn write_ai_log(data: &str) -> Result<(), String> {
-	// Open File in Append Mode
-	let ai_log_file_string = "./dave_conf/var/dave_ai.log";
-	if Path::new(ai_log_file_string).exists() {
-		fs::remove_file(ai_log_file_string)
-			.map_err(|_| "File cannot be removed".to_string())?;
-	}
+	remove_ai_log();
 
 	let mut file = OpenOptions::new()
 		.create_new(true)
 		.write(true)
 		.append(true)
-		.open(ai_log_file_string)
+		.open(AI_LOG_FILE)
 		.map_err(|_| "Failed to open AI log file".to_string())?;
 
 	// Write Data to File
 	file.write_all(data.as_bytes())
 		.map_err(|error| format!("Error writing to log file: {}", error))
+}
+
+fn remove_ai_log() {
+	if Path::new(AI_LOG_FILE).exists() {
+		match fs::remove_file(AI_LOG_FILE).map_err(|_| "File cannot be removed".to_string()) {
+			Ok(_) => {},
+			Err(error) => eprintln!("##==>>>> ERROR: {}", error),
+		};
+	}
 }
 
 // Main Game Loop
@@ -300,7 +306,7 @@ pub fn tic_tac_toe_main() -> io::Result<()> {
 fn play() -> Result<(), String> {
 	let ref mut board = create_board();
 	clearscreen();
-	println!("[***] Welcome to Dave's Tic-Tac-Toe Game [***]");
+	println!("[***] Welcome to Dave's Tic-Tac-Toe Game [***]\n");
 
 	let human_char = ask_player_char()?;
 	let ai_char = if human_char == 'X' { 'O' } else { 'X' };
@@ -341,13 +347,14 @@ fn play() -> Result<(), String> {
 
 	clearscreen();
 	if winner == human_char {
-		println!("[*] YOU ({}) WIN [*]", human_char);
+		println!("[*] YOU WIN : ({}) [*]", human_char);
 	} else if winner == ai_char {
-		println!("[*] YOU ({}) LOSE [*]", human_char);
+		println!("[*] YOU LOSE : ({}) [*]", human_char);
 	} else {
 		println!("[*] DRAW! [*]");
 	}
 	print_board(board);
+	remove_ai_log();
 
 	Ok(())
 }

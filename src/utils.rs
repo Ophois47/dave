@@ -104,8 +104,15 @@ pub fn get_system_info() -> io::Result<()> {
         println!("##==> Disk: '{}'", disk.name().to_str().unwrap_or("Unknown"));
         println!("##==> Disk Mounted On: '{}'", disk.mount_point().display());
         println!("##==> Disk Type: '{}'", disk.kind());
-        println!("##==> Disk File System Type: '{}'", disk.file_system().to_str().unwrap_or("Unknown"));
-        println!("##==> Disk Space Available: '{} B / {} B'", disk.available_space(), disk.total_space());
+        println!(
+            "##==> Disk File System Type: '{}'",
+            disk.file_system().to_str().unwrap_or("Unknown"),
+        );
+        println!(
+            "##==> Disk Space Available: '{} B / {} B'",
+            disk.available_space(),
+            disk.total_space(),
+        );
         println!("##==> Disk Removable: '{}'", disk.is_removable());
         println!();
     }
