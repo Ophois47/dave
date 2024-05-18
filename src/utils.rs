@@ -132,27 +132,29 @@ pub fn get_system_info() -> io::Result<()> {
 
     // Components Temperature
     let components = Components::new_with_refreshed_list();
-    println!("#==>> Components:");
-    for component in &components {
-        match component.critical() {
-            Some(component_critical) => {
-                println!(
-                    "#==> '{}: {:.1}°C (Max: {:.1}°C, Critical: {:.1}°C)'",
-                    component.label(),
-                    component.temperature(),
-                    component.max(),
-                    component_critical,
-                );
-            },
-            _ => {
-                println!(
-                    "#==> '{}: {:.1}°C (Max: {:.1}°C)'",
-                    component.label(),
-                    component.temperature(),
-                    component.max(),
-                );
-            },
-        };
+    if components.len() > 0 {
+        println!("#==>> Components:");
+        for component in &components {
+            match component.critical() {
+                Some(component_critical) => {
+                    println!(
+                        "#==> '{}: {:.1}°C (Max: {:.1}°C, Critical: {:.1}°C)'",
+                        component.label(),
+                        component.temperature(),
+                        component.max(),
+                        component_critical,
+                    );
+                },
+                _ => {
+                    println!(
+                        "#==> '{}: {:.1}°C (Max: {:.1}°C)'",
+                        component.label(),
+                        component.temperature(),
+                        component.max(),
+                    );
+                },
+            };
+        }
     }
 
     Ok(())
