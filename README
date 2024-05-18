@@ -22,6 +22,7 @@ dave gives you the privilege of battling his AI with 'tic-tac-toe'
 dave will supply you with a random value based on a range given by the user with 'get-rand'
 dave lets you scan a number of ports with 'port-scan'
 dave allows you to view your current system information with 'my-sys'
+dave has created a graphical user interface (GUI) for you to fiddle with using 'gui'
 
 To Install Dave:
 ===================
