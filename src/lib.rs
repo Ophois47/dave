@@ -11,6 +11,7 @@ pub mod dave_db;
 pub mod dave_encrypt;
 pub mod dave_grep;
 pub mod dave_guess;
+pub mod dave_gui;
 pub mod dave_hash;
 pub mod dave_land;
 pub mod dave_land_lib;

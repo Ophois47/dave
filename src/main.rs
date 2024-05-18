@@ -60,6 +60,7 @@ use davelib::dave_encrypt::*;
 use davelib::dave_grep;
 use davelib::dave_grep::Config;
 use davelib::dave_guess::guess_number;
+use davelib::dave_gui::*;
 use davelib::dave_hash::*;
 use davelib::dave_land::dave_game_loop;
 use davelib::dave_machine::*;
@@ -317,6 +318,8 @@ fn argument_parser() -> ArgMatches {
             .about("This is a text based adventure game by Dave"))
         .subcommand(Command::new("snake")
             .about("This is a classic Snake game by Dave"))
+        .subcommand(Command::new("gui")
+            .about("This is Dave's gooey"))
         .subcommand(Command::new("tic-tac-toe")
             .about("This is a classic Tic-Tac-Toe game by Dave"))
         .subcommand(Command::new("my-sys")
@@ -487,10 +490,17 @@ fn update_config<'a>(matches: &ArgMatches) {
         let config_path = config.config_path();
 
         if let Err(error) = config.save() {
-            eprintln!("##==>>>> ERROR: Unable to save configuration: {}: {}", config_path.display(), error);
+            eprintln!(
+                "##==>>>> ERROR: Unable to save configuration: {}: {}",
+                config_path.display(),
+                error,
+            );
             std::process::exit(1)
         }
-        println!("##==> Successfully Wrote Configuration to: {}", config_path.display());
+        println!(
+            "##==> Successfully Wrote Configuration to: {}",
+            config_path.display(),
+        );
         std::process::exit(0)
     }
 
@@ -502,7 +512,13 @@ fn update_config<'a>(matches: &ArgMatches) {
 }
 
 fn print_startup_message() {
-    println!("##==> Dave Version: {}, Release: {}, Patchlevel: {} ({})", VERSION[0], VERSION[1], VERSION[2], BUILD_DATE);
+    println!(
+        "##==> Dave Version: {}, Release: {}, Patchlevel: {} ({})",
+        VERSION[0],
+        VERSION[1],
+        VERSION[2],
+        BUILD_DATE,
+    );
     println!();
 }
 
@@ -523,7 +539,10 @@ fn main() {
     print_startup_message();
 
     // Check Current OS to Determine Colored Terminal Output
-    println!("##==> INFO! Found Operating System '{}'. Configuring Terminal Environment ...", env::consts::OS);
+    println!(
+        "##==> INFO! Found Operating System '{}'. Configuring Terminal Environment ...",
+        env::consts::OS,
+    );
     if let Err(error) = setup_terminal() {
         eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
     }
@@ -556,6 +575,11 @@ fn main() {
         },
         Some(("perceptron", _matches)) => {
             if let Err(error) = daves_perceptron() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("gui", _matches)) => {
+            if let Err(error) = dave_gui() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
@@ -888,7 +912,9 @@ fn main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             } else {
-                println!("##==> A valid quiz must be chosen. Try running 'dave quiz --help' for more information");
+                println!(
+                    "##==> A valid quiz must be chosen. Try running 'dave quiz --help' for more information",
+                );
             }
         },
         Some(("budget", matches)) => {

@@ -1,15 +1,29 @@
 use std::io;
-use std::time::{Duration, Instant};
+use std::time::{
+    Duration,
+    Instant,
+};
 use std::thread;
 use crossterm::{
-	event::{self, Event, KeyCode},
+	event::{
+        self,
+        Event,
+        KeyCode,
+    },
 };
 use rand;
 use tui::{
 	backend::Backend,
-	style::{Color, Style},
+	style::{
+        Color,
+        Style,
+    },
 	text::Span,
-	widgets::{canvas::Canvas, Block, Borders},
+	widgets::{
+        canvas::Canvas,
+        Block,
+        Borders,
+    },
 	Frame,
 	Terminal,
 };
