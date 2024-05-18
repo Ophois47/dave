@@ -27,22 +27,32 @@ impl eframe::App for DaveApp {
 				ui.text_edit_singleline(&mut self.name)
 					.labelled_by(name_label.id);
 			});
-			ui.add(egui::Slider::new(&mut self.age, 0..=120).text("Age"));
+			ui.add(egui::Slider::new(&mut self.age, 0..=2000).text("Age"));
 			if ui.button("Increment").clicked() {
 				self.age += 1;
 			}
+			ui.separator();
 			ui.label(
 				format!(
-					"Hello '{}'. Age: {}",
+					"It's great to meet you, {}. You don't look {} years old.",
 					self.name,
 					self.age,
 				),
 			);
-			ui.image(
-				egui::include_image!(
-					"../dave_conf/var/frog.png"
-				),
-			);
+			ui.separator();
+			if self.age == 2000 {
+				ui.image(
+					egui::include_image!(
+						"../dave_conf/var/ttyom.png"
+					),
+				);
+			} else {
+				ui.image(
+					egui::include_image!(
+						"../dave_conf/var/frog.png"
+					),
+				);
+			};
 		});
 
 		if ctx.input(|i| i.viewport().close_requested()) {
@@ -59,16 +69,17 @@ impl eframe::App for DaveApp {
 				.collapsible(false)
 				.resizable(false)
 				.show(ctx, |ui| {
-					if ui.button("Yes").clicked() {
-						self.show_confirmation_message = false;
-						self.allowed_to_close = true;
-						ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
-					}
-
-					if ui.button("No").clicked() {
-						self.show_confirmation_message = false;
-						self.allowed_to_close = false;
-					}
+					ui.horizontal(|ui| {
+						if ui.button("Yes").clicked() {
+							self.show_confirmation_message = false;
+							self.allowed_to_close = true;
+							ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
+						}
+						if ui.button("No").clicked() {
+							self.show_confirmation_message = false;
+							self.allowed_to_close = false;
+						}
+					});
 				});
 		};
 	}
