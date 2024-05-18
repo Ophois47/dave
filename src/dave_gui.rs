@@ -59,15 +59,15 @@ impl eframe::App for DaveApp {
 				.collapsible(false)
 				.resizable(false)
 				.show(ctx, |ui| {
-					if ui.button("No").clicked() {
-						self.show_confirmation_message = false;
-						self.allowed_to_close = false;
-					}
-
 					if ui.button("Yes").clicked() {
 						self.show_confirmation_message = false;
 						self.allowed_to_close = true;
 						ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
+					}
+
+					if ui.button("No").clicked() {
+						self.show_confirmation_message = false;
+						self.allowed_to_close = false;
 					}
 				});
 		};
@@ -76,7 +76,9 @@ impl eframe::App for DaveApp {
 
 pub fn dave_gui() -> Result<(), eframe::Error> {
 	let options = eframe::NativeOptions {
-		viewport: egui::ViewportBuilder::default().with_inner_size([320.0, 240.0]),
+		viewport: egui::ViewportBuilder::default()
+			.with_inner_size([400.0, 250.0])
+			.with_min_inner_size([400.0, 250.0]),
 		..Default::default()
 	};
 
