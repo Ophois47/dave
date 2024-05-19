@@ -1,6 +1,6 @@
 [package]
 name = "dave"
-version = "8.6.5"
+version = "9.0.0"
 edition = "2021"
 
 [lib]
@@ -17,6 +17,7 @@ chrono = "0.4"
 
 [dependencies]
 age = "0.10"
+bevy = "0.13"
 bincode = "1"
 bytesize = "1"
 chrono = "0.4"

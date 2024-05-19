@@ -60,7 +60,8 @@ use davelib::dave_encrypt::*;
 use davelib::dave_grep;
 use davelib::dave_grep::Config;
 use davelib::dave_guess::guess_number;
-use davelib::dave_gui::*;
+use davelib::dave_gui::dave_gui;
+use davelib::dave_graphics::daves_cube;
 use davelib::dave_hash::*;
 use davelib::dave_land::dave_game_loop;
 use davelib::dave_machine::*;
@@ -318,6 +319,12 @@ fn argument_parser() -> ArgMatches {
             .about("This is a text based adventure game by Dave"))
         .subcommand(Command::new("snake")
             .about("This is a classic Snake game by Dave"))
+        .subcommand(Command::new("bevy")
+            .about("A series of 3D graphical environments by Dave")
+            .arg(Arg::new("cubeland")
+                .long("cubeland")
+                .action(ArgAction::SetTrue)
+                .help("Enter the world of the cubes")))
         .subcommand(Command::new("gui")
             .about("This is Dave's gooey"))
         .subcommand(Command::new("tic-tac-toe")
@@ -597,6 +604,13 @@ fn main() {
         Some(("my-sys", _matches)) => {
             if let Err(error) = get_system_info() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("bevy", matches)) => {
+            if matches.get_flag("cubeland") {
+                if let Err(error) = daves_cube() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
             }
         },
         Some(("port-scan", matches)) => {

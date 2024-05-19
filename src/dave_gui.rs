@@ -27,7 +27,8 @@ impl eframe::App for DaveApp {
 				ui.text_edit_singleline(&mut self.name)
 					.labelled_by(name_label.id);
 			});
-			ui.add(egui::Slider::new(&mut self.age, 0..=2000).text("Age"));
+			ui.label(format!("Your Age:"));
+			ui.add(egui::Slider::new(&mut self.age, 0..=2000).text("Years Old"));
 			if ui.button("Increment").clicked() {
 				self.age += 1;
 			}
@@ -88,7 +89,7 @@ impl eframe::App for DaveApp {
 pub fn dave_gui() -> Result<(), eframe::Error> {
 	let options = eframe::NativeOptions {
 		viewport: egui::ViewportBuilder::default()
-			.with_inner_size([400.0, 250.0])
+			.with_inner_size([400.0, 550.0])
 			.with_min_inner_size([400.0, 250.0]),
 		..Default::default()
 	};
