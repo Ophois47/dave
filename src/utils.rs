@@ -195,6 +195,7 @@ pub struct CameraController {
     pub key_up: KeyCode,
     pub key_down: KeyCode,
     pub key_run: KeyCode,
+    pub key_quit: KeyCode,
     pub mouse_key_cursor_grab: MouseButton,
     pub keyboard_key_toggle_cursor_grab: KeyCode,
     pub walk_speed: f32,
@@ -218,6 +219,7 @@ impl Default for CameraController {
             key_up: KeyCode::KeyQ,
             key_down: KeyCode::KeyZ,
             key_run: KeyCode::ShiftLeft,
+            key_quit: KeyCode::Escape,
             mouse_key_cursor_grab: MouseButton::Left,
             keyboard_key_toggle_cursor_grab: KeyCode::KeyM,
             walk_speed: 5.0,
@@ -241,7 +243,8 @@ impl fmt::Display for CameraController {
             {:?} & {:?}\t - Fly Forwards & Backwards
             {:?} & {:?}\t - Fly Sideways Left & Right
             {:?} & {:?}\t - Fly Up & Down
-            {:?}\t - Fly Faster While Held",
+            {:?}\t - Fly Faster While Held
+            {:?}\t - Quit\n",
             self.mouse_key_cursor_grab,
             self.keyboard_key_toggle_cursor_grab,
             self.key_forward,
@@ -251,6 +254,7 @@ impl fmt::Display for CameraController {
             self.key_up,
             self.key_down,
             self.key_run,
+            self.key_quit,
         )
     }
 }
@@ -300,6 +304,9 @@ fn run_camera_controller(
         }
         if key_input.pressed(controller.key_down) {
             axis_input.y -= 1.0;
+        }
+        if key_input.pressed(controller.key_quit) {
+            std::process::exit(0)
         }
 
         let mut cursor_grab_change = false;

@@ -356,10 +356,10 @@ fn render_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         CameraController::default(),
         EnvironmentMapLight {
             diffuse_map: asset_server.load(
-                ASSETS_DIR.to_owned() + "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2",
+                ASSETS_DIR.to_owned() + "/env_maps/pisa_diffuse_rgb9e5_zstd.ktx2",
             ),
             specular_map: asset_server.load(
-                ASSETS_DIR.to_owned() + "environment_maps/pisa_specular_rgb9e5_zstd.ktx2",
+                ASSETS_DIR.to_owned() + "/env_maps/pisa_specular_rgb9e5_zstd.ktx2",
             ),
             intensity: 250.0,
         },
