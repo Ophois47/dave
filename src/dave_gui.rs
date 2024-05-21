@@ -44,13 +44,13 @@ impl eframe::App for DaveApp {
 			if self.age == 2000 {
 				ui.image(
 					egui::include_image!(
-						"../dave_conf/var/ttyom.png"
+						"../dave_conf/var/daves_assets/ttyom.png"
 					),
 				);
 			} else {
 				ui.image(
 					egui::include_image!(
-						"../dave_conf/var/frog.png"
+						"../dave_conf/var/daves_assets/frog.png"
 					),
 				);
 			};

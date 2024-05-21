@@ -23,6 +23,8 @@ dave will supply you with a random value based on a range given by the user with
 dave lets you scan a number of ports with 'port-scan'
 dave allows you to view your current system information with 'my-sys'
 dave has created a graphical user interface (GUI) for you to fiddle with using 'gui'
+dave lets you work with and explore and play with 3D graphics using 'bevy'
+dave allows you to play the classic Breakout game with 'breakout'
 
 To Install Dave:
 ===================

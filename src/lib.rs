@@ -2,6 +2,7 @@
 extern crate serde_derive;
 
 pub mod config;
+pub mod dave_breakout;
 pub mod dave_budget;
 pub mod dave_calcs;
 pub mod dave_chip8;
@@ -24,6 +25,7 @@ pub mod dave_port_scan;
 pub mod dave_quiz;
 pub mod dave_rep_max;
 pub mod dave_scrape;
+pub mod dave_skybox;
 pub mod dave_snake;
 pub mod dave_tic_tac_toe;
 pub mod release;

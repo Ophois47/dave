@@ -50,6 +50,7 @@ use std::process;
 use std::str::FromStr;
 use std::time::Instant;
 use davelib::config::*;
+use davelib::dave_breakout::dave_breakout_main;
 use davelib::dave_budget::DaveBudget;
 use davelib::dave_calcs::*;
 use davelib::dave_chip8::*;
@@ -61,7 +62,11 @@ use davelib::dave_grep;
 use davelib::dave_grep::Config;
 use davelib::dave_guess::guess_number;
 use davelib::dave_gui::dave_gui;
-use davelib::dave_graphics::daves_cube;
+use davelib::dave_graphics::{
+    daves_atmo_fog,
+    daves_cube,
+    daves_shapes,
+};
 use davelib::dave_hash::*;
 use davelib::dave_land::dave_game_loop;
 use davelib::dave_machine::*;
@@ -72,6 +77,7 @@ use davelib::dave_port_scan::port_scan_main;
 use davelib::dave_quiz::*;
 use davelib::dave_rep_max::dave_rep_max_calc;
 use davelib::dave_scrape::*;
+use davelib::dave_skybox::daves_skybox;
 use davelib::dave_snake::Game;
 use davelib::dave_tic_tac_toe::tic_tac_toe_main;
 use davelib::utils::*;
@@ -319,12 +325,26 @@ fn argument_parser() -> ArgMatches {
             .about("This is a text based adventure game by Dave"))
         .subcommand(Command::new("snake")
             .about("This is a classic Snake game by Dave"))
+        .subcommand(Command::new("breakout")
+            .about("This is a classic Break game by Dave, written with Bevy"))
         .subcommand(Command::new("bevy")
             .about("A series of 3D graphical environments by Dave")
             .arg(Arg::new("cubeland")
                 .long("cubeland")
                 .action(ArgAction::SetTrue)
-                .help("Enter the world of the cubes")))
+                .help("Enter the world of the cubes"))
+            .arg(Arg::new("shapeland")
+                .long("shapeland")
+                .action(ArgAction::SetTrue)
+                .help("Be dazzled by the world of the shapes"))
+            .arg(Arg::new("fog")
+                .long("fog")
+                .action(ArgAction::SetTrue)
+                .help("Behold! Atmospheric Fog simulation"))
+            .arg(Arg::new("skybox")
+                .long("skybox")
+                .action(ArgAction::SetTrue)
+                .help("Enter the skybox")))
         .subcommand(Command::new("gui")
             .about("This is Dave's gooey"))
         .subcommand(Command::new("tic-tac-toe")
@@ -596,6 +616,11 @@ fn main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
+        Some(("breakout", _matches)) => {
+            if let Err(error) = dave_breakout_main() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
         Some(("tic-tac-toe", _matches)) => {
             if let Err(error) = tic_tac_toe_main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
@@ -609,6 +634,21 @@ fn main() {
         Some(("bevy", matches)) => {
             if matches.get_flag("cubeland") {
                 if let Err(error) = daves_cube() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("shapeland") {
+                if let Err(error) = daves_shapes() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("fog") {
+                if let Err(error) = daves_atmo_fog() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("skybox") {
+                if let Err(error) = daves_skybox() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
