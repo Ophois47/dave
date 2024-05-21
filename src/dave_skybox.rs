@@ -20,14 +20,14 @@ use bevy::{
 };
 use crate::utils::*;
 
-const ASSETS_DIR: &str = "/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets";
+const ASSETS_DIR: &str = "/home/david/Documents/Programs/Rust/dave/dave_conf/cube_maps/var/daves_assets";
 const CUBEMAPS: &[(&str, CompressedImageFormats)] = &[
 	(
-		"/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets/Ryfjallet_cubemap.png",
+		"/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap.png",
 		CompressedImageFormats::NONE,
 	),
 	(
-		"/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets/Ryfjallet_cubemap_astc4x4.ktx2",
+		"/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap_astc4x4.ktx2",
 		CompressedImageFormats::ASTC_LDR,
 	),
 	(
@@ -35,7 +35,7 @@ const CUBEMAPS: &[(&str, CompressedImageFormats)] = &[
 		CompressedImageFormats::BC,
 	),
 	(
-		"/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets/Ryfjallet_cubemap_etc2.ktx2",
+		"/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap_etc2.ktx2",
 		CompressedImageFormats::ETC2,
 	),
 ];
@@ -196,7 +196,7 @@ fn cycle_cubemap_asset(
 		if supported_compressed_formats.contains(CUBEMAPS[new_index].1) {
 			break;
 		}
-		info!("Skipping Unsupported Format: {:?}", CUBEMAPS[new_index]);
+		info!("##==> INFO! Skipping Unsupported Format: {:?}", CUBEMAPS[new_index]);
 	}
 
 	// Skip Swapping to Same Texture
@@ -232,7 +232,7 @@ fn asset_loaded(
 	mut skyboxes: Query<&mut Skybox>,
 ) {
 	if !cubemap.is_loaded && asset_server.load_state(&cubemap.image_handle) == LoadState::Loaded {
-		info!("Swapping to {} ...", CUBEMAPS[cubemap.index].0);
+		info!("##==> INFO! Swapping to {} ...", CUBEMAPS[cubemap.index].0);
 		// TODO: Add Text Explaining Each Cubemap
 		let image = images.get_mut(&cubemap.image_handle).unwrap();
 		if image.texture_descriptor.array_layer_count() == 1 {

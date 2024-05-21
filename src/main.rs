@@ -63,8 +63,10 @@ use davelib::dave_grep::Config;
 use davelib::dave_guess::guess_number;
 use davelib::dave_gui::dave_gui;
 use davelib::dave_graphics::{
+    daves_animated_fox,
     daves_atmo_fog,
     daves_cube,
+    daves_render_viewer,
     daves_shapes,
 };
 use davelib::dave_hash::*;
@@ -344,7 +346,15 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("skybox")
                 .long("skybox")
                 .action(ArgAction::SetTrue)
-                .help("Enter the skybox")))
+                .help("Enter the skybox"))
+            .arg(Arg::new("render")
+                .long("render")
+                .action(ArgAction::SetTrue)
+                .help("Load and render glTF file models of your choice"))
+            .arg(Arg::new("fox")
+                .long("fox")
+                .action(ArgAction::SetTrue)
+                .help("Play with David's animated Fox")))
         .subcommand(Command::new("gui")
             .about("This is Dave's gooey"))
         .subcommand(Command::new("tic-tac-toe")
@@ -649,6 +659,16 @@ fn main() {
             }
             if matches.get_flag("skybox") {
                 if let Err(error) = daves_skybox() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("render") {
+                if let Err(error) = daves_render_viewer() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("fox") {
+                if let Err(error) = daves_animated_fox() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }

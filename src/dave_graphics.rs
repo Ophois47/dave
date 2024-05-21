@@ -1,10 +1,13 @@
-use std::f32::consts::PI;
+use std::f32::consts::*;
 use std::io;
+use std::time::Duration;
 use bevy::{
+    animation::RepeatAnimation,
 	app::MainScheduleOrder,
 	ecs::schedule::*,
     pbr::{
         CascadeShadowConfigBuilder,
+        DirectionalLightShadowMap,
         NotShadowCaster,
     },
 	prelude::*,
@@ -21,7 +24,9 @@ use crate::utils::*;
 
 const ASSETS_DIR: &str = "/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets";
 
+//
 // Cube Program
+//
 fn daves_cube_setup(
 	mut commands: Commands,
 	mut meshes: ResMut<Assets<Mesh>>,
@@ -75,7 +80,9 @@ pub fn daves_cube() -> io::Result<()> {
 	Ok(())
 }
 
+//
 // Shapes Program
+//
 #[derive(Component)]
 struct Shape;
 
@@ -194,7 +201,9 @@ pub fn daves_shapes() -> io::Result<()> {
     Ok(())
 }
 
+//
 // Atmospheric Fog Program
+//
 fn toggle_system(keycode: Res<ButtonInput<KeyCode>>, mut fog: Query<&mut FogSettings>) {
     let mut fog_settings = fog.single_mut();
 
@@ -320,7 +329,237 @@ pub fn daves_atmo_fog() -> io::Result<()> {
     Ok(())
 }
 
+//
+// Load and Render 3D Models
+//
+fn animate_light_direction(
+    time: Res<Time>,
+    mut query: Query<&mut Transform, With<DirectionalLight>>,
+) {
+    for mut transform in &mut query {
+        transform.rotation = Quat::from_euler(
+            EulerRot::ZYX,
+            0.0,
+            time.elapsed_seconds() * PI / 5.0,
+            -FRAC_PI_4,
+        );
+    }
+}
+
+fn render_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // Camera
+    commands.spawn((
+        Camera3dBundle {
+            transform: Transform::from_xyz(0.7, 0.7, 1.0).looking_at(Vec3::new(0.0, 0.3, 0.0), Vec3::Y),
+            ..default()
+        },
+        CameraController::default(),
+        EnvironmentMapLight {
+            diffuse_map: asset_server.load(
+                ASSETS_DIR.to_owned() + "environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2",
+            ),
+            specular_map: asset_server.load(
+                ASSETS_DIR.to_owned() + "environment_maps/pisa_specular_rgb9e5_zstd.ktx2",
+            ),
+            intensity: 250.0,
+        },
+    ));
+
+    // Lighting
+    commands.spawn(DirectionalLightBundle {
+        directional_light: DirectionalLight {
+            shadows_enabled: true,
+            ..default()
+        },
+        cascade_shadow_config: CascadeShadowConfigBuilder {
+            num_cascades: 1,
+            maximum_distance: 1.6,
+            ..default()
+        }
+        .into(),
+        ..default()
+    });
+
+    // Scene
+    commands.spawn(SceneBundle {
+        scene: asset_server.load(
+            ASSETS_DIR.to_owned() + "/models/flight_helmet/FlightHelmet.gltf#Scene0",
+        ),
+        ..default()
+    });
+}
+
+pub fn daves_render_viewer() -> io::Result<()> {
+    App::new()
+        .insert_resource(DirectionalLightShadowMap { size: 4096 })
+        .add_plugins(DefaultPlugins)
+        .add_plugins(CameraControllerPlugin)
+        .add_systems(Startup, render_setup)
+        .add_systems(Update, animate_light_direction)
+        .run();
+
+    Ok(())
+}
+
+//
+// 3D Animated Fox
+//
+#[derive(Resource)]
+struct Animations(Vec<Handle<AnimationClip>>);
+
+fn keyboard_animation_control(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut animation_players: Query<&mut AnimationPlayer>,
+    animations: Res<Animations>,
+    mut current_animation: Local<usize>,
+) {
+    for mut player in &mut animation_players {
+        if keyboard_input.just_pressed(KeyCode::Space) {
+            if player.is_paused() {
+                player.resume();
+            } else {
+                player.pause();
+            }
+        }
+
+        if keyboard_input.just_pressed(KeyCode::ArrowUp) {
+            let speed = player.speed();
+            player.set_speed(speed * 1.2);
+        }
+
+        if keyboard_input.just_pressed(KeyCode::ArrowDown) {
+            let speed = player.speed();
+            player.set_speed(speed * 0.8);
+        }
+
+        if keyboard_input.just_pressed(KeyCode::ArrowLeft) {
+            let elapsed = player.seek_time();
+            player.seek_to(elapsed - 0.1);
+        }
+
+        if keyboard_input.just_pressed(KeyCode::ArrowRight) {
+            let elapsed = player.seek_time();
+            player.seek_to(elapsed + 0.1);
+        }
+
+        if keyboard_input.just_pressed(KeyCode::Enter) {
+            *current_animation = (*current_animation + 1) % animations.0.len();
+            player
+                .play_with_transition(
+                    animations.0[*current_animation].clone_weak(),
+                    Duration::from_millis(250),
+                )
+                .repeat();
+        }
+
+        if keyboard_input.just_pressed(KeyCode::Digit1) {
+            player.set_repeat(RepeatAnimation::Count(1));
+            player.replay();
+        }
+
+        if keyboard_input.just_pressed(KeyCode::Digit3) {
+            player.set_repeat(RepeatAnimation::Count(3));
+            player.replay();
+        }
+
+        if keyboard_input.just_pressed(KeyCode::Digit5) {
+            player.set_repeat(RepeatAnimation::Count(5));
+            player.replay();
+        }
+
+        if keyboard_input.just_pressed(KeyCode::KeyL) {
+            player.set_repeat(RepeatAnimation::Forever);
+        }
+    }
+}
+
+// Begin Animations When Scene Has Loaded
+fn setup_scene_once_loaded(
+    animations: Res<Animations>,
+    mut players: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
+) {
+    for mut player in &mut players {
+        player.play(animations.0[0].clone_weak()).repeat();
+    }
+}
+
+fn animation_setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    // Insert Resource With Current Scene Info
+    commands.insert_resource(Animations(vec![
+        asset_server.load(ASSETS_DIR.to_owned() + "/models/fox/Fox.glb#Animation2"),
+        asset_server.load(ASSETS_DIR.to_owned() + "/models/fox/Fox.glb#Animation1"),
+        asset_server.load(ASSETS_DIR.to_owned() + "/models/fox/Fox.glb#Animation0"),
+    ]));
+
+    // Camera
+    commands.spawn(Camera3dBundle {
+        transform: Transform::from_xyz(100.0, 100.0, 150.0)
+            .looking_at(Vec3::new(0.0, 20.0, 0.0), Vec3::Y),
+        ..default()
+    });
+
+    // Plane
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Plane3d::default().mesh().size(500000.0, 500000.0)),
+        material: materials.add(Color::rgb(0.3, 0.5, 0.3)),
+        ..default()
+    });
+
+    // Light
+    commands.spawn(DirectionalLightBundle {
+        transform: Transform::from_rotation(Quat::from_euler(EulerRot::ZYX, 0.0, 1.0, -PI/ 4.)),
+        directional_light: DirectionalLight {
+            shadows_enabled: true,
+            ..default()
+        },
+        cascade_shadow_config: CascadeShadowConfigBuilder {
+            first_cascade_far_bound: 200.0,
+            maximum_distance: 400.0,
+            ..default()
+        }
+        .into(),
+        ..default()
+    });
+
+    // Fox
+    commands.spawn(SceneBundle {
+        scene: asset_server.load(ASSETS_DIR.to_owned() + "/models/fox/Fox.glb#Scene0"),
+        ..default()
+    });
+
+    println!("##==> Fox Controls:");
+    println!(" - SPACE: Play / Pause");
+    println!(" - Arrow Up / Arrow Down: Speed Up / Slow Down Animation Playback");
+    println!(" - Arrow Left / Arrow Right: Seek Backward / Seek Forward");
+    println!(" - L: Loop Animation Indefinitely");
+    println!(" - ENTER: Change Animation");
+}
+
+pub fn daves_animated_fox() -> io::Result<()> {
+    App::new()
+        .insert_resource(AmbientLight {
+            color: Color::WHITE,
+            brightness: 2000.,
+        })
+        .add_plugins(DefaultPlugins)
+        .add_systems(Startup, animation_setup)
+        .add_systems(
+            Update,
+            (setup_scene_once_loaded, keyboard_animation_control),
+        )
+        .run();
+
+    Ok(())
+}
+
+//
 // Stepping Program
+//
 #[derive(Debug, Hash, PartialEq, Eq, Clone, ScheduleLabel)]
 struct DebugSchedule;
 

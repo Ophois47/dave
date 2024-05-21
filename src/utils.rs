@@ -67,6 +67,9 @@ pub fn get_file_size(path: &Path) -> io::Result<()> {
     Ok(())
 }
 
+//
+// Obtains Current System Information
+//
 pub fn get_system_info() -> io::Result<()> {
     // Ensure List of Components, Network
     // Interfaces, Disks and Users are Instantiated
@@ -167,7 +170,9 @@ pub fn get_system_info() -> io::Result<()> {
     Ok(())
 }
 
+//
 // Camera Controller For Bevy
+//
 pub struct CameraControllerPlugin;
 
 impl Plugin for CameraControllerPlugin {
@@ -210,7 +215,7 @@ impl Default for CameraController {
             key_back: KeyCode::KeyS,
             key_left: KeyCode::KeyA,
             key_right: KeyCode::KeyD,
-            key_up: KeyCode::KeyE,
+            key_up: KeyCode::KeyQ,
             key_down: KeyCode::KeyZ,
             key_run: KeyCode::ShiftLeft,
             mouse_key_cursor_grab: MouseButton::Left,
