@@ -66,6 +66,7 @@ use davelib::dave_graphics::{
     daves_animated_fox,
     daves_atmo_fog,
     daves_cube,
+    dave_morph_main,
     daves_render_viewer,
     daves_shapes,
 };
@@ -339,6 +340,10 @@ fn argument_parser() -> ArgMatches {
                 .long("shapeland")
                 .action(ArgAction::SetTrue)
                 .help("Be dazzled by the world of the shapes"))
+            .arg(Arg::new("morph")
+                .long("morph")
+                .action(ArgAction::SetTrue)
+                .help("Colorful wiggle bar animation. Wee!"))
             .arg(Arg::new("fog")
                 .long("fog")
                 .action(ArgAction::SetTrue)
@@ -649,6 +654,11 @@ fn main() {
             }
             if matches.get_flag("shapeland") {
                 if let Err(error) = daves_shapes() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("morph") {
+                if let Err(error) = dave_morph_main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }

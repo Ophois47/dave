@@ -202,6 +202,111 @@ pub fn daves_shapes() -> io::Result<()> {
 }
 
 //
+// Colored Wiggle Bars!
+//
+#[derive(Resource)]
+struct MorphData {
+    the_wave: Handle<AnimationClip>,
+    mesh: Handle<Mesh>,
+}
+
+fn name_morphs(
+    mut has_printed: Local<bool>,
+    morph_data: Res<MorphData>,
+    meshes: Res<Assets<Mesh>>,
+) {
+    if *has_printed {
+        return
+    }
+
+    let Some(mesh) = meshes.get(&morph_data.mesh) else {
+        return
+    };
+    let Some(names) = mesh.morph_target_names() else {
+        return
+    };
+
+    for name in names {
+        println!("Target Name: {name}");
+    }
+    println!();
+    *has_printed = true;
+}
+
+fn setup_animations(
+    mut has_setup: Local<bool>,
+    mut players: Query<(&Name, &mut AnimationPlayer)>,
+    morph_data: Res<MorphData>,
+) {
+    if *has_setup {
+        return
+    }
+    for (name, mut player) in &mut players {
+        if name.as_str() != "Main" {
+            continue;
+        }
+        player.play(morph_data.the_wave.clone()).repeat();
+        *has_setup = true;
+    }
+}
+
+fn morph_setup(asset_server: Res<AssetServer>, mut commands: Commands) {
+    // Animation
+    commands.insert_resource(MorphData {
+        the_wave: asset_server.load(
+            ASSETS_DIR.to_owned() + "/models/morph/MorphStressTest.gltf#Animation2",
+        ),
+        mesh: asset_server.load(
+            ASSETS_DIR.to_owned() + "/models/morph/MorphStressTest.gltf#Mesh0/Primitive0",
+        ),
+    });
+
+    // Scene
+    commands.spawn(SceneBundle {
+        scene: asset_server.load(
+            ASSETS_DIR.to_owned() + "/models/morph/MorphStressTest.gltf#Scene0",
+        ),
+        ..default()
+    });
+
+    // Lighting
+    commands.spawn(DirectionalLightBundle {
+        transform: Transform::from_rotation(Quat::from_rotation_z(PI / 2.0)),
+        ..default()
+    });
+
+    // Camera
+    commands.spawn((
+        Camera3dBundle {
+            transform: Transform::from_xyz(3.0, 2.1, 10.2).looking_at(Vec3::ZERO, Vec3::Y),
+            ..default()
+        },
+        CameraController::default(),
+    ));
+}
+
+pub fn dave_morph_main() -> io::Result<()> {
+    App::new()
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "Morph Targets".to_string(),
+                ..default()
+            }),
+            ..default()
+        }))
+        .add_plugins(CameraControllerPlugin)
+        .insert_resource(AmbientLight {
+            brightness: 150.0,
+            ..default()
+        })
+        .add_systems(Startup, morph_setup)
+        .add_systems(Update, (name_morphs, setup_animations))
+        .run();
+
+    Ok(())
+}
+
+//
 // Atmospheric Fog Program
 //
 fn toggle_system(keycode: Res<ButtonInput<KeyCode>>, mut fog: Query<&mut FogSettings>) {
