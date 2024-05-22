@@ -334,6 +334,8 @@ fn argument_parser() -> ArgMatches {
             .about("This is a classic Snake game by Dave"))
         .subcommand(Command::new("breakout")
             .about("This is a classic Break game by Dave, written with Bevy"))
+        .subcommand(Command::new("davemark")
+            .about("This is DaveMark. A stress testing program for modern machines"))
         .subcommand(Command::new("st-buttons")
             .about("A series of 2D button stress test for your system")
             .arg(Arg::new("buttons")
@@ -687,6 +689,9 @@ fn main() {
             if let Err(error) = get_system_info() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
+        },
+        Some(("davemark", matches)) => {
+
         },
         Some(("st-buttons", matches)) => {
             // Gather User Arguments
