@@ -251,7 +251,7 @@ fn asset_loaded(
 	}
 }
 
-pub fn daves_skybox() -> io::Result<()> {
+pub fn daves_skybox_main() -> io::Result<()> {
 	App::new()
 		.add_plugins((DefaultPlugins, FrameTimeDiagnosticsPlugin))
 		.add_plugins(CameraControllerPlugin)

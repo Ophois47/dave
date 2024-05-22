@@ -5,20 +5,38 @@ use bevy::{
     animation::RepeatAnimation,
 	app::MainScheduleOrder,
     asset::LoadState,
+    diagnostic::{
+        FrameTimeDiagnosticsPlugin,
+        LogDiagnosticsPlugin,
+    },
 	ecs::schedule::*,
     pbr::{
         CascadeShadowConfigBuilder,
         DirectionalLightShadowMap,
+        light_consts,
         NotShadowCaster,
     },
 	prelude::*,
     render::{
+        camera::{
+            Exposure,
+            PhysicalCameraParameters,
+        },
         render_asset::RenderAssetUsages,
         render_resource::{
             Extent3d,
             TextureDimension,
             TextureFormat,
         },
+    },
+    window::{
+        PresentMode,
+        WindowPlugin,
+        WindowResolution,
+    },
+    winit::{
+        UpdateMode,
+        WinitSettings,
     },
 };
 use crate::utils::*;
@@ -71,7 +89,7 @@ fn daves_cube_setup(
     ));
 }
 
-pub fn daves_cube() -> io::Result<()> {
+pub fn daves_cube_main() -> io::Result<()> {
 	App::new()
 		.add_plugins(DefaultPlugins)
         .add_plugins(CameraControllerPlugin)
@@ -191,7 +209,7 @@ fn uv_shapes_texture() -> Image {
     )
 }
 
-pub fn daves_shapes() -> io::Result<()> {
+pub fn daves_shapes_main() -> io::Result<()> {
     App::new()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(CameraControllerPlugin)
@@ -286,7 +304,7 @@ fn morph_setup(asset_server: Res<AssetServer>, mut commands: Commands) {
     ));
 }
 
-pub fn dave_morph_main() -> io::Result<()> {
+pub fn daves_morph_main() -> io::Result<()> {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -458,7 +476,7 @@ fn pbr_setup(
     ));
 }
 
-pub fn dave_pbr_main() -> io::Result<()> {
+pub fn daves_pbr_main() -> io::Result<()> {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(CameraControllerPlugin)
@@ -583,7 +601,7 @@ fn fog_setup_terrain_scene(
     ));
 }
 
-pub fn daves_atmo_fog() -> io::Result<()> {
+pub fn daves_atmo_fog_main() -> io::Result<()> {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(CameraControllerPlugin)
@@ -657,7 +675,7 @@ fn render_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-pub fn daves_render_viewer() -> io::Result<()> {
+pub fn daves_render_viewer_main() -> io::Result<()> {
     App::new()
         .insert_resource(DirectionalLightShadowMap { size: 4096 })
         .add_plugins(DefaultPlugins)
@@ -673,12 +691,12 @@ pub fn daves_render_viewer() -> io::Result<()> {
 // 3D Animated Fox
 //
 #[derive(Resource)]
-struct Animations(Vec<Handle<AnimationClip>>);
+struct FoxAnimations(Vec<Handle<AnimationClip>>);
 
-fn keyboard_animation_control(
+fn keyboard_fox_animation_control(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut animation_players: Query<&mut AnimationPlayer>,
-    animations: Res<Animations>,
+    animations: Res<FoxAnimations>,
     mut current_animation: Local<usize>,
 ) {
     for mut player in &mut animation_players {
@@ -738,12 +756,16 @@ fn keyboard_animation_control(
         if keyboard_input.just_pressed(KeyCode::KeyL) {
             player.set_repeat(RepeatAnimation::Forever);
         }
+
+        if keyboard_input.just_pressed(KeyCode::Escape) {
+            std::process::exit(0)
+        }
     }
 }
 
 // Begin Animations When Scene Has Loaded
-fn setup_scene_once_loaded(
-    animations: Res<Animations>,
+fn setup_fox_scene_once_loaded(
+    animations: Res<FoxAnimations>,
     mut players: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
 ) {
     for mut player in &mut players {
@@ -751,14 +773,14 @@ fn setup_scene_once_loaded(
     }
 }
 
-fn animation_setup(
+fn fox_animation_setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Insert Resource With Current Scene Info
-    commands.insert_resource(Animations(vec![
+    commands.insert_resource(FoxAnimations(vec![
         asset_server.load(ASSETS_DIR.to_owned() + "/models/fox/Fox.glb#Animation2"),
         asset_server.load(ASSETS_DIR.to_owned() + "/models/fox/Fox.glb#Animation1"),
         asset_server.load(ASSETS_DIR.to_owned() + "/models/fox/Fox.glb#Animation0"),
@@ -801,25 +823,646 @@ fn animation_setup(
     });
 
     println!("##==> Fox Controls:");
-    println!(" - SPACE: Play / Pause");
-    println!(" - Arrow Up / Arrow Down: Speed Up / Slow Down Animation Playback");
-    println!(" - Arrow Left / Arrow Right: Seek Backward / Seek Forward");
-    println!(" - L: Loop Animation Indefinitely");
-    println!(" - ENTER: Change Animation");
+    println!("  - SPACE: Play / Pause");
+    println!("  - Arrow Up / Arrow Down: Speed Up / Slow Down Animation Playback");
+    println!("  - Arrow Left / Arrow Right: Seek Backward / Seek Forward");
+    println!("  - L: Loop Animation Indefinitely");
+    println!("  - ENTER: Change Animation");
+    println!("  - Esc: Quit")
 }
 
-pub fn daves_animated_fox() -> io::Result<()> {
+pub fn daves_animated_fox_main() -> io::Result<()> {
     App::new()
         .insert_resource(AmbientLight {
             color: Color::WHITE,
             brightness: 2000.,
         })
         .add_plugins(DefaultPlugins)
-        .add_systems(Startup, animation_setup)
+        .add_systems(Startup, fox_animation_setup)
         .add_systems(
             Update,
-            (setup_scene_once_loaded, keyboard_animation_control),
+            (setup_fox_scene_once_loaded, keyboard_fox_animation_control),
         )
+        .run();
+
+    Ok(())
+}
+
+//
+// 3D Animated Foxes
+//
+#[derive(Resource)]
+struct Foxes {
+    count: usize,
+    speed: f32,
+    moving: bool,
+    sync: bool,
+}
+
+const RING_SPACING: f32 = 2.0;
+const FOX_SPACING: f32 = 2.0;
+
+#[derive(Component, Clone, Copy)]
+enum RotationDirection {
+    CounterClockwise,
+    Clockwise,
+}
+
+impl RotationDirection {
+    fn sign(&self) -> f32 {
+        match self {
+            RotationDirection::CounterClockwise => 1.0,
+            RotationDirection::Clockwise => -1.0,
+        }
+    }
+}
+
+#[derive(Component)]
+struct Ring {
+    radius: f32,
+}
+
+fn keyboard_foxes_animation_control(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut animation_player: Query<&mut AnimationPlayer>,
+    animations: Res<FoxAnimations>,
+    mut current_animation: Local<usize>,
+    mut foxes: ResMut<Foxes>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Space) {
+        foxes.moving = !foxes.moving;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::ArrowUp) {
+        foxes.speed *= 1.25;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::ArrowDown) {
+        foxes.speed *= 0.8;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::Enter) {
+        *current_animation = (*current_animation + 1) % animations.0.len();
+    }
+
+    for mut player in &mut animation_player {
+        if keyboard_input.just_pressed(KeyCode::Space) {
+            if player.is_paused() {
+                player.resume();
+            } else {
+                player.pause();
+            }
+        }
+
+        if keyboard_input.just_pressed(KeyCode::ArrowUp) {
+            let speed = player.speed();
+            player.set_speed(speed * 1.25);
+        }
+
+        if keyboard_input.just_pressed(KeyCode::ArrowDown) {
+            let speed = player.speed();
+            player.set_speed(speed * 0.8);
+        }
+
+        if keyboard_input.just_pressed(KeyCode::ArrowLeft) {
+            let elapsed = player.seek_time();
+            player.seek_to(elapsed - 0.1);
+        }
+
+        if keyboard_input.just_pressed(KeyCode::ArrowRight) {
+            let elapsed = player.seek_time();
+            player.seek_to(elapsed + 0.1);
+        }
+
+        if keyboard_input.just_pressed(KeyCode::Enter) {
+            player
+                .play_with_transition(
+                    animations.0[*current_animation].clone_weak(),
+                    Duration::from_millis(250),
+                )
+                .repeat();
+        }
+
+        if keyboard_input.just_pressed(KeyCode::Escape) {
+            std::process::exit(0)
+        }
+    }
+}
+
+fn update_fox_rings(
+    time: Res<Time>,
+    foxes: Res<Foxes>,
+    mut rings: Query<(&Ring, &RotationDirection, &mut Transform)>,
+) {
+    if !foxes.moving {
+        return
+    }
+
+    let dt = time.delta_seconds();
+    for (ring, rotation_direction, mut transform) in &mut rings {
+        let angular_velocity = foxes.speed / ring.radius;
+        transform.rotate_y(rotation_direction.sign() * angular_velocity * dt);
+    }
+}
+
+fn setup_foxes_scene_once_loaded(
+    animations: Res<FoxAnimations>,
+    foxes: Res<Foxes>,
+    mut player: Query<(Entity, &mut AnimationPlayer)>,
+    mut done: Local<bool>,
+) {
+    if !*done && player.iter().len() == foxes.count {
+        for (entity, mut player) in &mut player {
+            player.play(animations.0[0].clone_weak()).repeat();
+            if !foxes.sync {
+                player.seek_to(entity.index() as f32 / 10.0);
+            }
+        }
+        *done = true;
+    }
+}
+
+fn foxes_setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    foxes: Res<Foxes>,
+) {
+    // Insert Resource With Current Scene Information
+    commands.insert_resource(FoxAnimations(vec![
+        asset_server.load(ASSETS_DIR.to_owned() + "/models/fox/Fox.glb#Animation2"),
+        asset_server.load(ASSETS_DIR.to_owned() + "/models/fox/Fox.glb#Animation1"),
+        asset_server.load(ASSETS_DIR.to_owned() + "/models/fox/Fox.glb#Animation0"),
+    ]));
+
+    // Concentric Ring of Foxes, Running in Opposite Directions
+    let fox_handle = asset_server.load(ASSETS_DIR.to_owned() + "/models/fox/Fox.glb#Scene0");
+    let ring_directions = [
+        (
+            Quat::from_rotation_y(PI),
+            RotationDirection::CounterClockwise,
+        ),
+        (Quat::IDENTITY, RotationDirection::Clockwise),
+    ];
+
+    let mut ring_index = 0;
+    let mut radius = RING_SPACING;
+    let mut foxes_remaining = foxes.count;
+
+    info!("Spawning {} Foxes ...", foxes.count);
+
+    while foxes_remaining > 0 {
+        let (base_rotation, ring_direction) = ring_directions[ring_index % 2];
+        let ring_parent = commands.spawn((
+            SpatialBundle::INHERITED_IDENTITY,
+            ring_direction,
+            Ring { radius },
+        ))
+        .id();
+
+        let circumference = PI * 2. * radius;
+        let foxes_in_ring = ((circumference / FOX_SPACING) as usize).min(foxes_remaining);
+        let fox_spacing_angle = circumference / (foxes_in_ring as f32 * radius);
+
+        for fox_i in 0..foxes_in_ring {
+            let fox_angle = fox_i as f32 * fox_spacing_angle;
+            let (s, c) = fox_angle.sin_cos();
+            let (x, z) = (radius * c, radius * s);
+
+            commands.entity(ring_parent).with_children(|builder| {
+                builder.spawn(SceneBundle {
+                    scene: fox_handle.clone(),
+                    transform: Transform::from_xyz(x, 0.0, z)
+                        .with_scale(Vec3::splat(0.01))
+                        .with_rotation(base_rotation * Quat::from_rotation_y(-fox_angle)),
+                    ..default()
+                });
+            });
+        }
+
+        foxes_remaining -= foxes_in_ring;
+        radius += RING_SPACING;
+        ring_index += 1;
+    }
+
+    // Camera
+    let zoom = 0.8;
+    let translation = Vec3::new(
+        radius * 1.25 * zoom,
+        radius * 0.5 * zoom,
+        radius * 1.5 * zoom,
+    );
+    commands.spawn((
+        Camera3dBundle {
+            transform: Transform::from_translation(translation)
+                .looking_at(0.2 * Vec3::new(translation.x, 0.0, translation.z), Vec3::Y),
+            ..default()
+        },
+        CameraController::default(),
+    ));
+
+    // Plane
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Plane3d::default().mesh().size(5000.0, 5000.0)),
+        material: materials.add(Color::rgb(0.3, 0.5, 0.3)),
+        ..default()
+    });
+
+    // Light
+    commands.spawn(DirectionalLightBundle {
+        transform: Transform::from_rotation(Quat::from_euler(EulerRot::ZYX, 0.0, 1.0, -PI / 4.)),
+        directional_light: DirectionalLight {
+            shadows_enabled: true,
+            ..default()
+        },
+        cascade_shadow_config: CascadeShadowConfigBuilder {
+            first_cascade_far_bound: 0.9 * radius,
+            maximum_distance: 2.8 * radius,
+            ..default()
+        }
+        .into(),
+        ..default()
+    });
+
+    println!("##==> Foxes Controls:");
+    println!("  - SPACE : Play / Pause");
+    println!("  - Arrow Up / Arrow Down : Speed Up / Slow Down Animation Playback");
+    println!("  - Arrow Left / Arrow Right : Seek Backward / Seek Forward");
+    println!("  - ENTER : Change Animation");
+    println!("  - Esc : Quit")
+}
+
+pub fn daves_animated_foxes_main() -> io::Result<()> {
+    App::new()
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "🦊🦊🦊 Many Foxes! 🦊🦊🦊".into(),
+                    present_mode: PresentMode::AutoNoVsync,
+                    resolution: WindowResolution::new(1920.0, 1080.0)
+                        .with_scale_factor_override(1.0),
+                    ..default()
+                }),
+                ..default()
+            }),
+            FrameTimeDiagnosticsPlugin,
+            LogDiagnosticsPlugin::default(),
+        ))
+        .insert_resource(WinitSettings {
+            focused_mode: UpdateMode::Continuous,
+            unfocused_mode: UpdateMode::Continuous,
+        })
+        .insert_resource(Foxes {
+            count: 1000,
+            speed: 2.0,
+            moving: true,
+            sync: true,
+        })
+        .add_systems(Startup, foxes_setup)
+        .add_systems(
+            Update,
+            (
+                setup_foxes_scene_once_loaded,
+                keyboard_foxes_animation_control,
+                update_fox_rings.after(keyboard_foxes_animation_control),
+            ),
+        )
+        .run();
+
+    Ok(())
+}
+
+//
+// 3D Rendering + Lighting
+//
+#[derive(Resource, Default, Deref, DerefMut)]
+struct Parameters(PhysicalCameraParameters);
+
+#[derive(Component)]
+struct Movable;
+
+fn movement(
+    input: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
+    mut query: Query<&mut Transform, With<Movable>>,
+) {
+    for mut transform in &mut query {
+        let mut direction = Vec3::ZERO;
+        if input.pressed(KeyCode::ArrowUp) {
+            direction.y += 1.0;
+        }
+        if input.pressed(KeyCode::ArrowDown) {
+            direction.y -= 1.0;
+        }
+        if input.pressed(KeyCode::ArrowLeft) {
+            direction.x -= 1.0;
+        }
+        if input.pressed(KeyCode::ArrowRight) {
+            direction.x += 1.0;
+        }
+
+        transform.translation += time.delta_seconds() * 2.0 * direction;
+    }
+}
+
+fn update_exposure(
+    key_input: Res<ButtonInput<KeyCode>>,
+    mut parameters: ResMut<Parameters>,
+    mut exposure: Query<&mut Exposure>,
+    mut text: Query<&mut Text>,
+) {
+    let mut text = text.single_mut();
+    if key_input.just_pressed(KeyCode::Digit2) {
+        parameters.aperture_f_stops *= 2.0;
+    } else if key_input.just_pressed(KeyCode::Digit1) {
+        parameters.aperture_f_stops *= 0.5;
+    }
+    if key_input.just_pressed(KeyCode::Digit4) {
+        parameters.shutter_speed_s *= 2.0;
+    } else if key_input.just_pressed(KeyCode::Digit3) {
+        parameters.shutter_speed_s *= 0.5;
+    }
+    if key_input.just_pressed(KeyCode::Digit6) {
+        parameters.sensitivity_iso += 100.0;
+    } else if key_input.just_pressed(KeyCode::Digit5) {
+        parameters.sensitivity_iso -= 100.0;
+    }
+    if key_input.just_pressed(KeyCode::KeyR) {
+        *parameters = Parameters::default();
+    }
+
+    text.sections[0].value = format!("Aperture: f/{:.0}\n", parameters.aperture_f_stops);
+    text.sections[1].value = format!(
+        "Shutter Speed: 1/{:.0}s\n",
+        1.0 / parameters.shutter_speed_s,
+    );
+    text.sections[2].value = format!("Sensitivity: ISO {:.0}\n", parameters.sensitivity_iso);
+
+    *exposure.single_mut() = Exposure::from_physical_camera(**parameters);
+}
+
+fn lighting_setup(
+    parameters: Res<Parameters>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
+) {
+    // Ground Plane
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Plane3d::default().mesh().size(10.0, 10.0)),
+        material: materials.add(StandardMaterial {
+            base_color: Color::WHITE,
+            perceptual_roughness: 1.0,
+            ..default()
+        }),
+        ..default()
+    });
+
+    // Left Wall
+    let mut transform = Transform::from_xyz(2.5, 2.5, 0.0);
+    transform.rotate_z(PI / 2.);
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Cuboid::new(5.0, 0.15, 5.0)),
+        transform,
+        material: materials.add(StandardMaterial {
+            base_color: Color::INDIGO,
+            perceptual_roughness: 1.0,
+            ..default()
+        }),
+        ..default()
+    });
+
+    // Back Right Wall
+    let mut transform = Transform::from_xyz(0.0, 2.5, -2.5);
+    transform.rotate_x(PI / 2.);
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Cuboid::new(5.0, 0.15, 5.0)),
+        transform,
+        material: materials.add(StandardMaterial {
+            base_color: Color::INDIGO,
+            perceptual_roughness: 1.0,
+            ..default()
+        }),
+        ..default()
+    });
+
+    // Bevy Logo to Demonstrate Alpha Mask Shadows
+    let mut transform = Transform::from_xyz(-2.2, 0.5, 1.0);
+    transform.rotate_y(PI / 8.);
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Rectangle::new(2.0, 0.5)),
+            transform,
+            material: materials.add(StandardMaterial {
+                base_color_texture: Some(asset_server.load(
+                    ASSETS_DIR.to_owned() + "/textures/bevy_logo_light.png",
+                )),
+                perceptual_roughness: 1.0,
+                alpha_mode: AlphaMode::Mask(0.5),
+                cull_mode: None,
+                ..default()
+            }),
+            ..default()
+        },
+        Movable,
+    ));
+
+    // Cube
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Cuboid::default()),
+            material: materials.add(StandardMaterial {
+                base_color: Color::PINK,
+                ..default()
+            }),
+            transform: Transform::from_xyz(0.0, 0.5, 0.0),
+            ..default()
+        },
+        Movable,
+    ));
+
+    // Sphere
+    commands.spawn((
+        PbrBundle {
+            mesh: meshes.add(Sphere::new(0.5).mesh().uv(32, 18)),
+            material: materials.add(StandardMaterial {
+                base_color: Color::LIME_GREEN,
+                ..default()
+            }),
+            transform: Transform::from_xyz(1.5, 1.0, 1.5),
+            ..default()
+        },
+        Movable,
+    ));
+
+    // Ambient Light
+    commands.insert_resource(AmbientLight {
+        color: Color::ORANGE_RED,
+        brightness: 0.02,
+    });
+
+    // Red Point Light
+    commands
+        .spawn(PointLightBundle {
+            // transform: Transform::from_xyz(5.0, 8.0, 2.0),
+            transform: Transform::from_xyz(1.0, 2.0, 0.0),
+            point_light: PointLight {
+                intensity: 100_000.0,
+                color: Color::RED,
+                shadows_enabled: true,
+                ..default()
+            },
+            ..default()
+        })
+        .with_children(|builder| {
+            builder.spawn(PbrBundle {
+                mesh: meshes.add(Sphere::new(0.1).mesh().uv(32, 18)),
+                material: materials.add(StandardMaterial {
+                    base_color: Color::RED,
+                    emissive: Color::rgba_linear(7.13, 0.0, 0.0, 0.0),
+                    ..default()
+                }),
+                ..default()
+            });
+        });
+
+    // Green Spot Light
+    commands
+        .spawn(SpotLightBundle {
+            transform: Transform::from_xyz(-1.0, 2.0, 0.0)
+                .looking_at(Vec3::new(-1.0, 0.0, 0.0), Vec3::Z),
+            spot_light: SpotLight {
+                intensity: 100_000.0,
+                color: Color::GREEN,
+                shadows_enabled: true,
+                inner_angle: 0.6,
+                outer_angle: 0.8,
+                ..default()
+            },
+            ..default()
+        })
+        .with_children(|builder| {
+            builder.spawn(PbrBundle {
+                transform: Transform::from_rotation(Quat::from_rotation_x(PI / 2.0)),
+                mesh: meshes.add(Capsule3d::new(0.1, 0.125)),
+                material: materials.add(StandardMaterial {
+                    base_color: Color::GREEN,
+                    emissive: Color::rgba_linear(0.0, 7.13, 0.0, 0.0),
+                    ..default()
+                }),
+                ..default()
+            });
+        });
+
+    // Blue Point Light
+    commands
+        .spawn(PointLightBundle {
+            // transform: Transform::from_xyz(5.0, 8.0, 2.0),
+            transform: Transform::from_xyz(0.0, 4.0, 0.0),
+            point_light: PointLight {
+                intensity: 100_000.0,
+                color: Color::BLUE,
+                shadows_enabled: true,
+                ..default()
+            },
+            ..default()
+        })
+        .with_children(|builder| {
+            builder.spawn(PbrBundle {
+                mesh: meshes.add(Sphere::new(0.1).mesh().uv(32, 18)),
+                material: materials.add(StandardMaterial {
+                    base_color: Color::BLUE,
+                    emissive: Color::rgba_linear(0.0, 0.0, 7.13, 0.0),
+                    ..default()
+                }),
+                ..default()
+            });
+        });
+
+    // Directional 'Sun' Light
+    commands.spawn(DirectionalLightBundle {
+        directional_light: DirectionalLight {
+            illuminance: light_consts::lux::OVERCAST_DAY,
+            shadows_enabled: true,
+            ..default()
+        },
+        transform: Transform {
+            translation: Vec3::new(0.0, 2.0, 0.0),
+            rotation: Quat::from_rotation_x(-PI / 4.),
+            ..default()
+        },
+        // The default cascade config is designed to handle large scenes.
+        // As this example has a much smaller world, we can tighten the shadow
+        // bounds for better visual quality.
+        cascade_shadow_config: CascadeShadowConfigBuilder {
+            first_cascade_far_bound: 4.0,
+            maximum_distance: 10.0,
+            ..default()
+        }
+        .into(),
+        ..default()
+    });
+
+    // Example Instructions
+    let style = TextStyle {
+        font_size: 20.0,
+        ..default()
+    };
+
+    commands.spawn(
+        TextBundle::from_sections(vec![
+            TextSection::new(
+                format!("Aperture: f/{:.0}\n", parameters.aperture_f_stops),
+                style.clone(),
+            ),
+            TextSection::new(
+                format!(
+                    "Shutter Speed: 1/{:.0}s\n",
+                    1.0 / parameters.shutter_speed_s,
+                ),
+                style.clone(),
+            ),
+            TextSection::new("\n\n", style.clone()),
+            TextSection::new("Controls\n", style.clone()),
+            TextSection::new("------------------\n", style.clone()),
+            TextSection::new("Arrow Keys - Move Objects\n", style.clone()),
+            TextSection::new("1/2 - Decrease/Increase Aperture\n", style.clone()),
+            TextSection::new("3/4 - Decrease/Increase Shutter Speed\n", style.clone()),
+            TextSection::new("5/6 - Decrease/Increase Sensitivity\n", style.clone()),
+            TextSection::new("R - Reset Exposure\n", style),
+        ])
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(12.0),
+            left: Val::Px(12.0),
+            ..default()
+        }),
+    );
+
+    // Camera
+    commands.spawn((
+        Camera3dBundle {
+            transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+            exposure: Exposure::from_physical_camera(**parameters),
+            ..default()
+        },
+        CameraController::default(),
+    ));
+}
+
+pub fn daves_lights_main() -> io::Result<()> {
+    App::new()
+        .add_plugins(DefaultPlugins)
+        .add_plugins(CameraControllerPlugin)
+        .insert_resource(Parameters(PhysicalCameraParameters {
+            aperture_f_stops: 1.0,
+            shutter_speed_s: 1.0 / 125.0,
+            sensitivity_iso: 100.0,
+        }))
+        .add_systems(Startup, lighting_setup)
+        .add_systems(Update, (update_exposure, movement, animate_light_direction))
         .run();
 
     Ok(())

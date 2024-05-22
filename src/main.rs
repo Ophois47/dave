@@ -63,13 +63,15 @@ use davelib::dave_grep::Config;
 use davelib::dave_guess::guess_number;
 use davelib::dave_gui::dave_gui;
 use davelib::dave_graphics::{
-    daves_animated_fox,
-    daves_atmo_fog,
-    daves_cube,
-    dave_morph_main,
-    dave_pbr_main,
-    daves_render_viewer,
-    daves_shapes,
+    daves_animated_fox_main,
+    daves_animated_foxes_main,
+    daves_atmo_fog_main,
+    daves_cube_main,
+    daves_lights_main,
+    daves_morph_main,
+    daves_pbr_main,
+    daves_render_viewer_main,
+    daves_shapes_main,
 };
 use davelib::dave_hash::*;
 use davelib::dave_land::dave_game_loop;
@@ -81,7 +83,7 @@ use davelib::dave_port_scan::port_scan_main;
 use davelib::dave_quiz::*;
 use davelib::dave_rep_max::dave_rep_max_calc;
 use davelib::dave_scrape::*;
-use davelib::dave_skybox::daves_skybox;
+use davelib::dave_skybox::daves_skybox_main;
 use davelib::dave_snake::Game;
 use davelib::dave_tic_tac_toe::tic_tac_toe_main;
 use davelib::utils::*;
@@ -331,6 +333,8 @@ fn argument_parser() -> ArgMatches {
             .about("This is a classic Snake game by Dave"))
         .subcommand(Command::new("breakout")
             .about("This is a classic Break game by Dave, written with Bevy"))
+        .subcommand(Command::new("stress-test")
+            .about("A series of 2D and 3D stress tests for your system"))
         .subcommand(Command::new("bevy")
             .about("A series of 3D graphical environments by Dave")
             .arg(Arg::new("cubeland")
@@ -364,7 +368,15 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("fox")
                 .long("fox")
                 .action(ArgAction::SetTrue)
-                .help("Play with David's animated Fox")))
+                .help("Play with David's animated Fox"))
+            .arg(Arg::new("foxes")
+                .long("foxes")
+                .action(ArgAction::SetTrue)
+                .help("Play with David's animated Foxes"))
+            .arg(Arg::new("lighting")
+                .long("lighting")
+                .action(ArgAction::SetTrue)
+                .help("Bask in the glory of the lights made by Dave")))
         .subcommand(Command::new("gui")
             .about("This is Dave's gooey"))
         .subcommand(Command::new("tic-tac-toe")
@@ -653,42 +665,52 @@ fn main() {
         },
         Some(("bevy", matches)) => {
             if matches.get_flag("cubeland") {
-                if let Err(error) = daves_cube() {
+                if let Err(error) = daves_cube_main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
             if matches.get_flag("shapeland") {
-                if let Err(error) = daves_shapes() {
+                if let Err(error) = daves_shapes_main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
             if matches.get_flag("morph") {
-                if let Err(error) = dave_morph_main() {
+                if let Err(error) = daves_morph_main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
             if matches.get_flag("pbr") {
-                if let Err(error) = dave_pbr_main() {
+                if let Err(error) = daves_pbr_main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
             if matches.get_flag("fog") {
-                if let Err(error) = daves_atmo_fog() {
+                if let Err(error) = daves_atmo_fog_main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
             if matches.get_flag("skybox") {
-                if let Err(error) = daves_skybox() {
+                if let Err(error) = daves_skybox_main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
             if matches.get_flag("render") {
-                if let Err(error) = daves_render_viewer() {
+                if let Err(error) = daves_render_viewer_main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
             if matches.get_flag("fox") {
-                if let Err(error) = daves_animated_fox() {
+                if let Err(error) = daves_animated_fox_main() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("foxes") {
+                if let Err(error) = daves_animated_foxes_main() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("lighting") {
+                if let Err(error) = daves_lights_main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
