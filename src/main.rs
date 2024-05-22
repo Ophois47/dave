@@ -85,6 +85,7 @@ use davelib::dave_rep_max::dave_rep_max_calc;
 use davelib::dave_scrape::*;
 use davelib::dave_skybox::daves_skybox_main;
 use davelib::dave_snake::Game;
+use davelib::dave_stress_tests::st_too_many_buttons;
 use davelib::dave_tic_tac_toe::tic_tac_toe_main;
 use davelib::utils::*;
 use davelib::release;
@@ -333,8 +334,32 @@ fn argument_parser() -> ArgMatches {
             .about("This is a classic Snake game by Dave"))
         .subcommand(Command::new("breakout")
             .about("This is a classic Break game by Dave, written with Bevy"))
-        .subcommand(Command::new("stress-test")
-            .about("A series of 2D and 3D stress tests for your system"))
+        .subcommand(Command::new("st-buttons")
+            .about("A series of 2D button stress test for your system")
+            .arg(Arg::new("buttons")
+                .long("buttons")
+                .value_parser(value_parser!(usize))
+                .num_args(1)
+                .default_value("110")
+                .help("How many buttons to display"))
+            .arg(Arg::new("img-frq")
+                .long("img-frq")
+                .value_parser(value_parser!(usize))
+                .num_args(1)
+                .default_value("4")
+                .help("How many Nth buttons will display images"))
+            .arg(Arg::new("grid")
+                .long("grid")
+                .action(ArgAction::SetTrue)
+                .help("Display the grid layout model"))
+            .arg(Arg::new("borders")
+                .long("borders")
+                .action(ArgAction::SetTrue)
+                .help("Display borders around each button"))
+            .arg(Arg::new("text")
+                .long("text")
+                .action(ArgAction::SetTrue)
+                .help("Display text to on each button")))
         .subcommand(Command::new("bevy")
             .about("A series of 3D graphical environments by Dave")
             .arg(Arg::new("cubeland")
@@ -660,6 +685,24 @@ fn main() {
         },
         Some(("my-sys", _matches)) => {
             if let Err(error) = get_system_info() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("st-buttons", matches)) => {
+            // Gather User Arguments
+            let num_buttons = matches.get_one::<usize>("buttons");
+            let img_frq = matches.get_one::<usize>("img-frq");
+            let grid = matches.get_flag("grid");
+            let borders = matches.get_flag("borders");
+            let text = matches.get_flag("text");
+
+            if let Err(error) = st_too_many_buttons(
+                num_buttons.unwrap(),
+                img_frq.unwrap(),
+                grid,
+                borders,
+                text,
+            ) {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
