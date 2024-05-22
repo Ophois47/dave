@@ -67,6 +67,7 @@ use davelib::dave_graphics::{
     daves_atmo_fog,
     daves_cube,
     dave_morph_main,
+    dave_pbr_main,
     daves_render_viewer,
     daves_shapes,
 };
@@ -344,6 +345,10 @@ fn argument_parser() -> ArgMatches {
                 .long("morph")
                 .action(ArgAction::SetTrue)
                 .help("Colorful wiggle bar animation. Wee!"))
+            .arg(Arg::new("pbr")
+                .long("pbr")
+                .action(ArgAction::SetTrue)
+                .help("Configured Physically Based Rendering example"))
             .arg(Arg::new("fog")
                 .long("fog")
                 .action(ArgAction::SetTrue)
@@ -659,6 +664,11 @@ fn main() {
             }
             if matches.get_flag("morph") {
                 if let Err(error) = dave_morph_main() {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            }
+            if matches.get_flag("pbr") {
+                if let Err(error) = dave_pbr_main() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
             }
