@@ -85,7 +85,10 @@ use davelib::dave_rep_max::dave_rep_max_calc;
 use davelib::dave_scrape::*;
 use davelib::dave_skybox::daves_skybox_main;
 use davelib::dave_snake::Game;
-use davelib::dave_stress_tests::st_too_many_buttons;
+use davelib::dave_stress_tests::{
+    davemark_main,
+    st_too_many_buttons,
+};
 use davelib::dave_tic_tac_toe::tic_tac_toe_main;
 use davelib::utils::*;
 use davelib::release;
@@ -690,8 +693,10 @@ fn main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
-        Some(("davemark", matches)) => {
-
+        Some(("davemark", _matches)) => {
+            if let Err(error) = davemark_main() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
         },
         Some(("st-buttons", matches)) => {
             // Gather User Arguments

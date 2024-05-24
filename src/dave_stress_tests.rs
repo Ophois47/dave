@@ -41,25 +41,6 @@ use crate::dave_graphics::ASSETS_DIR;
 //
 // Too Many Buttons!
 //
-/*struct Args {
-	// Give Buttons Text
-	no_text: bool,
-	// Give Buttons Border
-	no_borders: bool,
-	// Perform Full Relayout Each Frame
-	relayout: bool,
-	// Recompute All Text Each Frame
-	recompute_text: bool,
-	// Default Buttons 110
-	buttons: usize,
-	// Give Every Nth Button an Image
-	// Default 4
-	image_freq: usize,
-	// Use Grid Layout Model
-	grid: bool,
-}*/
-
-// Temporary Arg Solution
 const ARG_IMAGE_FREQ: usize = 4;
 const ARG_BUTTONS: usize = 110;
 const ARG_NO_BORDERS: bool = false;
@@ -136,7 +117,9 @@ fn setup_flex(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn setup_grid(mut commands: Commands, asset_server: Res<AssetServer>) {
     let image = if 0 < ARG_IMAGE_FREQ {
-        Some(asset_server.load("branding/icon.png"))
+        Some(asset_server.load(
+        	ASSETS_DIR.to_owned() + "/textures/bevy_logo_light.png",
+        ))
     } else {
         None
     };
@@ -312,7 +295,7 @@ const MATERIAL_TEXTURE_COUNT: usize = 1;
 // Generate Z Values in Increasing Order Rather Than Randomly
 const ORDERED_Z: bool = false;
 
-const FIXED_TIMESTAMP: f32 = 0.2;
+const FIXED_TIMESTEP: f32 = 0.2;
 
 #[derive(Resource)]
 struct DaveCounter {
@@ -352,7 +335,7 @@ struct EntityScheduled {
 	per_wave: usize,
 }
 
-fn scheduled_spawned(
+fn scheduled_spawner(
 	mut commands: Commands,
 	windows: Query<&Window>,
 	mut scheduled: ResMut<EntityScheduled>,
@@ -404,7 +387,9 @@ fn davemark_setup(
 
 	let mut textures = Vec::with_capacity(MATERIAL_TEXTURE_COUNT.max(1));
 	if matches!(MODE, Mode::Sprite) || MATERIAL_TEXTURE_COUNT > 0 {
-		textures.push(asset_server.load("icon"));
+		textures.push(asset_server.load(
+			ASSETS_DIR.to_owned() + "/textures/bevy_logo_light.png",
+		));
 	}
 	init_textures(&mut textures, images);
 
@@ -532,7 +517,7 @@ fn entity_velocity_transform(
 	let mut velocity = Vec3::new(MAX_VELOCITY * (velocity_rng.gen::<f32>() - 0.5), 0., 0.);
 
 	if let Some(waves) = waves {
-		for _ in 0..(waves * (FIXED_TIMESTAMP / dt).round() as usize) {
+		for _ in 0..(waves * (FIXED_TIMESTEP / dt).round() as usize) {
 			step_movement(&mut translation, &mut velocity, dt);
 			handle_collision(half_extents, &translation, &mut velocity);
 		}
@@ -773,4 +758,47 @@ fn spawn_entities(
         entity_resources.color_rng.gen(),
         entity_resources.color_rng.gen(),
     );
+}
+
+pub fn davemark_main() -> io::Result<()> {
+	App::new()
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "DaveMark".into(),
+                    resolution: WindowResolution::new(1920.0, 1080.0)
+                        .with_scale_factor_override(1.0),
+                    present_mode: PresentMode::AutoNoVsync,
+                    ..default()
+                }),
+                ..default()
+            }),
+            FrameTimeDiagnosticsPlugin,
+            LogDiagnosticsPlugin::default(),
+        ))
+        .insert_resource(WinitSettings {
+            focused_mode: UpdateMode::Continuous,
+            unfocused_mode: UpdateMode::Continuous,
+        })
+        .insert_resource(DaveCounter {
+            count: 0,
+            color: Color::WHITE,
+        })
+        .add_systems(Startup, davemark_setup)
+        .add_systems(FixedUpdate, scheduled_spawner)
+        .add_systems(
+            Update,
+            (
+                mouse_handler,
+                movement_system,
+                collision_system,
+                counter_system,
+            ),
+        )
+        .insert_resource(Time::<Fixed>::from_duration(Duration::from_secs_f32(
+            FIXED_TIMESTEP,
+        )))
+        .run();
+
+    Ok(())
 }
