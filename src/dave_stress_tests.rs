@@ -53,8 +53,13 @@ const FONT_SIZE: f32 = 7.0;
 struct IdleColor(BackgroundColor);
 
 fn button_system(
+	key_input: Res<ButtonInput<KeyCode>>,
 	mut interaction_query: Query<(&Interaction, &mut BackgroundColor, &IdleColor), Changed<Interaction>>,
 ) {
+	if key_input.pressed(KeyCode::Escape) {
+		println!();
+		std::process::exit(0)
+	}
 	for (interaction, mut button_color, IdleColor(idle_color)) in interaction_query.iter_mut() {
 		*button_color = match interaction {
 			Interaction::Hovered => Color::ORANGE_RED.into(),
@@ -265,6 +270,8 @@ pub fn st_too_many_buttons(
 		});
 	}
 
+	info!("Press ESCAPE to Quit");
+
 	app.run();
 	Ok(())
 }
@@ -419,6 +426,8 @@ fn davemark_setup(
 		)
 	};
 
+	info!("Press ESCAPE to Quit");
+
 	commands.spawn(Camera2dBundle::default());
 	commands
 		.spawn(NodeBundle {
@@ -476,6 +485,7 @@ fn mouse_handler(
 	mut commands: Commands,
 	time: Res<Time>,
 	mouse_button_input: Res<ButtonInput<MouseButton>>,
+	key_input: Res<ButtonInput<KeyCode>>,
 	windows: Query<&Window>,
 	entity_resources: ResMut<EntityResources>,
 	mut counter: ResMut<DaveCounter>,
@@ -485,8 +495,16 @@ fn mouse_handler(
 	if rng.is_none() {
 		*rng = Some(StdRng::seed_from_u64(42));
 	}
-	let rng = rng.as_mut().unwrap();
+	let rng = match rng.as_mut() {
+		Some(r) => r,
+		None => std::process::exit(1),
+	};
 	let window = windows.single();
+
+	if key_input.pressed(KeyCode::Escape) {
+		println!();
+		std::process::exit(0)
+	}
 
 	if mouse_button_input.just_released(MouseButton::Left) {
 		counter.color = Color::rgb_linear(rng.gen(), rng.gen(), rng.gen());
@@ -563,7 +581,6 @@ fn handle_collision(half_extents: Vec2, translation: &Vec3, velocity: &mut Vec3)
 }
 fn collision_system(windows: Query<&Window>, mut bird_query: Query<(&mut Entity, &Transform)>) {
     let window = windows.single();
-
     let half_extents = 0.5 * Vec2::new(window.width(), window.height());
 
     for (mut bird, transform) in &mut bird_query {
