@@ -57,11 +57,9 @@ use davelib::dave_chip8::*;
 use davelib::dave_conversions::*;
 use davelib::dave_currency::dave_currency_conv;
 use davelib::dave_db::DaveDatabase;
+use davelib::dave_ecs::dave_ecs_main;
 use davelib::dave_encrypt::*;
-use davelib::dave_grep;
-use davelib::dave_grep::Config;
-use davelib::dave_guess::guess_number;
-use davelib::dave_gui::dave_gui;
+use davelib::dave_game::davegame_main;
 use davelib::dave_graphics::{
     daves_animated_fox_main,
     daves_animated_foxes_main,
@@ -73,6 +71,12 @@ use davelib::dave_graphics::{
     daves_render_viewer_main,
     daves_shapes_main,
 };
+use davelib::dave_grep::{
+    self,
+    Config,
+};
+use davelib::dave_guess::guess_number;
+use davelib::dave_gui::dave_gui;
 use davelib::dave_hash::*;
 use davelib::dave_land::dave_game_loop;
 use davelib::dave_machine::*;
@@ -87,7 +91,8 @@ use davelib::dave_skybox::daves_skybox_main;
 use davelib::dave_snake::Game;
 use davelib::dave_stress_tests::{
     davemark_main,
-    st_too_many_buttons,
+    st_too_many_buttons_main,
+    st_too_many_lights_main,
 };
 use davelib::dave_tic_tac_toe::tic_tac_toe_main;
 use davelib::utils::*;
@@ -339,6 +344,12 @@ fn argument_parser() -> ArgMatches {
             .about("This is a classic Break game by Dave, written with Bevy"))
         .subcommand(Command::new("davemark")
             .about("This is DaveMark. A stress testing program for modern machines"))
+        .subcommand(Command::new("davegame")
+            .about("Dave's Game"))
+        .subcommand(Command::new("ecs")
+            .about("Dave's Entity Component System in full action"))
+        .subcommand(Command::new("st-lights")
+            .about("Dave's stress test of too many lights"))
         .subcommand(Command::new("st-buttons")
             .about("A series of 2D button stress test for your system")
             .arg(Arg::new("buttons")
@@ -698,6 +709,21 @@ fn main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
+        Some(("davegame", _matches)) => {
+            if let Err(error) = davegame_main() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("ecs", _matches)) => {
+            if let Err(error) = dave_ecs_main() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("st-lights", _matches)) => {
+            if let Err(error) = st_too_many_lights_main() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
         Some(("st-buttons", matches)) => {
             // Gather User Arguments
             let num_buttons = matches.get_one::<usize>("buttons");
@@ -706,7 +732,7 @@ fn main() {
             let borders = matches.get_flag("borders");
             let text = matches.get_flag("text");
 
-            if let Err(error) = st_too_many_buttons(
+            if let Err(error) = st_too_many_buttons_main(
                 num_buttons.unwrap(),
                 img_frq.unwrap(),
                 grid,

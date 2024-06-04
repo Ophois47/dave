@@ -1,3 +1,4 @@
+use std::f64::consts::PI;
 use std::io;
 use std::str::FromStr;
 use bevy::{
@@ -6,8 +7,20 @@ use bevy::{
 		FrameTimeDiagnosticsPlugin,
 		LogDiagnosticsPlugin,
 	},
+	math::{
+		DVec2,
+		DVec3,
+	},
+	pbr::{
+		ExtractedPointLight,
+		GlobalLightMeta,
+	},
 	prelude::*,
 	render::{
+		camera::ScalingMode,
+		Render,
+		RenderApp,
+		RenderSet,
 		render_asset::RenderAssetUsages,
 		render_resource::{
 			Extent3d,
@@ -35,6 +48,7 @@ use rand::{
 	Rng,
 	SeedableRng,
 	seq::SliceRandom,
+	thread_rng,
 };
 use crate::dave_graphics::ASSETS_DIR;
 
@@ -225,7 +239,7 @@ fn spawn_button(
 	}
 }
 
-pub fn st_too_many_buttons(
+pub fn st_too_many_buttons_main(
 	_num_buttons: &usize,
 	_img_frq: &usize,
 	grid: bool,
@@ -273,6 +287,186 @@ pub fn st_too_many_buttons(
 	info!("Press ESCAPE to Quit");
 
 	app.run();
+	Ok(())
+}
+
+//
+// Too Many Lights!
+//
+// NOTE: This epsilon value is apparently optimal for optimizing for the average
+// nearest-neighbor distance. See:
+// http://extremelearning.com.au/how-to-evenly-distribute-points-on-a-sphere-more-effectively-than-the-canonical-fibonacci-lattice/
+const EPSILON: f64 = 0.36;
+
+fn fibonacci_spiral_on_sphere(golden_ratio: f64, i: usize, n: usize) -> DVec2 {
+	DVec2::new(
+		PI * 2. * (i as f64 / golden_ratio),
+		(1.0 - 2.0 * (i as f64 + EPSILON) / (n as f64 - 1.0 + 2.0 * EPSILON)).acos(),
+	)
+}
+
+fn spherical_polar_to_cartesian(p: DVec2) -> DVec3 {
+	let (sin_theta, cos_theta) = p.x.sin_cos();
+	let (sin_phi, cos_phi) = p.y.sin_cos();
+	DVec3::new(cos_theta * sin_phi, sin_theta * sin_phi, cos_phi)
+}
+
+// System for Rotating Camera
+fn move_camera(
+	time: Res<Time>,
+	key_input: Res<ButtonInput<KeyCode>>,
+	mut camera_query: Query<&mut Transform, With<Camera>>,
+) {
+	let mut camera_transform = camera_query.single_mut();
+	let delta = time.delta_seconds() * 0.15;
+
+	if key_input.pressed(KeyCode::Escape) {
+	    println!();
+	    std::process::exit(0)
+	}
+
+	camera_transform.rotate_z(delta);
+	camera_transform.rotate_x(delta);
+}
+
+fn print_light_count(time: Res<Time>, mut timer: Local<PrintingTimer>, lights: Query<&PointLight>) {
+	timer.0.tick(time.delta());
+
+	if timer.0.just_finished() {
+		info!("Lights: {}", lights.iter().len());
+	}
+}
+
+struct LogVisibleLights;
+
+impl Plugin for LogVisibleLights {
+	fn build(&self, app: &mut App) {
+		let Ok(render_app) = app.get_sub_app_mut(RenderApp) else {
+			return;
+		};
+
+		render_app.add_systems(Render, print_visible_light_count.in_set(RenderSet::Prepare));
+	}
+}
+
+fn print_visible_light_count(
+	time: Res<Time>,
+	mut timer: Local<PrintingTimer>,
+	visible: Query<&ExtractedPointLight>,
+	global_light_meta: Res<GlobalLightMeta>,
+) {
+	timer.0.tick(time.delta());
+
+	if timer.0.just_finished() {
+		info!(
+			"Visible Lights: {}, Rendered Lights: {}",
+			visible.iter().len(),
+			global_light_meta.entity_to_index.len(),
+		);
+	}
+}
+
+struct PrintingTimer(Timer);
+
+impl Default for PrintingTimer {
+	fn default() -> Self {
+		Self(Timer::from_seconds(1.0, TimerMode::Repeating))
+	}
+}
+
+fn setup_lights(
+	mut commands: Commands,
+	mut meshes: ResMut<Assets<Mesh>>,
+	mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+	const LIGHT_RADIUS: f32 = 0.3;
+	const LIGHT_INTENSITY: f32 = 1000.0;
+	const RADIUS: f32 = 50.0;
+	const N_LIGHTS: usize = 100_000;
+
+	commands.spawn(PbrBundle {
+		mesh: meshes.add(Sphere::new(RADIUS).mesh().ico(9).unwrap()),
+		material: materials.add(Color::WHITE),
+		transform: Transform::from_scale(Vec3::NEG_ONE),
+		..default()
+	});
+
+	let mesh = meshes.add(Cuboid::default());
+	let material = materials.add(StandardMaterial {
+		base_color: Color::PINK,
+		..default()
+	});
+
+	// NOTE: This pattern is good for testing performance of culling as it provides roughly
+    // the same number of visible meshes regardless of the viewing angle.
+    // NOTE: f64 is used to avoid precision issues that produce visual artifacts in the distribution
+    let golden_ratio = 0.5f64 * (1.0f64 + 5.0f64.sqrt());
+    let mut rng = thread_rng();
+
+    for i in 0..N_LIGHTS {
+    	let spherical_polar_theta_phi = fibonacci_spiral_on_sphere(golden_ratio, i, N_LIGHTS);
+    	let unit_sphere_p = spherical_polar_to_cartesian(spherical_polar_theta_phi);
+    	commands.spawn(PointLightBundle {
+    		point_light: PointLight {
+    			range: LIGHT_RADIUS,
+    			intensity: LIGHT_INTENSITY,
+    			color: Color::hsl(rng.gen_range(0.0..360.0), 1.0, 0.5),
+    			..default()
+    		},
+    		transform: Transform::from_translation((RADIUS as f64 * unit_sphere_p).as_vec3()),
+    		..default()
+    	});
+    }
+
+    // Camera
+    commands.spawn(Camera3dBundle {
+    	projection: OrthographicProjection {
+    		scale: 20.0,
+    		scaling_mode: ScalingMode::FixedHorizontal(1.0),
+    		..default()
+    	}
+    	.into(),
+    	..default()
+    });
+
+    commands.spawn(PbrBundle {
+    	mesh,
+    	material,
+    	transform: Transform {
+    		translation: Vec3::new(0.0, RADIUS, 0.0),
+    		scale: Vec3::splat(5.0),
+    		..default()
+    	},
+    	..default()
+    });
+
+    info!("Press ESCAPE to Quit");
+}
+
+pub fn st_too_many_lights_main() -> io::Result<()> {
+	App::new()
+		.add_plugins((
+			DefaultPlugins.set(WindowPlugin {
+				primary_window: Some(Window {
+					resolution: WindowResolution::new(1920.0, 1080.0).with_scale_factor_override(1.0),
+					title: "Daves Many Lights!".into(),
+					present_mode: PresentMode::AutoNoVsync,
+					..default()
+				}),
+				..default()
+			}),
+			FrameTimeDiagnosticsPlugin,
+			LogDiagnosticsPlugin::default(),
+			LogVisibleLights,
+		))
+		.insert_resource(WinitSettings {
+			focused_mode: UpdateMode::Continuous,
+			unfocused_mode: UpdateMode::Continuous,
+		})
+		.add_systems(Startup, setup_lights)
+		.add_systems(Update, (move_camera, print_light_count))
+		.run();
+
 	Ok(())
 }
 
@@ -391,11 +585,11 @@ fn davemark_setup(
 	counter: ResMut<DaveCounter>,
 ) {
 	let images = images.into_inner();
-
 	let mut textures = Vec::with_capacity(MATERIAL_TEXTURE_COUNT.max(1));
+
 	if matches!(MODE, Mode::Sprite) || MATERIAL_TEXTURE_COUNT > 0 {
 		textures.push(asset_server.load(
-			ASSETS_DIR.to_owned() + "/textures/bevy_logo_light.png",
+			ASSETS_DIR.to_owned() + "/textures/frog.png",
 		));
 	}
 	init_textures(&mut textures, images);
@@ -429,8 +623,7 @@ fn davemark_setup(
 	info!("Press ESCAPE to Quit");
 
 	commands.spawn(Camera2dBundle::default());
-	commands
-		.spawn(NodeBundle {
+	commands.spawn(NodeBundle {
 			style: Style {
 				position_type: PositionType::Absolute,
 				padding: UiRect::all(Val::Px(5.0)),

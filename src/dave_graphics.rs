@@ -1620,7 +1620,7 @@ fn build_ui(
 
 fn build_help(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((TextBundle::from_sections([TextSection::new(
-        "Press ` to toggle stepping mode (S: step system, Space: step frame)",
+        "Press ` to toggle stepping mode (S: Step System, Space: Step Frame)",
         TextStyle {
             font: asset_server.load(FONT_MEDIUM),
             font_size: 18.0,
