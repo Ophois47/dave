@@ -25,6 +25,9 @@ dave allows you to view your current system information with 'my-sys'
 dave has created a graphical user interface (GUI) for you to fiddle with using 'gui'
 dave lets you work with and explore and play with 3D graphics using 'bevy'
 dave allows you to play the classic Breakout game with 'breakout'
+dave lets you stress test your system with 'st-buttons' and 'st-lights'
+dave lets you really stress test your system with 'davemark'
+dave gives you the opportunity to play his new game with 'davegame'
 
 To Install Dave:
 ===================
