@@ -473,10 +473,10 @@ pub fn st_too_many_lights_main() -> io::Result<()> {
 //
 // DaveMark
 //
-const ENTITIES_PER_SECOND: u32 = 10000;
+const ENTITIES_PER_SECOND: u32 = 1000;
 const GRAVITY: f32 = -9.8 * 100.0;
 const MAX_VELOCITY: f32 = 750.;
-const ENTITY_SCALE: f32 = 0.15;
+const ENTITY_SCALE: f32 = 0.05;
 const ENTITY_TEXTURE_SIZE: usize = 256;
 const HALF_ENTITY_SIZE: f32 = ENTITY_TEXTURE_SIZE as f32 * ENTITY_SCALE * 0.5;
 
@@ -485,9 +485,9 @@ const MODE: Mode = Mode::Sprite;
 // Spawn All Waves Upfront
 const BENCHMARK: bool = false;
 // How Many Birds to Spawn Per Wave
-const PER_WAVE: usize = 5;
+const PER_WAVE: usize = 1;
 // Number of Waves to Spawn
-const WAVES: usize = 5;
+const WAVES: usize = 4;
 // Whether to Vary the Material Data in Each Instance
 const VARY_PER_INSTANCE: bool = false;
 // Number of Different Textures From Which to Randomly Select

@@ -363,7 +363,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut game: ResMu
 	// Scoreboard
 	commands.spawn(
 		TextBundle::from_section(
-			"Press ESC to Quit\nScore:",
+			"Score:",
 			TextStyle {
 				font_size: 30.0,
 				color: Color::rgb(0.5, 0.5, 1.0),
@@ -372,7 +372,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut game: ResMu
 		)
 		.with_style(Style {
 			position_type: PositionType::Absolute,
-			top: Val::Px(15.0),
+			top: Val::Px(5.0),
 			left: Val::Px(5.0),
 			..default()
 		}),

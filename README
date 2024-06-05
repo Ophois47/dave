@@ -59,7 +59,6 @@ $ awk -f dave_map.awk ../dave_land_file.ron > map.gv
 $ dot -Tpng -o dave_map.png map.gv
 $ cd ../
 
-
 Dave Chip8 Emulator!
 =======================
 The 'l', '↓'' and '↑'' are new keys only for the emulator:
