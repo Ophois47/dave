@@ -473,11 +473,11 @@ pub fn st_too_many_lights_main() -> io::Result<()> {
 //
 // DaveMark
 //
-const ENTITIES_PER_SECOND: u32 = 1000;
+const ENTITIES_PER_SECOND: u32 = 2;
 const GRAVITY: f32 = -9.8 * 100.0;
 const MAX_VELOCITY: f32 = 750.;
 const ENTITY_SCALE: f32 = 0.05;
-const ENTITY_TEXTURE_SIZE: usize = 256;
+const ENTITY_TEXTURE_SIZE: usize = 64;
 const HALF_ENTITY_SIZE: f32 = ENTITY_TEXTURE_SIZE as f32 * ENTITY_SCALE * 0.5;
 
 // Use Sprite or Mesh2D
@@ -676,7 +676,7 @@ fn davemark_setup(
 #[allow(clippy::too_many_arguments)]
 fn mouse_handler(
 	mut commands: Commands,
-	time: Res<Time>,
+	_time: Res<Time>,
 	mouse_button_input: Res<ButtonInput<MouseButton>>,
 	key_input: Res<ButtonInput<KeyCode>>,
 	windows: Query<&Window>,
@@ -699,12 +699,12 @@ fn mouse_handler(
 		std::process::exit(0)
 	}
 
-	if mouse_button_input.just_released(MouseButton::Left) {
+	if mouse_button_input.pressed(MouseButton::Left) {
 		counter.color = Color::rgb_linear(rng.gen(), rng.gen(), rng.gen());
 	}
 
-	if mouse_button_input.pressed(MouseButton::Left) {
-		let spawn_count = (ENTITIES_PER_SECOND as f64 * time.delta_seconds_f64()) as usize;
+	if mouse_button_input.just_pressed(MouseButton::Left) {
+		let spawn_count = (ENTITIES_PER_SECOND as f64) as usize;
 		spawn_entities(
 			&mut commands,
 			&window.resolution,

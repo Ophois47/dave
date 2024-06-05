@@ -9,7 +9,10 @@ use bevy::{
 	prelude::*,
 	sprite::MaterialMesh2dBundle,
 };
-use crate::dave_graphics::SteppingPlugin;
+use crate::dave_graphics::{
+	ASSETS_DIR,
+	SteppingPlugin,
+};
 
 const PADDLE_SIZE: Vec3 = Vec3::new(120.0, 20.0, 0.0);
 const GAP_BETWEEN_PADDLE_AND_FLOOR: f32 = 60.0;
@@ -154,12 +157,13 @@ fn setup(
 	commands.spawn(Camera2dBundle::default());
 
 	// Sound
-	let ball_collision_sound = asset_server.load("sounds/breakout_collision.ogg");
+	let ball_collision_sound = asset_server.load(
+		ASSETS_DIR.to_owned() + "/audio/collision.ogg",
+	);
 	commands.insert_resource(CollisionSound(ball_collision_sound));
 
 	// Paddle
 	let paddle_y = BOTTOM_WALL + GAP_BETWEEN_PADDLE_AND_FLOOR;
-
 	commands.spawn((
 		SpriteBundle {
 			transform: Transform {

@@ -1534,8 +1534,8 @@ fn initialized(state: Res<State>) -> bool {
 
 const FONT_SIZE: f32 = 20.0;
 const FONT_COLOR: Color = Color::rgb(0.2, 0.2, 0.2);
-const FONT_BOLD: &str = "fonts/FiraSans-Bold.ttf";
-const FONT_MEDIUM: &str = "fonts/FiraMono-Medium.ttf";
+const FONT_BOLD: &str = "/fonts/FiraSans-Bold.ttf";
+const FONT_MEDIUM: &str = "/fonts/FiraMono-Medium.ttf";
 
 #[derive(Component)]
 struct SteppingUi;
@@ -1559,7 +1559,7 @@ fn build_ui(
         text_sections.push(TextSection::new(
             format!("{:?}\n", label),
             TextStyle {
-                font: asset_server.load(FONT_BOLD),
+                font: asset_server.load(ASSETS_DIR.to_owned() + FONT_BOLD),
                 font_size: FONT_SIZE,
                 color: FONT_COLOR,
             },
@@ -1579,7 +1579,7 @@ fn build_ui(
             text_sections.push(TextSection::new(
                 "   ",
                 TextStyle {
-                    font: asset_server.load(FONT_MEDIUM),
+                    font: asset_server.load(ASSETS_DIR.to_owned() + FONT_MEDIUM),
                     font_size: FONT_SIZE,
                     color: FONT_COLOR,
                 },
@@ -1588,7 +1588,7 @@ fn build_ui(
             text_sections.push(TextSection::new(
                 format!("{}\n", system.name()),
                 TextStyle {
-                    font: asset_server.load(FONT_MEDIUM),
+                    font: asset_server.load(ASSETS_DIR.to_owned() + FONT_MEDIUM),
                     font_size: FONT_SIZE,
                     color: FONT_COLOR,
                 },
@@ -1620,9 +1620,9 @@ fn build_ui(
 
 fn build_help(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((TextBundle::from_sections([TextSection::new(
-        "Press ` to toggle stepping mode (S: Step System, Space: Step Frame)",
+        "Press the ~ key to toggle frame stepping mode (S: Step System, Space: Step Frame)\nPress ESC to Quit",
         TextStyle {
-            font: asset_server.load(FONT_MEDIUM),
+            font: asset_server.load(ASSETS_DIR.to_owned() + FONT_MEDIUM),
             font_size: 18.0,
             color: FONT_COLOR,
         },

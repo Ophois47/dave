@@ -14,6 +14,9 @@ enum GameState {
 #[derive(Resource)]
 struct BonusSpawnTimer(Timer);
 
+#[derive(Resource)]
+struct ScoreSound(Handle<AudioSource>);
+
 struct Cell {
 	height: f32,
 }
@@ -221,6 +224,7 @@ fn move_player(
 	keyboard_input: Res<ButtonInput<KeyCode>>,
 	mut game: ResMut<Game>,
 	mut transforms: Query<&mut Transform>,
+	sound: Res<ScoreSound>,
 	time: Res<Time>,
 ) {
 	if game.player.move_cooldown.tick(time.delta()).finished() {
@@ -274,6 +278,13 @@ fn move_player(
 	// Consume Point!
 	if let Some(entity) = game.bonus.entity {
 		if game.player.i == game.bonus.i && game.player.j == game.bonus.j {
+			// Play Sound for Point Score
+			commands.spawn(AudioBundle {
+				source: sound.0.clone(),
+				// Auto-Despawn Entity When Playback Finishes
+				settings: PlaybackSettings::DESPAWN,
+			});
+			// Increment Score
 			game.score += 2;
 			game.point_consumed += 1;
 			commands.entity(entity).despawn_recursive();
@@ -296,7 +307,11 @@ fn setup_cameras(mut commands: Commands, mut game: ResMut<Game>) {
 	});
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut game: ResMut<Game>) {
+fn setup(
+	mut commands: Commands,
+	asset_server: Res<AssetServer>,
+	mut game: ResMut<Game>,
+) {
 	// Reset Game State
 	game.point_consumed = 0;
 	game.score = 0;
@@ -314,6 +329,20 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut game: ResMu
 		},
 		..default()
 	});
+
+	// Sound
+	commands.spawn(AudioBundle {
+		source: asset_server.load(ASSETS_DIR.to_owned() + "/audio/mysteriousguitar.ogg"),
+		settings: PlaybackSettings {
+			mode: bevy::audio::PlaybackMode::Loop,
+			..default()
+		},
+		..default()
+	});
+	let score_sound = asset_server.load(
+		ASSETS_DIR.to_owned() + "/audio/collision.ogg",
+	);
+	commands.insert_resource(ScoreSound(score_sound));
 
 	// Spawn Game Board
 	let cell_scene = asset_server.load(
