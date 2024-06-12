@@ -53,6 +53,7 @@ use davelib::config::*;
 use davelib::dave_breakout::dave_breakout_main;
 use davelib::dave_budget::DaveBudget;
 use davelib::dave_calcs::*;
+use davelib::dave_cars::dave_cars_main;
 use davelib::dave_chip8::*;
 use davelib::dave_conversions::*;
 use davelib::dave_currency::dave_currency_conv;
@@ -348,6 +349,8 @@ fn argument_parser() -> ArgMatches {
             .about("Dave's Game"))
         .subcommand(Command::new("ecs")
             .about("Dave's Entity Component System in full action"))
+        .subcommand(Command::new("cars")
+            .about("A game of cars by Dave"))
         .subcommand(Command::new("st-lights")
             .about("Dave's stress test of too many lights"))
         .subcommand(Command::new("st-buttons")
@@ -716,6 +719,11 @@ fn main() {
         },
         Some(("ecs", _matches)) => {
             if let Err(error) = dave_ecs_main() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("cars", _matches)) => {
+            if let Err(error) = dave_cars_main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },

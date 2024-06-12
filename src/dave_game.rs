@@ -330,9 +330,9 @@ fn setup(
 		..default()
 	});
 
-	// Sound
+	// Game Audio
 	commands.spawn(AudioBundle {
-		source: asset_server.load(ASSETS_DIR.to_owned() + "/audio/mysteriousguitar.ogg"),
+		source: asset_server.load(ASSETS_DIR.to_owned() + "/audio/slopes.ogg"),
 		settings: PlaybackSettings {
 			mode: bevy::audio::PlaybackMode::Loop,
 			..default()
