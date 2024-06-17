@@ -128,7 +128,7 @@ fn dave_cars_setup(
 		..default()
 	});
 	let score_sound = asset_server.load(
-		ASSETS_DIR.to_owned() + "/audio/score.ogg",
+		ASSETS_DIR.to_owned() + "/audio/collision.ogg",
 	);
 	commands.insert_resource(ScoreSound(score_sound));
 	let crash_sound = asset_server.load(
@@ -247,7 +247,7 @@ fn dave_cars_setup(
 	.with_children(|parent| {
 		parent.spawn(SceneBundle {
 			scene: asset_server.load(
-				ASSETS_DIR.to_owned() + "/models/dave_cars/challenger.glb#Scene0",
+				ASSETS_DIR.to_owned() + "/models/dave_cars/dave_challenger.glb#Scene0",
 			),
 			..Default::default()
 		});
@@ -255,7 +255,6 @@ fn dave_cars_setup(
 	.insert(Player);
 
 	// Scoreboard
-	commands.spawn(Camera2dBundle::default());
 	commands.spawn(TextBundle {
 		text: Text::from_section(
 			"Score:",
