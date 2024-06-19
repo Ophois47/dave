@@ -1,7 +1,6 @@
 use bevy::{
 	prelude::*,
 	time::common_conditions::on_timer,
-	// window::WindowResolution,
 };
 use rand::{
 	distributions::{
@@ -51,6 +50,9 @@ struct CrashSound(Handle<AudioSource>);
 
 #[derive(Resource)]
 struct EngineSound(Handle<AudioSource>);
+
+#[derive(Resource)]
+struct TireSound(Handle<AudioSource>);
 
 #[derive(Resource)]
 struct Score {
@@ -139,6 +141,10 @@ fn dave_cars_setup(
 		ASSETS_DIR.to_owned() + "/audio/revving.ogg",
 	);
 	commands.insert_resource(EngineSound(engine_sound));
+	let tire_sound = asset_server.load(
+		ASSETS_DIR.to_owned() + "/audio/tires.ogg",
+	);
+	commands.insert_resource(TireSound(tire_sound));
 
 	// Street
 	let mut rng = rand::thread_rng();
@@ -216,8 +222,9 @@ fn dave_cars_setup(
 			let ran_street = die.sample(&mut rng);
 			commands.spawn((
 				Transform {
-					translation: Vec3::new(ran_street as f32, 0.0, j as f32),
-					scale: Vec3::new(0.1, 0.1, 0.1),
+					translation: Vec3::new(ran_street as f32, 0.2, j as f32),
+					rotation: Quat::from_rotation_y(PI + 5.0),
+					scale: Vec3::new(0.7, 0.7, 0.7),
 					..Default::default()
 				},
 				GlobalTransform::IDENTITY,
@@ -225,7 +232,7 @@ fn dave_cars_setup(
 			.with_children(|parent| {
 				parent.spawn(SceneBundle {
 					scene: asset_server.load(
-						ASSETS_DIR.to_owned() + "/models/dave_cars/burger.glb#Scene0",
+						ASSETS_DIR.to_owned() + "/models/dave_cars/trophy.glb#Scene0",
 					),
 					..Default::default()
 				});
@@ -301,7 +308,8 @@ fn move_car(
 	mut commands: Commands,
 	keyboard_input: Res<ButtonInput<KeyCode>>,
 	mut position: Query<&mut Transform, With<Player>>,
-	sound: Res<EngineSound>,
+	engine_sound: Res<EngineSound>,
+	tire_sound: Res<TireSound>,
 ) {
 	for mut transform in position.iter_mut() {
 		if keyboard_input.just_pressed(KeyCode::ArrowLeft) {
@@ -312,6 +320,12 @@ fn move_car(
 				transform.translation.y,
 				transform.translation.z,
 			);
+			// Play Sound for Changing Lanes
+			commands.spawn(AudioBundle {
+				source: tire_sound.0.clone(),
+				// Auto-Despawn Entity When Playback Finishes
+				settings: PlaybackSettings::DESPAWN,
+			});
 		}
 		if keyboard_input.just_pressed(KeyCode::ArrowRight) {
 			let mut x = transform.translation.x + 1.0;
@@ -321,11 +335,17 @@ fn move_car(
 				transform.translation.y,
 				transform.translation.z,
 			);
+			// Play Sound for Changing Lanes
+			commands.spawn(AudioBundle {
+				source: tire_sound.0.clone(),
+				// Auto-Despawn Entity When Playback Finishes
+				settings: PlaybackSettings::DESPAWN,
+			});
 		}
 		if keyboard_input.just_pressed(KeyCode::ArrowUp) {
 			// Play Sound for Revving Engine
 			commands.spawn(AudioBundle {
-				source: sound.0.clone(),
+				source: engine_sound.0.clone(),
 				// Auto-Despawn Entity When Playback Finishes
 				settings: PlaybackSettings::DESPAWN,
 			});
@@ -356,8 +376,9 @@ fn move_street(
 				let ran_street = die.sample(&mut rng);
 				commands.spawn((
 					Transform {
-						translation: Vec3::new(ran_street as f32, 0.0, transform.translation.z),
-						scale: Vec3::new(0.1, 0.1, 0.1),
+						translation: Vec3::new(ran_street as f32, 0.2, transform.translation.z),
+						rotation: Quat::from_rotation_y(PI + 5.0),
+						scale: Vec3::new(0.7, 0.7, 0.7),
 						..Default::default()
 					},
 					GlobalTransform::IDENTITY,
@@ -365,7 +386,7 @@ fn move_street(
 				.with_children(|parent| {
 					parent.spawn(SceneBundle {
 						scene: asset_server.load(
-							ASSETS_DIR.to_owned() + "/models/dave_cars/burger.glb#Scene0",
+							ASSETS_DIR.to_owned() + "/models/dave_cars/trophy.glb#Scene0",
 						),
 						..Default::default()
 					});
