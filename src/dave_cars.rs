@@ -86,6 +86,7 @@ pub fn dave_cars_main() -> io::Result<()> {
 				move_obstacle,
 				collision_point,
 				collision_obstacle,
+				rotate_point,
 				scoreboard
 			),
 		)
@@ -357,7 +358,7 @@ fn move_car(
 	}
 }
 
-const STREET_SPEED: f32 = 1.8;
+const STREET_SPEED: f32 = 3.0;
 
 fn move_street(
 	mut commands: Commands,
@@ -411,6 +412,12 @@ fn move_point(
 		if transform.translation.z >= 2.0 {
 			commands.entity(entity).despawn_recursive();
 		}
+	}
+}
+
+fn rotate_point(time: Res<Time>, mut query: Query<&mut Transform, With<Point>>) {
+	for mut transform in &mut query {
+		transform.rotate_y(2.0 * time.delta_seconds());
 	}
 }
 
@@ -489,7 +496,7 @@ fn spawn_obstacle(
 	.insert(Obstacle);
 }
 
-const OBSTACLE_SPEED: f32 = 2.5;
+const OBSTACLE_SPEED: f32 = 3.5;
 
 fn move_obstacle(
 	time: Res<Time>,
