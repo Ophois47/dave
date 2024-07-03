@@ -351,6 +351,12 @@ fn argument_parser() -> ArgMatches {
             .about("Dave's Entity Component System in full action"))
         .subcommand(Command::new("cars")
             .about("A game of cars by Dave"))
+        .subcommand(Command::new("ls")
+            .about("Directory traversal")
+            .arg(Arg::new("filename")
+                .value_parser(value_parser!(String))
+                .value_name("directory")
+                .num_args(1)))
         .subcommand(Command::new("st-lights")
             .about("Dave's stress test of too many lights"))
         .subcommand(Command::new("st-buttons")
@@ -725,6 +731,17 @@ fn main() {
         Some(("cars", _matches)) => {
             if let Err(error) = dave_cars_main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
+        },
+        Some(("ls", matches)) => {
+            if let Some(gotten_dir) = matches.get_one::<String>("filename") {
+                if let Err(error) = dave_ls_main(gotten_dir.to_string()) {
+                    eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                }
+            } else {
+                println!(
+                    "##==>>>> ERROR: A valid path must be passed to the program. Try running 'dave ls --help' for more information",
+                );
             }
         },
         Some(("st-lights", _matches)) => {

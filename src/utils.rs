@@ -10,6 +10,7 @@ use bevy::{
 };
 use bytesize::ByteSize;
 use colored::*;
+use file_format::FileFormat;
 use rand::Rng;
 use spinners::{
     Spinner,
@@ -49,7 +50,7 @@ pub fn get_file_size(path: &Path) -> io::Result<()> {
                 .fold(0, |acc, m| acc + m.len());
 
             spinner.stop_with_symbol(&stop_symbol);
-            println!("##==>> Directory '{}' is {}", path.display(), ByteSize::b(total_size));
+            println!("##==>> Directory '{}' is {}\n", path.display(), ByteSize::b(total_size));
         } else if file_metadata.is_file() {
             println!("##==> Path '{}' Points to a File", path.display());
             println!("##==> Calculating Size of File ...");
@@ -61,9 +62,23 @@ pub fn get_file_size(path: &Path) -> io::Result<()> {
             println!("{}", "##==>>> Warning! Where did you even find this? Spit it out".red());
         }
     } else {
-        eprintln!("{}{}", "##==>>>> ERROR: File Not Found: ".red(), path.display());
+        eprintln!("{}{}", "##==>>> File Not Found: ".yellow(), path.display());
     }
-    
+    Ok(())
+}
+
+pub fn dave_ls_main(dir: String) -> io::Result<()> {
+    println!("##==>> Running Directory Scan on: '{}'\n", dir);
+    for entry in WalkDir::new(dir.clone()).into_iter().filter_map(|e| e.ok()) {
+        println!("##==> {}", entry.path().display());
+        if let Err(error) = get_file_size(Path::new(&entry.path())) {
+            eprintln!("##==>>>> ERROR: {}", error);
+        };
+        if !entry.metadata()?.is_dir() {
+            let fmt = FileFormat::from_file(&entry.path())?;
+            println!("##==> File Type: '{}'\n", fmt.name());
+        }
+    }
     Ok(())
 }
 

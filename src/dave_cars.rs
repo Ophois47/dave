@@ -438,7 +438,6 @@ fn collision_point(
 					// Auto-Despawn Entity When Playback Finishes
 					settings: PlaybackSettings::DESPAWN,
 				});
-
 				commands.entity(entity).despawn_recursive();
 				score.value += 1;
 			}
@@ -515,6 +514,63 @@ fn move_obstacle(
 	}
 }
 
+fn collision_obstacle(
+	mut commands: Commands,
+	mut score: ResMut<Score>,
+	_state: ResMut<State<GameState>>,
+	position: Query<(Entity, &Transform), With<Obstacle>>,
+	player_position: Query<&Transform, With<Player>>,
+	asset_server: Res<AssetServer>,
+	sound: Res<CrashSound>,
+) {
+	let player_transform = player_position.single();
+	for (_entity, transform) in position.iter() {
+		if transform.translation.x == player_transform.translation.x {
+			if (transform.translation.z - player_transform.translation.z).abs() < 0.4 {
+				// state.set(Box::new(GameState::GameOver)).unwrap();
+				// Play Sound for Collision
+				commands.spawn(AudioBundle {
+					source: sound.0.clone(),
+					// Auto-Despawn Entity When Playback Finishes
+					settings: PlaybackSettings::DESPAWN,
+				});
+				// Spawn Explosion
+				commands.spawn((
+					Transform {
+						translation: player_transform.translation,
+						scale: Vec3::new(0.3, 0.3, 0.3),
+						..Default::default()
+					},
+					GlobalTransform::IDENTITY,
+				))
+				.with_children(|parent| {
+					parent.spawn(SceneBundle {
+						scene: asset_server.load(
+							ASSETS_DIR.to_owned() + "/models/dave_cars/fireball.glb#Scene0",
+						),
+						..Default::default()
+					});
+				});
+
+				if score.value > score.best {
+					score.best = score.value;
+					score.value = 0;
+				}
+				return;
+			}
+		}
+	}
+}
+
+fn gameover_keyboard(
+	mut state: ResMut<State<GameState>>,
+	keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+	if keyboard_input.just_pressed(KeyCode::Space) {
+		state.set(Box::new(GameState::Playing)).unwrap();
+	}
+}
+
 fn teardown(mut commands: Commands, entities: Query<Entity>) {
 	for entity in entities.iter() {
 		commands.entity(entity).despawn_recursive();
@@ -550,43 +606,4 @@ fn show_text(
 			..default()
 		});
 	});
-}
-
-fn collision_obstacle(
-	mut commands: Commands,
-	mut score: ResMut<Score>,
-	_state: ResMut<State<GameState>>,
-	position: Query<(Entity, &Transform), With<Obstacle>>,
-	player_position: Query<&Transform, With<Player>>,
-	sound: Res<CrashSound>,
-) {
-	let player_transform = player_position.single();
-	for (_entity, transform) in position.iter() {
-		if transform.translation.x == player_transform.translation.x {
-			if (transform.translation.z - player_transform.translation.z).abs() < 0.4 {
-				// state.set(Box::new(GameState::GameOver)).unwrap();
-				// Play Sound for Collision
-				commands.spawn(AudioBundle {
-					source: sound.0.clone(),
-					// Auto-Despawn Entity When Playback Finishes
-					settings: PlaybackSettings::DESPAWN,
-				});
-
-				if score.value > score.best {
-					score.best = score.value;
-					score.value = 0;
-				}
-				return;
-			}
-		}
-	}
-}
-
-fn gameover_keyboard(
-	mut state: ResMut<State<GameState>>,
-	keyboard_input: Res<ButtonInput<KeyCode>>,
-) {
-	if keyboard_input.just_pressed(KeyCode::Space) {
-		state.set(Box::new(GameState::Playing)).unwrap();
-	}
 }
