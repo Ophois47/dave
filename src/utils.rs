@@ -1,7 +1,14 @@
-use std::io;
+use std::io::{
+    self,
+    BufReader,
+    prelude::*,
+};
 use std::f32::consts::*;
 use std::fmt;
-use std::fs;
+use std::fs::{
+    self,
+    File,
+};
 use std::path::Path;
 use bevy::{
     input::mouse::MouseMotion,
@@ -94,6 +101,51 @@ pub fn dave_ls_main(dir: String) -> io::Result<()> {
         if let Err(error) = get_file_size(Path::new(&entry.path())) {
             eprintln!("{}{}", "##==>>>> ERROR: {}".red(), error);
         };
+    }
+    Ok(())
+}
+
+pub fn dave_find_main(pattern: String, dir: &Path, verbose: usize) -> io::Result<()> {
+    for entry in WalkDir::new(dir).follow_links(true).into_iter().filter_map(|e| e.ok()) {
+        if entry.metadata()?.is_file() && !entry.metadata()?.permissions().readonly() {
+            let file = File::open(entry.path())?;
+            let reader = BufReader::new(file);
+            let mut found = false;
+            let mut line_number = 0;
+
+            for mut line in reader.lines() {
+                line_number += 1;
+                let line_text = match line.as_mut() {
+                    Ok(data) => data,
+                    Err(error) => {
+                        if verbose == 1 {
+                            eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                        }
+                        break
+                    },
+                };
+                if line_text.contains(&pattern) {
+                    println!(
+                        "##==>> Pattern '{}' WAS found on line #{} in '{}'",
+                        pattern,
+                        line_number,
+                        entry.path().display(),
+                    );
+                    if verbose == 1 {
+                        println!("##==> '{}'", line_text);
+                    }
+                    found = true;
+                }
+            }
+
+            if found == false && verbose == 1 {
+                println!(
+                    "##==>> Pattern '{}' was NOT found in '{}'",
+                    pattern,
+                    entry.path().display(),
+                );
+            }
+        }
     }
     Ok(())
 }

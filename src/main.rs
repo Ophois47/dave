@@ -130,6 +130,22 @@ fn argument_parser() -> ArgMatches {
                 .value_parser(value_parser!(String))
                 .value_name("path")
                 .num_args(1)))
+        .subcommand(Command::new("find")
+            .about("Find some shit in some shit")
+            .arg(Arg::new("verbose")
+                .long("verbose")
+                .short('v')
+                .action(ArgAction::SetTrue)
+                .help("Receive more information from output"))
+            .arg(Arg::new("pattern")
+                .value_parser(value_parser!(String))
+                .value_name("pattern")
+                .num_args(1)
+                .help("The pattern for DGREP to match against"))
+            .arg(Arg::new("filename")
+                .value_parser(value_parser!(String))
+                .value_name("filename")
+                .num_args(1)))
         .subcommand(Command::new("calc")
             .about("Use the program's calculator")
             .arg(Arg::new("simple")
@@ -741,6 +757,32 @@ fn main() {
             } else {
                 println!(
                     "##==>>>> ERROR: A valid path must be passed to the program. Try running 'dave ls --help' for more information",
+                );
+            }
+        },
+        Some(("find", matches)) => {
+            if let Some(gotten_pattern) = matches.get_one::<String>("pattern") {
+                if let Some(gotten_file) = matches.get_one::<String>("filename") {
+                    let mut verbose: usize = 0;
+                    if matches.get_flag("verbose") {
+                        verbose = 1;
+                    }
+
+                    if let Err(error) = dave_find_main(
+                        gotten_pattern.to_string(),
+                        Path::new(gotten_file),
+                        verbose,
+                    ) {
+                        eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+                    }
+                } else {
+                    println!(
+                        "##==>>>> ERROR: A valid file must be passed to the program. Try running 'dave find --help' for more information",
+                    );
+                }
+            } else {
+                println!(
+                    "##==>>>> ERROR: A valid pattern must be passed to the program. Try running 'dave find --help' for more information",
                 );
             }
         },
