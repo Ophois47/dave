@@ -26,7 +26,7 @@ colored = "2"
 crossterm = "0.27"
 eframe = "0.27"
 egui_extras = { version = "0.27", features = ["image"] }
-file-format = "0.24"
+file-format = { version = "0.24", features = ["reader"] }
 futures = "0.3"
 headless_chrome = "1"
 hex = "0.4"

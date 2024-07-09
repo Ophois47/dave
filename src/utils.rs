@@ -9,6 +9,10 @@ use bevy::{
     window::CursorGrabMode,
 };
 use bytesize::ByteSize;
+use chrono::{
+    DateTime as CDateTime,
+    Local as CLocal,
+};
 use colored::*;
 use file_format::FileFormat;
 use rand::Rng;
@@ -24,6 +28,9 @@ use sysinfo::{
 };
 use walkdir::WalkDir;
 
+// Format date string
+pub const DATE_FORMAT_STR: &str = "[%m-%d-%Y] [%H:%M:%S]";
+
 pub fn generate_random_number(min_value: u16, max_value: u16) -> u16 {
     let mut rng = rand::thread_rng();
     let random_value: u16 = rng.gen_range(min_value..max_value);
@@ -34,11 +41,13 @@ pub fn get_file_size(path: &Path) -> io::Result<()> {
     if path.exists() {
         let file_metadata = fs::metadata(path)?;
         let stop_symbol = format!("{}", "🗸".green());
+        let file_name = match path.file_name() {
+            Some(fname) => fname.to_str().unwrap_or("N/A"),
+            None => "N/A",
+        };
 
         if file_metadata.is_dir() {
-            println!("##==> Path '{}' Points to a Directory", path.display());
             println!("##==> Calculating Size of Directory ...");
-
             let mut spinner = Spinner::new(Spinners::Arc, String::new());
             let total_size = WalkDir::new(path)
                 .min_depth(1)
@@ -50,34 +59,41 @@ pub fn get_file_size(path: &Path) -> io::Result<()> {
                 .fold(0, |acc, m| acc + m.len());
 
             spinner.stop_with_symbol(&stop_symbol);
-            println!("##==>> Directory '{}' is {}\n", path.display(), ByteSize::b(total_size));
+            println!("##==> Directory '{}' is {}\n", file_name, ByteSize::b(total_size));
         } else if file_metadata.is_file() {
-            println!("##==> Path '{}' Points to a File", path.display());
             println!("##==> Calculating Size of File ...");
-
             let mut spinner = Spinner::new(Spinners::Arc, String::new());
-            println!("##==>> File '{}' is {}", path.display(), ByteSize::b(file_metadata.len()));
             spinner.stop_with_symbol(&stop_symbol);
+            println!("##==> File '{}' is {}\n", file_name, ByteSize::b(file_metadata.len()));
         } else {
-            println!("{}", "##==>>> Warning! Where did you even find this? Spit it out".red());
+            println!("{}", "##==>>> Warning! Where did you even find this? Spit it out".yellow());
         }
     } else {
-        eprintln!("{}{}", "##==>>> File Not Found: ".yellow(), path.display());
+        eprintln!("{}{}", "##==>>>> ERROR: File Not Found - ".red(), path.display());
     }
     Ok(())
 }
 
 pub fn dave_ls_main(dir: String) -> io::Result<()> {
-    println!("##==>> Running Directory Scan on: '{}'\n", dir);
-    for entry in WalkDir::new(dir.clone()).into_iter().filter_map(|e| e.ok()) {
-        println!("##==> {}", entry.path().display());
-        if let Err(error) = get_file_size(Path::new(&entry.path())) {
-            eprintln!("##==>>>> ERROR: {}", error);
-        };
-        if !entry.metadata()?.is_dir() {
-            let fmt = FileFormat::from_file(&entry.path())?;
-            println!("##==> File Type: '{}'\n", fmt.name());
+    let now: CDateTime<CLocal> = CLocal::now();
+    println!("##==> {} | Running Directory Scan on: '{}' ...\n", now.format(DATE_FORMAT_STR), dir);
+    for entry in WalkDir::new(dir.clone()).follow_links(true).into_iter().filter_map(|e| e.ok()) {
+        let now: CDateTime<CLocal> = CLocal::now();
+        println!("##==> {} | Scanning '{}' ...", now.format(DATE_FORMAT_STR), entry.path().display());
+
+        if entry.path() == std::path::PathBuf::from("/dev") {
+            eprintln!("{}", "##==>>>> ERROR: Cannot Scan '/dev'".red());
+            break
         }
+
+        if !entry.metadata()?.is_dir() && !entry.metadata()?.permissions().readonly() {
+            let fmt = FileFormat::from_file(&entry.path())?;
+            println!("##==> File Type: '{}'", fmt.name());
+        }
+
+        if let Err(error) = get_file_size(Path::new(&entry.path())) {
+            eprintln!("{}{}", "##==>>>> ERROR: {}".red(), error);
+        };
     }
     Ok(())
 }
