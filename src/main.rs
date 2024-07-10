@@ -135,8 +135,10 @@ fn argument_parser() -> ArgMatches {
             .arg(Arg::new("verbose")
                 .long("verbose")
                 .short('v')
-                .action(ArgAction::SetTrue)
-                .help("Receive more information from output"))
+                .default_value("0")
+                .value_parser(["0", "1", "2", "3"])
+                .value_parser(value_parser!(String))
+                .help("Receive more information from output, choose from levels 0-3"))
             .arg(Arg::new("pattern")
                 .value_parser(value_parser!(String))
                 .value_name("pattern")
@@ -763,9 +765,9 @@ fn main() {
         Some(("find", matches)) => {
             if let Some(gotten_pattern) = matches.get_one::<String>("pattern") {
                 if let Some(gotten_file) = matches.get_one::<String>("filename") {
-                    let mut verbose: usize = 0;
-                    if matches.get_flag("verbose") {
-                        verbose = 1;
+                    let mut verbose: String = "0".to_string();
+                    if let Some(verbose_level) = matches.get_one::<String>("verbose") {
+                        verbose = verbose_level.to_string();
                     }
 
                     if let Err(error) = dave_find_main(
