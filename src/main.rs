@@ -131,13 +131,13 @@ fn argument_parser() -> ArgMatches {
                 .value_name("path")
                 .num_args(1)))
         .subcommand(Command::new("find")
-            .about("Find some shit in some shit")
+            .about("Find a pattern within files of a given directory")
             .arg(Arg::new("verbose")
                 .long("verbose")
                 .short('v')
                 .default_value("0")
                 .value_parser(["0", "1", "2", "3"])
-                .value_parser(value_parser!(String))
+                .value_parser(value_parser!(u32))
                 .help("Receive more information from output, choose from levels 0-3"))
             .arg(Arg::new("pattern")
                 .value_parser(value_parser!(String))
@@ -765,9 +765,16 @@ fn main() {
         Some(("find", matches)) => {
             if let Some(gotten_pattern) = matches.get_one::<String>("pattern") {
                 if let Some(gotten_file) = matches.get_one::<String>("filename") {
-                    let mut verbose: String = "0".to_string();
-                    if let Some(verbose_level) = matches.get_one::<String>("verbose") {
-                        verbose = verbose_level.to_string();
+                    let mut verbose: u32 = 0;
+                    if let Some(mut verbose_level) = matches.get_one::<u32>("verbose") {
+                        if *verbose_level > 3 {
+                            eprintln!(
+                                "{}",
+                                "##==>>>> ERROR: Verbosity level must be between 0-3. Using default level 0\n".red(),
+                            );
+                            verbose_level = &0;
+                        }
+                        verbose = *verbose_level;
                     }
 
                     if let Err(error) = dave_find_main(

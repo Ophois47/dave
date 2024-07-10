@@ -105,7 +105,7 @@ pub fn dave_ls_main(dir: String) -> io::Result<()> {
     Ok(())
 }
 
-pub fn dave_find_main(pattern: String, dir: &Path, verbose: String) -> io::Result<()> {
+pub fn dave_find_main(pattern: String, dir: &Path, verbose: u32) -> io::Result<()> {
     for entry in WalkDir::new(dir).follow_links(true).into_iter().filter_map(|e| e.ok()) {
         if entry.metadata()?.is_file() && !entry.metadata()?.permissions().readonly() {
             let file = File::open(entry.path())?;
@@ -118,7 +118,7 @@ pub fn dave_find_main(pattern: String, dir: &Path, verbose: String) -> io::Resul
                 let line_text = match line.as_mut() {
                     Ok(data) => data,
                     Err(error) => {
-                        if verbose == "3" {
+                        if verbose == 3 {
                             eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                         }
                         break
@@ -131,14 +131,14 @@ pub fn dave_find_main(pattern: String, dir: &Path, verbose: String) -> io::Resul
                         line_number,
                         entry.path().display(),
                     );
-                    if *verbose >= *"1" {
+                    if verbose >= 1 {
                         println!("##==> Line #{}: '{}'", line_number, line_text);
                     }
                     found = true;
                 }
             }
 
-            if found == false && *verbose >= *"2" {
+            if found == false && verbose >= 2 {
                 println!(
                     "##==>> Pattern '{}' was NOT found in '{}'",
                     pattern,
