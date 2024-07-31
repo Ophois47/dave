@@ -361,9 +361,9 @@ fn argument_parser() -> ArgMatches {
             .about("This is a classic Snake game by Dave"))
         .subcommand(Command::new("breakout")
             .about("This is a classic Break game by Dave, written with Bevy"))
-        .subcommand(Command::new("davemark")
+        .subcommand(Command::new("dave-mark")
             .about("This is DaveMark. A stress testing program for modern machines"))
-        .subcommand(Command::new("davegame")
+        .subcommand(Command::new("dave-game")
             .about("Dave's Game"))
         .subcommand(Command::new("ecs")
             .about("Dave's Entity Component System in full action"))
@@ -731,12 +731,12 @@ fn main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
-        Some(("davemark", _matches)) => {
+        Some(("dave-mark", _matches)) => {
             if let Err(error) = davemark_main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
-        Some(("davegame", _matches)) => {
+        Some(("dave-game", _matches)) => {
             if let Err(error) = davegame_main() {
                 eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
