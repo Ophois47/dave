@@ -53,6 +53,7 @@ struct FPSText;
 #[derive(Component)]
 struct FormatText;
 
+#[allow(unexpected_cfgs)]
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 	// Direction Light
 	commands.spawn(DirectionalLightBundle {
