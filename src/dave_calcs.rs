@@ -1,6 +1,60 @@
 use colored::*;
 use std::io;
 
+// Wheel Horsepower Calculator
+// HP = WHP * 1 / (1 – (DL - 1))
+fn whp_to_hp(whp: u16, dtlf: f32) -> io::Result<u16> {
+	let hp = whp as f32 * 1.0 / (1.0 - (dtlf - 1.0));
+	Ok(hp as u16)
+}
+
+// WHP = HP / DL
+fn hp_to_whp(hp: u16, dtlf: f32) -> io::Result<u16> {
+	let whp: f32 = hp as f32 /  dtlf;
+	Ok(whp as u16)
+}
+
+pub fn wheel_hp_calc(
+	passed_horsepower: u16,
+	conversion_type: &str,
+	drive_train: &str,
+) -> io::Result<()> {
+	let drive_train_loss_factor: f32 = match drive_train {
+		"RWD" => 1.15,
+		"FWD" => 1.1,
+		"AWD" => 1.2,
+		_ => 0.0,
+	};
+	match conversion_type {
+		"HP" => {
+			println!("##==> Calculating WHP for {} HP ...", passed_horsepower);
+			if let Ok(converted_value) = hp_to_whp(passed_horsepower, drive_train_loss_factor) {
+				println!(
+					"##==>> {} Engine HP is equal to {} WHP with a {} drivetrain",
+					passed_horsepower,
+					converted_value,
+					drive_train,
+				);
+			}
+		},
+		"WHP" => {
+			println!("##==> Calculating HP for {} WHP ...", passed_horsepower);
+			if let Ok(converted_value) = whp_to_hp(passed_horsepower, drive_train_loss_factor) {
+				println!(
+					"##==>> {} WHP is equal to {} Engine HP with a {} drivetrain",
+					passed_horsepower,
+					converted_value,
+					drive_train,
+				);
+			}
+		},
+		_ => println!("Idk what you're getting at weirdo."),
+	};
+
+	Ok(())
+}
+
+// Classic Calculator
 pub fn dave_simple_calc_loop() -> io::Result<()> {
 	loop {
 		println!("{}", "-- Dave's Calculator --".cyan());

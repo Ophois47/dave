@@ -312,6 +312,26 @@ fn argument_parser() -> ArgMatches {
                 .value_name("filename")
                 .num_args(1)
                 .help("The file or directory passed to DGREP for it to search through for the given pattern")))
+        .subcommand(Command::new("hpower")
+            .about("Convert Horsepower to engine or to wheel.")
+            .arg(Arg::new("value")
+                .value_parser(value_parser!(u16))
+                .default_value("0")
+                .value_name("#")
+                .num_args(1)
+                .help("The amount of HP/WHP to convert."))
+            .arg(Arg::new("hp-type")
+                .value_parser(["HP", "WHP"])
+                .default_value("HP")
+                .value_name("HP/WHP")
+                .num_args(1)
+                .help("Choose whether to convert from Horsepower (HP) or from Wheel Horsepower (WHP)"))
+            .arg(Arg::new("drivetrain")
+                .value_parser(["FWD", "RWD", "AWD"])
+                .default_value("RWD")
+                .value_name("FWD/RWD/AWD")
+                .num_args(1)
+                .help("Choose whether to convert from Horsepower (HP) or from Wheel Horsepower (WHP)")))
         .subcommand(Command::new("crypt")
             .about("File Encryption and Decryption using a Passphrase")
             .arg(Arg::new("option")
@@ -955,6 +975,14 @@ fn main() {
                 if let Err(error) = dave_interest_calc_loop() {
                     eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
                 }
+            }
+        },
+        Some(("hpower", matches)) => {
+            let power_value = matches.get_one::<u16>("value").unwrap();
+            let power_type = matches.get_one::<String>("hp-type").unwrap();
+            let drivetrain = matches.get_one::<String>("drivetrain").unwrap();
+            if let Err(error) = wheel_hp_calc(*power_value, power_type, drivetrain) {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
             }
         },
         Some(("machine", matches)) => {
