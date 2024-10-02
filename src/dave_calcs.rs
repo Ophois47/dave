@@ -27,10 +27,10 @@ pub fn wheel_hp_calc(
 	};
 	match conversion_type {
 		"HP" => {
-			println!("##==> Calculating WHP for {} HP ...", passed_horsepower);
+			println!("##==> Calculating Wheel Horsepower for {} Crank Horsepower ...", passed_horsepower);
 			if let Ok(converted_value) = hp_to_whp(passed_horsepower, drive_train_loss_factor) {
 				println!(
-					"##==>> {} Engine HP is equal to {} WHP with a {} drivetrain",
+					"##==>> {} Engine Horsepower is equal to {} Wheel Horsepower with a {} drivetrain",
 					passed_horsepower,
 					converted_value,
 					drive_train,
@@ -38,17 +38,17 @@ pub fn wheel_hp_calc(
 			}
 		},
 		"WHP" => {
-			println!("##==> Calculating HP for {} WHP ...", passed_horsepower);
+			println!("##==> Calculating Crank Horsepower for {} Wheel Horsepower ...", passed_horsepower);
 			if let Ok(converted_value) = whp_to_hp(passed_horsepower, drive_train_loss_factor) {
 				println!(
-					"##==>> {} WHP is equal to {} Engine HP with a {} drivetrain",
+					"##==>> {} Wheel Horsepower is equal to {} Engine Horsepower with a {} drivetrain",
 					passed_horsepower,
 					converted_value,
 					drive_train,
 				);
 			}
 		},
-		_ => println!("Idk what you're getting at weirdo."),
+		_ => println!("##==> Unknown Conversion"),
 	};
 
 	Ok(())
