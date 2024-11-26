@@ -1,5 +1,12 @@
 use serde::{Deserialize, Serialize};
-use serde::de::{self, Deserializer, Error, MapAccess, SeqAccess, Visitor};
+use serde::de::{
+	self,
+	Deserializer,
+	Error,
+	MapAccess,
+	SeqAccess,
+	Visitor,
+};
 use serde::ser::{SerializeStruct, Serializer};
 use std::error;
 use std::fmt;
