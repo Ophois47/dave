@@ -59,6 +59,7 @@ use davelib::dave_conversions::*;
 use davelib::dave_currency::dave_currency_conv;
 use davelib::dave_db::DaveDatabase;
 use davelib::dave_ecs::dave_ecs_main;
+use davelib::dave_ed::dave_ed_main;
 use davelib::dave_encrypt::*;
 use davelib::dave_game::davegame_main;
 use davelib::dave_graphics::{
@@ -124,6 +125,8 @@ fn argument_parser() -> ArgMatches {
                 .long("save")
                 .action(ArgAction::SetTrue)
                 .help("Write this configuration to its default location or the path specified by config --path")))
+        .subcommand(Command::new("dave-ed")
+            .about("Dave's text editor"))
         .subcommand(Command::new("size")
             .about("Check the size of a file or directory")
             .arg(Arg::new("filename")
@@ -719,6 +722,11 @@ fn main() {
     match matches.subcommand() {
         Some(("config", matches)) => {
             update_config(&matches);
+        },
+        Some(("dave-ed", _matches)) => {
+            if let Err(error) = dave_ed_main() {
+                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
+            }
         },
         Some(("perceptron", _matches)) => {
             if let Err(error) = daves_perceptron() {

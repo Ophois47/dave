@@ -11,6 +11,7 @@ pub mod dave_conversions;
 pub mod dave_currency;
 pub mod dave_db;
 pub mod dave_ecs;
+pub mod dave_ed;
 pub mod dave_encrypt;
 pub mod dave_game;
 pub mod dave_genetic_algo;
