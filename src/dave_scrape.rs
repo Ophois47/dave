@@ -16,13 +16,13 @@ pub fn weather_scraper() -> io::Result<()> {
 	.unwrap();
 
 	let document = scraper::Html::parse_document(&response);
-	let weather_selector = scraper::Selector::parse("div.CurrentConditions--CurrentConditions--1XEyg").unwrap();
+	let weather_selector = scraper::Selector::parse("div.CurrentConditions--CurrentConditions--4Lqax").unwrap();
 	let weathers = document.select(&weather_selector).map(|x| x.inner_html());
 
 	for weather in weathers {
 		let fragment = scraper::Html::parse_fragment(&weather);
-		let temperature_selector = scraper::Selector::parse("span.CurrentConditions--tempValue--MHmYY").unwrap();
-		let location_selector = scraper::Selector::parse("h1.CurrentConditions--location--1YWj_").unwrap();
+		let temperature_selector = scraper::Selector::parse("span.CurrentConditions--tempValue--zUBSz").unwrap();
+		let location_selector = scraper::Selector::parse("h1.CurrentConditions--location--yub4l").unwrap();
 
 		let temperature_input = fragment.select(&temperature_selector).next().unwrap().inner_html();
 		let temperature = match parse_temperature(&temperature_input) {
