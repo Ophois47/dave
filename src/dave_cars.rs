@@ -243,6 +243,13 @@ fn dave_cars_setup(
 	}
 
 	// Player
+	/* let player_car = if chosen_car == "challenger" {
+		player_car = "/models/dave_cars/dave_challenger.glb#Scene0";
+	} else {
+		player_car = "/models/dave_cars/dave_corvette.glb#Scene0";
+	};*/
+	// let player_car: &str = "/models/dave_cars/dave_corvette.glb#Scene0";
+	let player_car: &str = "/models/dave_cars/dave_challenger.glb#Scene0";
 	commands.spawn((
 		Transform {
 			translation: Vec3::new(0.0, 0.5, 0.4),
@@ -255,7 +262,7 @@ fn dave_cars_setup(
 	.with_children(|parent| {
 		parent.spawn(SceneBundle {
 			scene: asset_server.load(
-				ASSETS_DIR.to_owned() + "/models/dave_cars/dave_challenger.glb#Scene0",
+				ASSETS_DIR.to_owned() + player_car,
 			),
 			..Default::default()
 		});
@@ -520,7 +527,7 @@ fn collision_obstacle(
 	_state: ResMut<State<GameState>>,
 	position: Query<(Entity, &Transform), With<Obstacle>>,
 	player_position: Query<&Transform, With<Player>>,
-	asset_server: Res<AssetServer>,
+	_asset_server: Res<AssetServer>,
 	sound: Res<CrashSound>,
 ) {
 	let player_transform = player_position.single();
@@ -535,7 +542,7 @@ fn collision_obstacle(
 					settings: PlaybackSettings::DESPAWN,
 				});
 				// Spawn Explosion
-				commands.spawn((
+				/*commands.spawn((
 					Transform {
 						translation: player_transform.translation,
 						scale: Vec3::new(0.3, 0.3, 0.3),
@@ -550,7 +557,7 @@ fn collision_obstacle(
 						),
 						..Default::default()
 					});
-				});
+				});*/
 
 				if score.value > score.best {
 					score.best = score.value;

@@ -41,7 +41,7 @@ use bevy::{
 };
 use crate::utils::*;
 
-pub const ASSETS_DIR: &str = "/home/david/Documents/Programs/Rust/dave/dave_conf/etc/daves_assets";
+pub const ASSETS_DIR: &str = "/home/david/Documents/Projects/Rust/dave/dave_conf/etc/daves_assets";
 
 //
 // Cube Program

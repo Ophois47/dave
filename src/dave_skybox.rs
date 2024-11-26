@@ -20,22 +20,22 @@ use bevy::{
 };
 use crate::utils::*;
 
-const ASSETS_DIR: &str = "/home/david/Documents/Programs/Rust/dave/dave_conf/cube_maps/var/daves_assets";
+const ASSETS_DIR: &str = "/home/david/Documents/Projects/Rust/dave/dave_conf/cube_maps/var/daves_assets";
 const CUBEMAPS: &[(&str, CompressedImageFormats)] = &[
 	(
-		"/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap.png",
+		"/home/david/Documents/Projects/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap.png",
 		CompressedImageFormats::NONE,
 	),
 	(
-		"/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap_astc4x4.ktx2",
+		"/home/david/Documents/Projects/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap_astc4x4.ktx2",
 		CompressedImageFormats::ASTC_LDR,
 	),
 	(
-		"/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets/Ryfjallet_cubemap_bc7.ktx2",
+		"/home/david/Documents/Projects/Rust/dave/dave_conf/var/daves_assets/Ryfjallet_cubemap_bc7.ktx2",
 		CompressedImageFormats::BC,
 	),
 	(
-		"/home/david/Documents/Programs/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap_etc2.ktx2",
+		"/home/david/Documents/Projects/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap_etc2.ktx2",
 		CompressedImageFormats::ETC2,
 	),
 ];
