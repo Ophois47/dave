@@ -22,6 +22,9 @@ use termion::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 
+//
+// Terminal
+//
 struct Size {
 	width: u16,
 	height: u16,
@@ -662,6 +665,15 @@ impl Document {
 		self.unhighlight_rows(at.y);
 	}
 
+	fn load(&mut self) -> Result<(), Error> {
+		if let Some(file_name) = &self.file_name {
+			let _file = fs::File::open(file_name)?;
+			self.file_type = FileType::from(file_name);
+			self.dirty = false;
+		}
+		Ok(())
+	}
+
 	fn save(&mut self) -> Result<(), Error> {
 		if let Some(file_name) = &self.file_name {
 			let mut file = fs::File::create(file_name)?;
@@ -928,10 +940,6 @@ struct DaveEd {
 
 impl DaveEd {
 	fn run(&mut self) {
-		println!("************************************************************************");
-		println!("*   Welcome to DaveEd! Dave's Very Own Text Editor (Hit 'Q' to Quit)   *");
-		println!("************************************************************************\n");
-
 		loop {
 			if let Err(error) = self.refresh_screen() {
 				Self::die(error);
@@ -947,7 +955,7 @@ impl DaveEd {
 
 	fn default() -> Self {
 		let args: Vec<String> = env::args().collect();
-		let mut initial_status = String::from("HELP: Ctrl + F = find | Ctrl + S = save | Ctrl + Q = quit");
+		let mut initial_status = String::from("HELP: Ctrl + F = Find | Ctrl + S = Save | Ctrl + Q = Quit");
 		let document = if let Some(file_name) = args.get(1) {
 			let doc = Document::open(file_name);
 			if let Ok(doc) = doc {
@@ -972,12 +980,28 @@ impl DaveEd {
 		}
 	}
 
+	fn load_file(file_name: String) -> Self {
+		let initial_status = String::from("HELP: Ctrl + F = Find | Ctrl + S = Save | Ctrl + Q = Quit");
+		let document = Document::open(file_name.as_str());
+
+		Self {
+			should_quit: false,
+			terminal: Terminal::default().unwrap(),
+			document: document.unwrap(),
+			cursor_position: Position::default(),
+			offset: Position::default(),
+			status_message: StatusMessage::from(initial_status),
+			quit_times: QUIT_TIMES,
+			highlighted_word: None,
+		}
+	}
+
 	fn refresh_screen(&mut self) -> Result<(), std::io::Error> {
         Self::cursor_hide();
         Self::cursor_position(&Position::default());
         if self.should_quit {
             Self::clear_screen();
-            println!("I love you deeply and personally.\r");
+            println!("##==> Thank you for using DaveEd. Have a great day!\r");
         } else {
             self.document.highlight(
                 &self.highlighted_word,
@@ -999,20 +1023,41 @@ impl DaveEd {
         Self::flush()
     }
 
+    fn show_help(&mut self) {
+    	let help_string = format!("HELP: Ctrl + F = Find | Ctrl + S = Save | Ctrl + Q = Quit");
+    	self.status_message = StatusMessage::from(help_string);
+    }
+
+    fn load(&mut self) {
+    	let new_name = self.prompt("Load File: ", |_, _, _| {}).unwrap_or(None);
+    	if new_name.is_none() {
+    		self.status_message = StatusMessage::from("Must Enter File Name".to_string());
+    		return;
+    	}
+    	self.document.file_name = new_name;
+
+    	if self.document.load().is_ok() {
+    		self.status_message = StatusMessage::from("File Loaded Successfully".to_string());
+    		dave_ed_load_file(self.document.file_name.clone().unwrap());
+    	} else {
+    		self.status_message = StatusMessage::from("Error Loading File".to_string());
+    	}
+    }
+
 	fn save(&mut self) {
 		if self.document.file_name.is_none() {
 			let new_name = self.prompt("Save as: ", |_, _, _| {}).unwrap_or(None);
 			if new_name.is_none() {
-				self.status_message = StatusMessage::from("Save aborted".to_string());
+				self.status_message = StatusMessage::from("Save Aborted".to_string());
 				return;
 			}
 			self.document.file_name = new_name;
 		}
 
 		if self.document.save().is_ok() {
-			self.status_message = StatusMessage::from("File saved successfully".to_string());
+			self.status_message = StatusMessage::from("File Saved Successfully".to_string());
 		} else {
-			self.status_message = StatusMessage::from("Error writing file".to_string());
+			self.status_message = StatusMessage::from("Error Writing File".to_string());
 		}
 	}
 
@@ -1020,7 +1065,7 @@ impl DaveEd {
 		let old_position = self.cursor_position.clone();
 		let mut direction = SearchDirection::Forward;
 		let query = self.prompt(
-			"Search (ESC to cancel, Arrows to navigate)",
+			"Search (ESC to Cancel, Arrows to Navigate)",
 			|editor, key, query| {
 				let mut moved = false;
 				match key {
@@ -1056,7 +1101,7 @@ impl DaveEd {
 			Key::Ctrl('q') => {
 				if self.quit_times > 0 && self.document.is_dirty() {
 					self.status_message = StatusMessage::from(format!(
-						"WARNING! File has unsaved changes. Press Ctrl+Q {} more times to quit",
+						"WARNING! File has unsaved changes! Press Ctrl + Q {} more times to quit.",
 						self.quit_times,
 					));
 					self.quit_times -= 1;
@@ -1065,7 +1110,9 @@ impl DaveEd {
 				self.should_quit = true
 			}
 			Key::Ctrl('s') => self.save(),
+			Key::Ctrl('l') => self.load(),
 			Key::Ctrl('f') => self.search(),
+			Key::Ctrl('h') => self.show_help(),
 			Key::Char(c) => {
 				self.document.insert(&self.cursor_position, c);
 				self.move_cursor(Key::Right);
@@ -1356,6 +1403,10 @@ impl DaveEd {
 	fn cursor_show() {
 		print!("{}", termion::cursor::Show);
 	}
+}
+
+pub fn dave_ed_load_file(file_name: String) {
+	DaveEd::load_file(file_name).run();
 }
 
 pub fn dave_ed_main() {

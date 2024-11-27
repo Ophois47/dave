@@ -59,7 +59,7 @@ use davelib::dave_conversions::*;
 use davelib::dave_currency::dave_currency_conv;
 use davelib::dave_db::DaveDatabase;
 use davelib::dave_ecs::dave_ecs_main;
-use davelib::dave_ed::dave_ed_main;
+use davelib::dave_ed::{dave_ed_main, dave_ed_load_file};
 use davelib::dave_encrypt::*;
 use davelib::dave_game::davegame_main;
 use davelib::dave_graphics::{
@@ -126,7 +126,12 @@ fn argument_parser() -> ArgMatches {
                 .action(ArgAction::SetTrue)
                 .help("Write this configuration to its default location or the path specified by config --path")))
         .subcommand(Command::new("dave-ed")
-            .about("Dave's text editor"))
+            .about("Dave's text editor")
+            .arg(Arg::new("load")
+                .long("load")
+                .short('l')
+                .value_parser(value_parser!(String))
+                .num_args(1)))
         .subcommand(Command::new("size")
             .about("Check the size of a file or directory")
             .arg(Arg::new("filename")
@@ -723,8 +728,12 @@ fn main() {
         Some(("config", matches)) => {
             update_config(&matches);
         },
-        Some(("dave-ed", _matches)) => {
-            dave_ed_main();
+        Some(("dave-ed", matches)) => {
+            if let Some(gotten_file) = matches.get_one::<String>("load") {
+                dave_ed_load_file(gotten_file.to_string());
+            } else {
+                dave_ed_main();
+            }
         },
         Some(("perceptron", _matches)) => {
             if let Err(error) = daves_perceptron() {
