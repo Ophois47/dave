@@ -1010,9 +1010,7 @@ impl DaveEd {
             self.document.highlight(
                 &self.highlighted_word,
                 Some(
-                    self.offset
-                        .y
-                        .saturating_add(self.terminal.size().height as usize),
+                    self.offset.y.saturating_add(self.terminal.size().height as usize),
                 ),
             );
             self.draw_rows();
@@ -1036,8 +1034,9 @@ impl DaveEd {
     	let new_name = self.prompt("Load File: ", |_, _, _| {}).unwrap_or(None);
     	if new_name.is_none() {
     		self.status_message = StatusMessage::from("Must Enter File Name".to_string());
-    		return;
+    		return
     	}
+
     	let file_is_present = std::path::Path::new(&new_name.clone().unwrap()).exists();
 		if !file_is_present {
 			self.status_message = StatusMessage::from("File Not Found.".to_string());
