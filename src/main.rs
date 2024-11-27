@@ -724,9 +724,7 @@ fn main() {
             update_config(&matches);
         },
         Some(("dave-ed", _matches)) => {
-            if let Err(error) = dave_ed_main() {
-                eprintln!("{}{}", "##==>>>> ERROR: ".red(), error);
-            }
+            dave_ed_main();
         },
         Some(("perceptron", _matches)) => {
             if let Err(error) = daves_perceptron() {
