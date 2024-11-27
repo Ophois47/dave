@@ -22,6 +22,8 @@ use termion::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 
+const HELP_MESSAGE: &str = "HELP: Ctrl + F = Find | Ctrl + S = Save | Alt + S = Save As | Ctrl + Q = Quit";
+
 //
 // Terminal
 //
@@ -954,19 +956,8 @@ impl DaveEd {
 	}
 
 	fn default() -> Self {
-		let args: Vec<String> = env::args().collect();
-		let mut initial_status = String::from("HELP: Ctrl + F = Find | Ctrl + S = Save | Ctrl + Q = Quit");
-		let document = if let Some(file_name) = args.get(1) {
-			let doc = Document::open(file_name);
-			if let Ok(doc) = doc {
-				doc
-			} else {
-				initial_status = format!("ERROR: Could Not Open File - {}", file_name);
-				Document::default()
-			}
-		} else {
-			Document::default()
-		};
+		let initial_status = String::from(HELP_MESSAGE);
+		let document = Document::default();
 
 		Self {
 			should_quit: false,
@@ -981,13 +972,26 @@ impl DaveEd {
 	}
 
 	fn load_file(file_name: String) -> Self {
-		let initial_status = String::from("HELP: Ctrl + F = Find | Ctrl + S = Save | Ctrl + Q = Quit");
-		let document = Document::open(file_name.as_str());
+		let mut initial_status = String::from(HELP_MESSAGE);
+		let mut document = Document::open(&file_name);
+		let file_is_present = std::path::Path::new(&file_name).exists();
+		if !file_is_present {
+			initial_status = String::from("File Not Found. Opening New File.");
+			document = Ok(Document::default())
+		}
+
+		let doc = match document {
+			Ok(doc) => doc,
+			Err(error) => {
+				eprintln!("##==>>>> ERROR: {}", error);
+				std::process::exit(1)
+			}
+		};
 
 		Self {
 			should_quit: false,
 			terminal: Terminal::default().unwrap(),
-			document: document.unwrap(),
+			document: doc,
 			cursor_position: Position::default(),
 			offset: Position::default(),
 			status_message: StatusMessage::from(initial_status),
@@ -1024,7 +1028,7 @@ impl DaveEd {
     }
 
     fn show_help(&mut self) {
-    	let help_string = format!("HELP: Ctrl + F = Find | Ctrl + S = Save | Ctrl + Q = Quit");
+    	let help_string = format!("{}", HELP_MESSAGE);
     	self.status_message = StatusMessage::from(help_string);
     }
 
@@ -1053,6 +1057,21 @@ impl DaveEd {
 			}
 			self.document.file_name = new_name;
 		}
+
+		if self.document.save().is_ok() {
+			self.status_message = StatusMessage::from("File Saved Successfully".to_string());
+		} else {
+			self.status_message = StatusMessage::from("Error Writing File".to_string());
+		}
+	}
+
+	fn save_as(&mut self) {
+		let new_name = self.prompt("Save as: ", |_, _, _| {}).unwrap_or(None);
+		if new_name.is_none() {
+			self.status_message = StatusMessage::from("Save Aborted".to_string());
+			return;
+		}
+		self.document.file_name = new_name;
 
 		if self.document.save().is_ok() {
 			self.status_message = StatusMessage::from("File Saved Successfully".to_string());
@@ -1101,7 +1120,7 @@ impl DaveEd {
 			Key::Ctrl('q') => {
 				if self.quit_times > 0 && self.document.is_dirty() {
 					self.status_message = StatusMessage::from(format!(
-						"WARNING! File has unsaved changes! Press Ctrl + Q {} more times to quit.",
+						"WARNING! File has unsaved changes! Press Ctrl + Q '{}' more times to quit.",
 						self.quit_times,
 					));
 					self.quit_times -= 1;
@@ -1110,6 +1129,7 @@ impl DaveEd {
 				self.should_quit = true
 			}
 			Key::Ctrl('s') => self.save(),
+			Key::Alt('s') => self.save_as(),
 			Key::Ctrl('l') => self.load(),
 			Key::Ctrl('f') => self.search(),
 			Key::Ctrl('h') => self.show_help(),
