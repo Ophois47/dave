@@ -1090,7 +1090,7 @@ impl DaveEd {
 		let old_position = self.cursor_position.clone();
 		let mut direction = SearchDirection::Forward;
 		let query = self.prompt(
-			"Search (ESC to Cancel, Arrows to Navigate)",
+			"Search (ESC to Cancel, Arrows to Navigate): ",
 			|editor, key, query| {
 				let mut moved = false;
 				match key {
@@ -1126,7 +1126,7 @@ impl DaveEd {
 			Key::Ctrl('q') => {
 				if self.quit_times > 0 && self.document.is_dirty() {
 					self.status_message = StatusMessage::from(format!(
-						"WARNING! File has unsaved changes! Press Ctrl + Q '{}' more times to quit.",
+						"WARNING! File has unsaved changes! Press Ctrl + Q '{}' more time(s) to Quit.",
 						self.quit_times,
 					));
 					self.quit_times -= 1;
