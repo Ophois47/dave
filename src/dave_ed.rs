@@ -1038,13 +1038,20 @@ impl DaveEd {
     		self.status_message = StatusMessage::from("Must Enter File Name".to_string());
     		return;
     	}
-    	self.document.file_name = new_name;
+    	let file_is_present = std::path::Path::new(&new_name.clone().unwrap()).exists();
+		if !file_is_present {
+			self.status_message = StatusMessage::from("File Not Found.".to_string());
+			return
+		} else {
+    		self.document.file_name = new_name;
+		}
 
     	if self.document.load().is_ok() {
     		self.status_message = StatusMessage::from("File Loaded Successfully".to_string());
     		dave_ed_load_file(self.document.file_name.clone().unwrap());
     	} else {
     		self.status_message = StatusMessage::from("Error Loading File".to_string());
+    		return
     	}
     }
 
