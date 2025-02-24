@@ -20,22 +20,22 @@ use bevy::{
 };
 use crate::utils::*;
 
-const ASSETS_DIR: &str = "/home/david/Documents/Projects/Rust/dave/dave_conf/cube_maps/var/daves_assets";
+const CUBEMAPS_DIR: &str = "./dave_conf/etc/daves_assets";
 const CUBEMAPS: &[(&str, CompressedImageFormats)] = &[
 	(
-		"/home/david/Documents/Projects/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap.png",
+		"cube_maps/Ryfjallet_cubemap.png",
 		CompressedImageFormats::NONE,
 	),
 	(
-		"/home/david/Documents/Projects/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap_astc4x4.ktx2",
+		"cube_maps/Ryfjallet_cubemap_astc4x4.ktx2",
 		CompressedImageFormats::ASTC_LDR,
 	),
 	(
-		"/home/david/Documents/Projects/Rust/dave/dave_conf/var/daves_assets/Ryfjallet_cubemap_bc7.ktx2",
+		"cube_maps/Ryfjallet_cubemap_bc7.ktx2",
 		CompressedImageFormats::BC,
 	),
 	(
-		"/home/david/Documents/Projects/Rust/dave/dave_conf/var/daves_assets/cube_maps/Ryfjallet_cubemap_etc2.ktx2",
+		"cube_maps/Ryfjallet_cubemap_etc2.ktx2",
 		CompressedImageFormats::ETC2,
 	),
 ];
@@ -87,7 +87,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 				"FPS: ",
 				TextStyle {
 					font: asset_server.load(
-						ASSETS_DIR.to_owned() + "/fonts/FiraSans-Bold.ttf",
+						CUBEMAPS_DIR.to_owned() + "/fonts/FiraSans-Bold.ttf",
 					),
 					font_size: 20.0,
 					color: Color::BLACK,
@@ -103,7 +103,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 			} else {
 				TextStyle {
 					font: asset_server.load(
-						ASSETS_DIR.to_owned() + "/fonts/FiraMono-Medium.ttf",
+						CUBEMAPS_DIR.to_owned() + "/fonts/FiraMono-Medium.ttf",
 					),
 					font_size: 20.0,
 					color: Color::GOLD,
@@ -113,7 +113,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 				"\nFormat: ",
 				TextStyle {
 					font: asset_server.load(
-						ASSETS_DIR.to_owned() + "/fonts/FiraMono-Medium.ttf",
+						CUBEMAPS_DIR.to_owned() + "/fonts/FiraMono-Medium.ttf",
 					),
 					font_size: 30.0,
 					color: Color::BLUE,
@@ -129,7 +129,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 			} else {
 				TextStyle {
 					font: asset_server.load(
-						ASSETS_DIR.to_owned() + "/fonts/FiraMono-Medium.ttf",
+						CUBEMAPS_DIR.to_owned() + "/fonts/FiraMono-Medium.ttf",
 					),
 					font_size: 25.0,
 					color: Color::RED,
